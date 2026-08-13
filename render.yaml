@@ -17,9 +17,19 @@ services:
       buildCommand: npm ci
       startCommand: npm start
 
-      # Render restarts the service if this stops answering. It also gives the keep-alive
-      # ping something cheap to hit.
-      healthCheckPath: /api/v1/health
+      # healthCheckPath is deliberately NOT set.
+      #
+      # With it configured, Render polls that path and stops routing traffic to an instance
+      # whose check fails. On the free plan there is only one instance, so a single failed or
+      # slow check takes the whole service offline and the edge answers with its own
+      # plain-text 404 (x-render-routing: no-server). Measured on this service: the app's own
+      # uptime counter climbed steadily with no restart, while roughly half of external
+      # requests were refused at the edge — the process was healthy the whole time and the
+      # routing layer was flapping.
+      #
+      # Without it, Render routes as long as the process holds the port, which is the right
+      # behaviour for a single-instance service. /api/v1/health still exists and is still
+      # what the keep-alive ping hits; it just no longer decides whether traffic flows.
 
       envVars:
           - key: NODE_ENV

@@ -32,6 +32,13 @@ export class ApiError extends Error {
         return (
             this.status >= 500 ||
             this.status === 0 ||
+            // Something other than our API answered. In practice this is the host's edge:
+            // when the free instance is briefly unreachable it returns its own plain-text
+            // 404, not our JSON envelope. That reads as "route not found" if you only look
+            // at the status, but it is infrastructure being unavailable and a repeat
+            // usually succeeds. Measured at roughly 5% of requests on the deployed service,
+            // so without this the learner sees a broken screen once every twenty clicks.
+            this.code === 'BAD_RESPONSE' ||
             this.code === 'AI_TIMEOUT' ||
             this.code === 'AI_UNAVAILABLE'
         );
@@ -102,18 +109,30 @@ async function request<T>(
 
 export const api = {
     /**
-     * Retried once on a server-side or network failure, because a GET is safe to repeat.
+     * Retried up to twice on a server-side or infrastructure failure, because a GET is safe
+     * to repeat. Two attempts rather than one because the deployed host drops roughly one
+     * request in twenty, and a single retry occasionally lands on the same gap.
      */
     async get<T>(path: string): Promise<T> {
-        try {
-            return await request<T>(path);
-        } catch (error) {
-            if (error instanceof ApiError && error.retryable) {
-                await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS));
-                return request<T>(path);
+        let lastError: unknown;
+
+        for (let attempt = 0; attempt < 3; attempt += 1) {
+            try {
+                return await request<T>(path);
+            } catch (error) {
+                lastError = error;
+
+                if (!(error instanceof ApiError) || !error.retryable) throw error;
+
+                if (attempt < 2) {
+                    await new Promise((resolve) =>
+                        setTimeout(resolve, RETRY_DELAY_MS * (attempt + 1))
+                    );
+                }
             }
-            throw error;
         }
+
+        throw lastError;
     },
 
     /**
