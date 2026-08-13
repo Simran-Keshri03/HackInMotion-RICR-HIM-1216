@@ -953,13 +953,13 @@ That creates a continuous adaptive learning loop designed around the individual 
 
 ## 👥 Team
 
-**Team:** [TEAM NAME]
+**Team:** AdigamAI-Adapt,Learn,Master
 
 **Members:**
-- [MEMBER 1]
-- [MEMBER 2]
-- [MEMBER 3]
-- [MEMBER 4]
+- Harsh Kumar
+- Ayush Kumar
+- Soumya Raghuwanshi
+- Simran Kumari Keshri
 
 ---
 
