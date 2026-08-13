@@ -52,10 +52,26 @@ compiled into the browser bundle. `SUPABASE_SECRET_KEY` and `ANTHROPIC_API_KEY` 
 | API | https://adigam-api.onrender.com/api/v1 |
 | Repo | github.com/harsh-1-code/HackInMotion-RICR-HIM-1216 (private) |
 | Supabase | project `ldvimvtbslswafllhgyb`, PostgreSQL 17.6, Mumbai |
-| Demo login | `demo@adigam-demo.com` / `AdigamDemo2026` |
+| Demo login | `demo@adigam-demo.com` — password is **not** in this file, see below |
 
 Git identity for this repo is already set: `shaunmortal <ayushkumar2.0ds@gmail.com>`. SSH key is
 authorised. Team: Harsh Kumar, Ayush Kumar, Soumya Raghuwanshi, Simran Kumari Keshri.
+
+**The demo account's password is deliberately not written down here.** A working login in a
+repository anybody can read is a way for a stranger to spend the project's AI credit through the
+tutor endpoint — the per-learner rate limit bounds it but does not stop it. Ask a teammate, or make
+a fresh confirmed account with the Supabase admin API:
+
+```bash
+SUPA=$(grep '^SUPABASE_URL=' backend/.env | cut -d= -f2-)
+SECRET=$(grep '^SUPABASE_SECRET_KEY=' backend/.env | cut -d= -f2-)
+curl -s -X POST "$SUPA/auth/v1/admin/users" \
+  -H "apikey: $SECRET" -H "Authorization: Bearer $SECRET" -H "Content-Type: application/json" \
+  -d '{"email":"you@gmail.com","password":"pick-something","email_confirm":true}'
+```
+
+`email_confirm: true` skips the confirmation email, which matters because Supabase's free mailer
+allows only a couple of messages an hour.
 
 **API credit: roughly $22 left of the original $26.** About $3.40 was spent filling the question
 bank. Real cost is ~2.4 cents per verified AI question.
