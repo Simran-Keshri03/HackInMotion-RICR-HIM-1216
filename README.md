@@ -72,13 +72,14 @@ All routes are under `/api/v1`. Every response uses one of two shapes:
 { "success": false, "data": null, "error": { "code": "NOT_FOUND", "message": "..." } }
 ```
 
-## TODO before submission
+
+## Team Details
 
 - HARSH KUMAR
 - AYUSH KUMAR
 - SOUMYA RAGHUWANSHI
 - SIMRAN KUMARI KESHRI
-- 
+  
 - Screenshots, architecture diagram, deployment URLs
 - `docs/`, `api-documentation.md`, presentation
 
