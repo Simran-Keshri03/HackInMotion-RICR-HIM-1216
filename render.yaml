@@ -40,10 +40,16 @@ services:
           - key: PORT
             value: 10000
 
-          # Must be the deployed frontend origin, with no trailing slash. Set this after the
-          # Vercel deploy, or CORS will block every browser request.
+          # The origins allowed to call this API. A frontend URL is not a secret, so it is
+          # committed rather than typed into a dashboard: the deployed site is documented in
+          # the repository and nobody has to remember to set it again after a rebuild.
+          #
+          # No trailing slash and no path — the browser sends the bare origin, and a mismatch
+          # blocks every request while both halves of the app are perfectly healthy.
+          # localhost stays in the list so local development keeps working against either the
+          # local or the deployed API.
           - key: CORS_ORIGINS
-            sync: false
+            value: https://adigamai.vercel.app,http://localhost:5173
 
           - key: SUPABASE_URL
             sync: false

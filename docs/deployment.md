@@ -42,9 +42,9 @@ from a laptop; the backend talks to Supabase over HTTPS with the keys above.
 1. Go to [dashboard.render.com](https://dashboard.render.com) → **New** → **Blueprint**.
 2. Connect the GitHub repository. Render finds `render.yaml` and proposes a service called
    `adigam-api`.
-3. It will ask for each `sync: false` variable. Fill in the four Supabase / Anthropic values.
-   For `CORS_ORIGINS`, put `http://localhost:5173` for now — Part 3 replaces it with the real
-   frontend URL.
+3. It will ask for each `sync: false` variable — the four Supabase / Anthropic secrets.
+   `CORS_ORIGINS` is **not** among them: it is committed in `render.yaml`, because a frontend
+   URL is not a secret and hard-coding it means nobody has to remember to set it again.
 4. **Apply**. The first build takes 2-4 minutes.
 5. Copy the service URL, which looks like `https://adigam-api.onrender.com`, and check it:
 
@@ -74,28 +74,36 @@ If that returns JSON, the backend is live.
 is compiled into the JavaScript the browser downloads — a secret there is a secret published
 on the internet.
 
-4. **Deploy**, then copy the URL (`https://adigam-xyz.vercel.app`).
+4. **Deploy**, then copy the URL (`https://adigamai.vercel.app`).
 
 ---
 
 ## Part 3 — Point the backend at the frontend
 
-Until this is done, every browser request is blocked by CORS and the app looks broken while
-both halves are actually fine.
+Until this is right, every browser request is blocked by CORS and the app looks broken while
+both halves are perfectly healthy. It is the single most common way a working deployment
+appears to fail.
 
-In Render → `adigam-api` → **Environment**, set:
+`CORS_ORIGINS` lives in `render.yaml`, so this is a code change rather than a dashboard visit:
 
+```yaml
+- key: CORS_ORIGINS
+  value: https://adigamai.vercel.app,http://localhost:5173
 ```
-CORS_ORIGINS = https://adigam-xyz.vercel.app
+
+No trailing slash and no path — the browser sends the bare origin. Push, and Render redeploys.
+
+If a Vercel deploy ever produces a different domain, update that line and push. To check it is
+right, ask the API to describe what it allows:
+
+```bash
+curl -s -D- -o /dev/null -X OPTIONS \
+  https://adigam-api.onrender.com/api/v1/learner/summary \
+  -H "Origin: https://adigamai.vercel.app" \
+  -H "Access-Control-Request-Method: GET" | grep -i access-control-allow-origin
 ```
 
-No trailing slash. Save; Render redeploys automatically. Then open the Vercel URL and sign in.
-
-To allow both the deployed site and local development at once, comma-separate them:
-
-```
-CORS_ORIGINS = https://adigam-xyz.vercel.app,http://localhost:5173
-```
+No header in the output means the origin is not allowed.
 
 ---
 
@@ -140,7 +148,7 @@ not magic links or OAuth redirects, so there is no callback URL to allow-list.
 
 ```bash
 API=https://adigam-api.onrender.com/api/v1
-SITE=https://adigam-xyz.vercel.app
+SITE=https://adigamai.vercel.app
 
 # 1. backend alive
 curl -s $API/health
