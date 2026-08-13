@@ -74,7 +74,11 @@ All routes are under `/api/v1`. Every response uses one of two shapes:
 
 ## TODO before submission
 
-- Team name and members
+- HARSH KUMAR
+- AYUSH KUMAR
+- SOUMYA RAGHUWANSHI
+- SIMRAN KUMARI KESHRI
+- 
 - Screenshots, architecture diagram, deployment URLs
 - `docs/`, `api-documentation.md`, presentation
 
