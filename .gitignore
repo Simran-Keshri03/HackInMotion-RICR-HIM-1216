@@ -13,3 +13,6 @@ npm-debug.log*
 
 .vscode/
 .idea/
+
+# Local only: demo account credentials, never committed
+.demo-login.txt

@@ -144,6 +144,30 @@ not magic links or OAuth redirects, so there is no callback URL to allow-list.
 
 ---
 
+## Why the repository is public
+
+Vercel's Hobby plan does not support collaboration on **private** repositories. On a private repo it
+deploys only commits whose author has contributing access to the Vercel project — every commit by
+anybody else is refused with `Deployment Blocked: the commit author did not have contributing access`.
+
+This project's Vercel account and its GitHub repository belong to different team members, so every
+push from another member piled up as Blocked while the site stayed on the one deployment the owner
+had triggered by hand. Four commits' worth of screens were missing from the live site, and nothing
+in the app or the build reported a problem — the deployments simply never ran.
+
+Making the repository public lifts the restriction at no cost, and a hackathon submission has to be
+readable by judges anyway. The alternatives, for the record: the project owner clicks Redeploy after
+every push, deploys from the CLI (`npx vercel --prod`), or the account upgrades to Pro.
+
+**What had to be true first.** A public repository is a one-way door for anything already committed,
+so before flipping it: the whole git history was scanned for Supabase keys, Anthropic keys, Postgres
+connection strings, JWTs and any committed `.env` — all clean, since `.env` has been gitignored from
+the first commit. One real leak did turn up: the demo account's password, written into
+`docs/CONTINUE-HERE.md`. A working login in a readable repository is a way for a stranger to spend
+the project's AI credit through the tutor endpoint, so it was removed from the file and the password
+was rotated, which also makes the copy left in git history useless. Demo credentials now live in
+`.demo-login.txt`, which is gitignored.
+
 ## Why the frontend build fails on a missing variable
 
 Vite replaces `import.meta.env.VITE_X` with a literal at build time. When a variable is missing it
@@ -205,6 +229,7 @@ move. That last step is the only one that proves the whole stack.
 | Backend exits immediately on deploy | A required environment variable is missing | Intentional: `config/environment.ts` refuses to boot on bad config. The Render log names the variable |
 | Frontend build fails naming `VITE_` variables | One is missing in Vercel's settings | Intentional. Without the check, the build would succeed and ship a white screen — see below |
 | Vercel shows an old version of the app | Auto-deploy is not wired to the repo | Vercel → project → Settings → Git: confirm the repository is connected and production branch is `main`. Then Deployments → Redeploy |
+| Vercel deployments say **Blocked** | Hobby plan + private repo: only the project owner's commits deploy | The repository is public, which lifts it. See below |
 | Sign-up says `email rate limit exceeded` | Supabase's mailer cap | Part 5, item 1 |
 | Sign-up says `email_address_invalid` | Reserved test domain | Part 5, item 2 |
 | Question generation returns 503 | `ANTHROPIC_API_KEY` not set on Render | Add it in Render → Environment |
