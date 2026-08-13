@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { Empty, Failed, Loading } from '@/components/Loading/States';
 import { useApi } from '@/hooks/useApi';
 import { api } from '@/lib/api';
-import type { LearnerSummary, NextSession } from '@/types/api';
+import type { Goal, LearnerSummary, NextSession } from '@/types/api';
 
 /**
  * The dashboard leads with what to do, not with what happened.
@@ -30,6 +30,12 @@ export default function Dashboard() {
     const session = useApi<NextSession>(() =>
         api.get<NextSession>('/recommendations/next')
     );
+    // Whether a goal exists changes what the empty state should say. Without one the engine
+    // ranks the whole syllabus, so "nothing to practise" is the wrong message — the learner
+    // needs to be sent to set a goal, not told there is no work.
+    const goal = useApi<{ goal: Goal | null }>(() =>
+        api.get<{ goal: Goal | null }>('/goals')
+    );
 
     return (
         <div className="stack">
@@ -40,11 +46,36 @@ export default function Dashboard() {
                 <Failed error={session.error} onRetry={session.reload} />
             ) : null}
 
+            {goal.data && !goal.data.goal && (
+                <div className="card stack">
+                    <span className="label">Start here</span>
+                    <p style={{ margin: 0 }}>
+                        You have not set a goal yet, so practice is being drawn from the
+                        whole syllabus. Tell us your exam and how much time you have and
+                        it will focus on what matters.
+                    </p>
+                    <button
+                        type="button"
+                        className="primary"
+                        onClick={() => navigate('/goals')}
+                    >
+                        Set your goal
+                    </button>
+                </div>
+            )}
+
             {session.data && !session.data.recommendation && (
-                <Empty title="Nothing to practise yet">
+                <Empty
+                    title="Nothing to practise yet"
+                    action={
+                        <button type="button" onClick={() => navigate('/goals')}>
+                            Change your goal
+                        </button>
+                    }
+                >
                     <p className="muted">
                         {session.data.reason ??
-                            'Set a learning goal and we will build you a plan.'}
+                            'There are no questions available for the subjects you chose.'}
                     </p>
                 </Empty>
             )}
@@ -97,6 +128,28 @@ export default function Dashboard() {
                             {session.data.bankNote}
                         </p>
                     )}
+                </div>
+            )}
+
+            {goal.data?.goal && (
+                <div className="card">
+                    <div className="spread">
+                        <div>
+                            <span className="label">{goal.data.goal.title}</span>
+                            <div className="faint">
+                                {goal.data.goal.dailyMinutes} min a day
+                            </div>
+                        </div>
+                        <div style={{ textAlign: 'right' }}>
+                            <div className="big">
+                                {Math.max(0, goal.data.goal.daysRemaining)}
+                            </div>
+                            <div className="faint">
+                                {goal.data.goal.daysRemaining === 1 ? 'day' : 'days'}{' '}
+                                left
+                            </div>
+                        </div>
+                    </div>
                 </div>
             )}
 

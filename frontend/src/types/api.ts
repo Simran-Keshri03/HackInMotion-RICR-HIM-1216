@@ -87,3 +87,24 @@ export interface AttemptResult {
         attemptsOnTopic: number;
     };
 }
+
+export interface Subject {
+    id: string;
+    name: string;
+    /** Exam importance; the planner and readiness score multiply by this. */
+    weight: number;
+    topicCount: number;
+}
+
+export interface Goal {
+    id: string;
+    title: string;
+    /** YYYY-MM-DD. */
+    examDate: string;
+    dailyMinutes: number;
+    subjectIds: string[];
+    /** Whole days from today. */
+    daysRemaining: number;
+    /** dailyMinutes x daysRemaining — the budget the planner divides work by. */
+    totalMinutesAvailable: number;
+}

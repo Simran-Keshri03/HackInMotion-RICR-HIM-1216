@@ -1,5 +1,9 @@
 # Development Guide & Current State
 
+> **Resuming work? Read `docs/CONTINUE-HERE.md` instead.** It carries the rules, the live URLs,
+> the exact remaining work in order, and every bug already fixed. This file is the longer
+> reference behind it.
+
 **Read this first.** It is the handoff document: where the project stands, how to run it, and
 what to do next. Written so a new session, or a teammate, can continue without re-deriving
 anything.

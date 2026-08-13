@@ -13,6 +13,20 @@
 | Team Member 4 | **[Simran Kumari Keshri]** | Frontend |
 
 
+---
+
+## 🔗 Live
+
+| | |
+|---|---|
+| App | **https://adigamai.vercel.app** |
+| API | **https://adigam-api.onrender.com/api/v1** |
+
+**Developers picking the work back up:** start at
+[`docs/CONTINUE-HERE.md`](docs/CONTINUE-HERE.md) — current state, remaining work in order, and
+the conventions to follow. [`docs/architecture.md`](docs/architecture.md) is the technical
+walkthrough; [`docs/deployment.md`](docs/deployment.md) covers both hosts.
+
 # ❗ Problem Statement
 
 Traditional learning systems generally provide the same sequence of content and practice to every learner. They often fail to continuously account for:
