@@ -6,6 +6,16 @@ each one needs a URL from the step before it.
 Committed configuration: `render.yaml` (repository root) and `frontend/vercel.json`. Neither
 contains a secret; every secret is entered once in the host's dashboard.
 
+**Why `frontend/vercel.json` has no comments.** Vercel validates the file against a strict
+schema and rejects any property it does not recognise, including the `"//"` key some tools
+accept as a comment — the import fails with *"should NOT have additional property `//`"*. So the
+reasoning lives here instead: the `rewrites` entry exists because this is a single-page app and
+only `index.html` is on disk. Without it, opening `https://…/dashboard` directly (or reloading
+on it) asks the CDN for a `/dashboard` file, gets a 404, and the learner never reaches the
+router. The `headers` entries cache hashed asset filenames hard, because they are immutable,
+and forbid caching `index.html`, because a deploy would otherwise leave browsers pointing at
+asset filenames that no longer exist.
+
 ---
 
 ## Before you start
