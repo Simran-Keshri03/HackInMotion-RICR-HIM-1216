@@ -144,6 +144,29 @@ not magic links or OAuth redirects, so there is no callback URL to allow-list.
 
 ---
 
+## Why the frontend build fails on a missing variable
+
+Vite replaces `import.meta.env.VITE_X` with a literal at build time. When a variable is missing it
+becomes `undefined`, the guard in `lib/supabase.ts` turns into an unconditional throw, and Rollup
+tree-shakes the auth client away as unreachable. The build then succeeds, weighs 25 kB less
+(measured: 98 kB gzip with the variables, 73 kB without) and white-screens on load.
+
+`vite.config.ts` therefore checks for them and fails the build, naming what is missing. `vite dev`
+still starts, so local development is told by the app rather than by a failed command.
+
+**A green build is not proof the app works.** Two checks that are:
+
+```bash
+# The bundle must contain the routes you expect. A 200 on /tutor proves nothing —
+# the SPA rewrite returns index.html for every path, including ones that do not exist.
+curl -s https://adigamai.vercel.app > /tmp/h
+JS=$(grep -o '/assets/index-[^"]*\.js' /tmp/h | head -1)
+curl -s "https://adigamai.vercel.app$JS" | grep -c '/tutor'   # must be > 0
+
+# The lazy chunks must exist. One per page.
+curl -s "https://adigamai.vercel.app$JS" | grep -o 'assets/[A-Za-z]*-[A-Za-z0-9_-]*\.js' | sort -u
+```
+
 ## Verifying the deployment
 
 ```bash
@@ -180,6 +203,8 @@ move. That last step is the only one that proves the whole stack.
 | First request takes ~50 seconds | Render free plan spun the service down | Part 4 |
 | Reloading `/dashboard` gives 404 | SPA rewrite missing | `frontend/vercel.json` is committed — confirm Root Directory is `frontend` |
 | Backend exits immediately on deploy | A required environment variable is missing | Intentional: `config/environment.ts` refuses to boot on bad config. The Render log names the variable |
+| Frontend build fails naming `VITE_` variables | One is missing in Vercel's settings | Intentional. Without the check, the build would succeed and ship a white screen — see below |
+| Vercel shows an old version of the app | Auto-deploy is not wired to the repo | Vercel → project → Settings → Git: confirm the repository is connected and production branch is `main`. Then Deployments → Redeploy |
 | Sign-up says `email rate limit exceeded` | Supabase's mailer cap | Part 5, item 1 |
 | Sign-up says `email_address_invalid` | Reserved test domain | Part 5, item 2 |
 | Question generation returns 503 | `ANTHROPIC_API_KEY` not set on Render | Add it in Render → Environment |
