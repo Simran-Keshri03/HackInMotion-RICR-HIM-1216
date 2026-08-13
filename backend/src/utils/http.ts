@@ -1,4 +1,5 @@
 import type { NextFunction, Request, Response } from 'express';
+import { AIProviderError } from '@/utils/errors.js';
 
 /**
  * Every response this API sends uses one of two shapes:
@@ -53,6 +54,14 @@ export function errorHandler(
 ) {
     if (err instanceof AppError) {
         sendError(res, err.status, err.code, err.message);
+        return;
+    }
+
+    // The AI failing is not a bug in Adigam, so it does not deserve a 500. Report what
+    // actually happened, with a status the client can act on.
+    if (err instanceof AIProviderError) {
+        console.warn(`AI provider failure (${err.code}): ${err.message}`);
+        sendError(res, err.httpStatus, err.code, err.message);
         return;
     }
 
