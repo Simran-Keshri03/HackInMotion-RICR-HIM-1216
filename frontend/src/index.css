@@ -1,111 +1,367 @@
+/*
+ * All of Adigam's styling. Plain CSS, no framework.
+ *
+ * Three screens do not need a design system, and every kB of CSS is a kB a learner on a slow
+ * connection waits for. Custom properties give the consistency a framework would, at no
+ * transfer cost.
+ *
+ * Dark by default: this is a study app, often used at night, and a dark surface is easier on
+ * the eyes than a bright one.
+ */
+
 :root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+    --bg: #0e1117;
+    --surface: #161b24;
+    --surface-raised: #1e252f;
+    --border: #2a323d;
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
+    --text: #e6edf3;
+    --text-dim: #9aa7b4;
+    --text-faint: #6b7787;
 
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
-  color-scheme: light dark;
-  color: var(--text);
-  background: var(--bg);
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+    --accent: #4c8dff;
+    --accent-dim: #2f5da8;
+    --good: #3fb950;
+    --bad: #f85149;
+    --warn: #d29922;
 
-  @media (max-width: 1024px) {
-    font-size: 16px;
-  }
+    --radius: 10px;
+    --gap: 16px;
+
+    color-scheme: dark;
+    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    line-height: 1.55;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
-
-  #social .button-icon {
-    filter: invert(1) brightness(2);
-  }
-}
-
-#root {
-  width: 1126px;
-  max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
+* {
+    box-sizing: border-box;
 }
 
 body {
-  margin: 0;
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    /* Comfortable on a phone; the layout is capped rather than fluid on desktop. */
+    font-size: 16px;
 }
 
 h1,
-h2 {
-  font-family: var(--heading);
-  font-weight: 500;
-  color: var(--text-h);
+h2,
+h3 {
+    margin: 0 0 8px;
+    line-height: 1.25;
 }
 
 h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
-  @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
-  }
+    font-size: 1.5rem;
 }
 h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
-  }
+    font-size: 1.15rem;
 }
+h3 {
+    font-size: 1rem;
+}
+
 p {
-  margin: 0;
+    margin: 0 0 12px;
 }
 
-code,
-.counter {
-  font-family: var(--mono);
-  display: inline-flex;
-  border-radius: 4px;
-  color: var(--text-h);
+a {
+    color: var(--accent);
 }
 
-code {
-  font-size: 15px;
-  line-height: 135%;
-  padding: 4px 8px;
-  background: var(--code-bg);
+/* ---------------------------------------------------------------- layout */
+
+.shell {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 20px 16px 64px;
+}
+
+.topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+}
+
+.brand {
+    font-weight: 700;
+    letter-spacing: -0.01em;
+}
+
+.brand span {
+    color: var(--accent);
+}
+
+.stack {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap);
+}
+
+.row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.spread {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+/* ---------------------------------------------------------------- card */
+
+.card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px;
+}
+
+.card--accent {
+    border-color: var(--accent-dim);
+    background: linear-gradient(180deg, #182337 0%, var(--surface) 70%);
+}
+
+/* ---------------------------------------------------------------- text */
+
+.muted {
+    color: var(--text-dim);
+}
+
+.faint {
+    color: var(--text-faint);
+    font-size: 0.85rem;
+}
+
+.label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+}
+
+.big {
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+}
+
+.mono {
+    font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+    font-variant-numeric: tabular-nums;
+}
+
+/* ---------------------------------------------------------------- button */
+
+button {
+    font: inherit;
+    cursor: pointer;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface-raised);
+    color: var(--text);
+    padding: 10px 16px;
+    transition: border-color 0.12s, background 0.12s;
+}
+
+button:hover:not(:disabled) {
+    border-color: var(--text-faint);
+}
+
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+button.primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #06101f;
+    font-weight: 600;
+}
+
+button.primary:hover:not(:disabled) {
+    background: #6ba0ff;
+    border-color: #6ba0ff;
+}
+
+button.link {
+    background: none;
+    border: none;
+    color: var(--accent);
+    padding: 0;
+    text-decoration: underline;
+}
+
+button.wide {
+    width: 100%;
+}
+
+/* ---------------------------------------------------------------- form */
+
+input {
+    font: inherit;
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+}
+
+input:focus {
+    outline: 2px solid var(--accent-dim);
+    outline-offset: 1px;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.field > label {
+    font-size: 0.85rem;
+    color: var(--text-dim);
+}
+
+/* ---------------------------------------------------------------- pills */
+
+.pill {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--surface-raised);
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.pill--easy {
+    color: var(--good);
+    border-color: #235c2c;
+}
+.pill--medium {
+    color: var(--warn);
+    border-color: #5c4a12;
+}
+.pill--hard {
+    color: var(--bad);
+    border-color: #6b2320;
+}
+
+/* ---------------------------------------------------------------- meter */
+
+.meter {
+    height: 7px;
+    border-radius: 999px;
+    background: var(--surface-raised);
+    overflow: hidden;
+}
+
+.meter > div {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 999px;
+    /* The one animation in the app: mastery moving after an answer is the whole point of
+       the product, so it is worth showing rather than snapping. */
+    transition: width 0.5s ease-out;
+}
+
+/* ---------------------------------------------------------------- options */
+
+.option {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    width: 100%;
+    text-align: left;
+    padding: 12px 14px;
+    line-height: 1.45;
+}
+
+.option[aria-pressed='true'] {
+    border-color: var(--accent);
+    background: #17243a;
+}
+
+.option--correct {
+    border-color: var(--good);
+    background: #12261a;
+}
+
+.option--wrong {
+    border-color: var(--bad);
+    background: #2a1618;
+}
+
+.option__mark {
+    flex: 0 0 22px;
+    font-weight: 700;
+    color: var(--text-faint);
+}
+
+/* ---------------------------------------------------------------- states */
+
+.state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-dim);
+}
+
+.spinner {
+    width: 26px;
+    height: 26px;
+    margin: 0 auto 12px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Respect a learner who has asked for less motion. */
+@media (prefers-reduced-motion: reduce) {
+    .spinner {
+        animation-duration: 2s;
+    }
+    .meter > div {
+        transition: none;
+    }
+}
+
+.banner {
+    padding: 12px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface-raised);
+    font-size: 0.9rem;
+}
+
+.banner--error {
+    border-color: #6b2320;
+    background: #241516;
+    color: #ffb4ae;
+}
+
+.banner--good {
+    border-color: #235c2c;
+    background: #13251a;
+    color: #7ee787;
 }

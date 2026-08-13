@@ -1,0 +1,240 @@
+import { useNavigate } from 'react-router-dom';
+import { Empty, Failed, Loading } from '@/components/Loading/States';
+import { useApi } from '@/hooks/useApi';
+import { api } from '@/lib/api';
+import type { LearnerSummary, NextSession } from '@/types/api';
+
+/**
+ * The dashboard leads with what to do, not with what happened.
+ *
+ * Charts tell a learner their accuracy is 61% and leave them to work out the implication. The
+ * "do this next" card is the product: one instruction, and the engine's own sentence
+ * explaining why it chose that instruction. The numbers come after.
+ */
+
+const ACTION_LABELS: Record<string, string> = {
+    learn_new: 'Start something new',
+    practice: 'Practise',
+    revise: 'Revise',
+    mini_test: 'Quick test',
+};
+
+export default function Dashboard() {
+    const navigate = useNavigate();
+
+    // Two independent requests. If the summary fails the recommendation can still render, and
+    // vice versa — one slow endpoint should not blank the whole screen.
+    const summary = useApi<LearnerSummary>(() =>
+        api.get<LearnerSummary>('/learner/summary')
+    );
+    const session = useApi<NextSession>(() =>
+        api.get<NextSession>('/recommendations/next')
+    );
+
+    return (
+        <div className="stack">
+            {/* ---------------------------------------------- next action */}
+            {session.loading && <Loading label="Working out what you should do next…" />}
+
+            {session.error ? (
+                <Failed error={session.error} onRetry={session.reload} />
+            ) : null}
+
+            {session.data && !session.data.recommendation && (
+                <Empty title="Nothing to practise yet">
+                    <p className="muted">
+                        {session.data.reason ??
+                            'Set a learning goal and we will build you a plan.'}
+                    </p>
+                </Empty>
+            )}
+
+            {session.data?.recommendation && (
+                <div className="card card--accent stack">
+                    <div className="spread">
+                        <span className="label">Do this next</span>
+                        <span
+                            className={`pill pill--${session.data.recommendation.difficulty}`}
+                        >
+                            {session.data.recommendation.difficulty}
+                        </span>
+                    </div>
+
+                    <div>
+                        <h1>{session.data.recommendation.topic.name}</h1>
+                        <p className="muted" style={{ margin: 0 }}>
+                            {ACTION_LABELS[session.data.recommendation.action] ??
+                                session.data.recommendation.action}
+                            {' · '}
+                            {session.data.recommendation.questionCount}{' '}
+                            {session.data.recommendation.questionCount === 1
+                                ? 'question'
+                                : 'questions'}
+                            {' · about '}
+                            {session.data.recommendation.estimatedMinutes} min
+                        </p>
+                    </div>
+
+                    {/* The engine's own explanation, verbatim. A recommendation a learner
+                        cannot interrogate is one they will not follow. */}
+                    <p style={{ margin: 0 }}>{session.data.recommendation.reason}</p>
+
+                    <MasterySignal
+                        score={session.data.recommendation.signals.masteryScore}
+                        attempts={session.data.recommendation.signals.totalAttempts}
+                    />
+
+                    <button
+                        type="button"
+                        className="primary wide"
+                        onClick={() => navigate('/practice')}
+                    >
+                        Start
+                    </button>
+
+                    {session.data.bankNote && (
+                        <p className="faint" style={{ margin: 0 }}>
+                            {session.data.bankNote}
+                        </p>
+                    )}
+                </div>
+            )}
+
+            {/* ---------------------------------------------- your numbers */}
+            {summary.loading && <Loading label="Loading your progress…" />}
+
+            {summary.error ? (
+                <Failed error={summary.error} onRetry={summary.reload} />
+            ) : null}
+
+            {summary.data && !summary.data.hasActivity && (
+                <div className="card">
+                    <span className="label">Your progress</span>
+                    <p className="muted" style={{ marginTop: 10, marginBottom: 0 }}>
+                        Answer your first question and your mastery scores will
+                        start appearing here.
+                    </p>
+                </div>
+            )}
+
+            {summary.data?.hasActivity && (
+                <>
+                    <div className="card">
+                        <span className="label">Your numbers</span>
+                        <div
+                            className="row"
+                            style={{ marginTop: 14, gap: 32 }}
+                        >
+                            <Stat
+                                value={String(summary.data.attempts.total)}
+                                label="questions answered"
+                            />
+                            <Stat
+                                value={
+                                    summary.data.attempts.accuracyPercent === null
+                                        ? '—'
+                                        : `${Math.round(summary.data.attempts.accuracyPercent)}%`
+                                }
+                                label="accuracy"
+                            />
+                            <Stat
+                                value={String(
+                                    summary.data.habits.currentStreakDays
+                                )}
+                                label="day streak"
+                            />
+                        </div>
+                    </div>
+
+                    {summary.data.weakestTopics.length > 0 && (
+                        <div className="card stack">
+                            <span className="label">Weakest topics</span>
+
+                            {summary.data.weakestTopics.map((topic) => (
+                                <div key={topic.topicId}>
+                                    <div className="spread">
+                                        <span>{topic.name}</span>
+                                        <span className="mono muted">
+                                            {Math.round(topic.masteryScore)}
+                                        </span>
+                                    </div>
+                                    <div
+                                        className="meter"
+                                        style={{ marginTop: 6 }}
+                                        role="progressbar"
+                                        aria-label={`${topic.name} mastery`}
+                                        aria-valuenow={Math.round(
+                                            topic.masteryScore
+                                        )}
+                                        aria-valuemin={0}
+                                        aria-valuemax={100}
+                                    >
+                                        <div
+                                            style={{
+                                                width: `${topic.masteryScore}%`,
+                                            }}
+                                        />
+                                    </div>
+                                    <span className="faint">
+                                        based on {topic.attempts}{' '}
+                                        {topic.attempts === 1
+                                            ? 'attempt'
+                                            : 'attempts'}
+                                    </span>
+                                </div>
+                            ))}
+
+                            {/* Said out loud rather than implied: a score from a handful of
+                                answers is an estimate, and the interface should not pretend
+                                otherwise. */}
+                            <p className="faint" style={{ margin: 0 }}>
+                                Mastery is an estimate from your answers so far, not
+                                a measurement.
+                            </p>
+                        </div>
+                    )}
+                </>
+            )}
+        </div>
+    );
+}
+
+function Stat({ value, label }: { value: string; label: string }) {
+    return (
+        <div>
+            <div className="big">{value}</div>
+            <div className="faint">{label}</div>
+        </div>
+    );
+}
+
+function MasterySignal({
+    score,
+    attempts,
+}: {
+    score: number | null;
+    attempts: number;
+}) {
+    if (score === null) {
+        return (
+            <p className="faint" style={{ margin: 0 }}>
+                You have not attempted this topic yet.
+            </p>
+        );
+    }
+
+    return (
+        <div>
+            <div className="spread">
+                <span className="faint">Current mastery</span>
+                <span className="mono">
+                    {Math.round(score)} · {attempts}{' '}
+                    {attempts === 1 ? 'attempt' : 'attempts'}
+                </span>
+            </div>
+            <div className="meter" style={{ marginTop: 6 }}>
+                <div style={{ width: `${score}%` }} />
+            </div>
+        </div>
+    );
+}

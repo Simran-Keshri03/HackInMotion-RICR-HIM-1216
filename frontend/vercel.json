@@ -1,0 +1,30 @@
+{
+    "$schema": "https://openapi.vercel.sh/vercel.json",
+
+    "//": "This app is a single-page app: only index.html exists on disk. Without the rewrite below, opening https://…/dashboard directly (or reloading on it) asks the CDN for a /dashboard file, gets a 404, and the learner never reaches the router. The rewrite hands every path to index.html and lets React Router decide.",
+
+    "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }],
+
+    "headers": [
+        {
+            "//": "Hashed asset filenames are immutable, so they can be cached hard.",
+            "source": "/assets/(.*)",
+            "headers": [
+                {
+                    "key": "Cache-Control",
+                    "value": "public, max-age=31536000, immutable"
+                }
+            ]
+        },
+        {
+            "//": "index.html must never be cached, or a deploy leaves browsers pointing at asset filenames that no longer exist.",
+            "source": "/index.html",
+            "headers": [
+                {
+                    "key": "Cache-Control",
+                    "value": "no-cache, no-store, must-revalidate"
+                }
+            ]
+        }
+    ]
+}
