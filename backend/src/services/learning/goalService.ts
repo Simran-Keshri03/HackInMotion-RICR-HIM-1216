@@ -8,6 +8,8 @@ export interface CreateGoalInput {
     examDate: string;
     dailyMinutes: number;
     subjectIds: string[];
+    /** Which syllabus these subjects belong to. */
+    curriculumId: string;
 }
 
 export interface GoalView {
@@ -16,6 +18,7 @@ export interface GoalView {
     examDate: string;
     dailyMinutes: number;
     subjectIds: string[];
+    curriculumId: string | null;
     /** Whole days from today. Zero on exam day, negative once it has passed. */
     daysRemaining: number;
     /** dailyMinutes x days left, so the planner and the UI agree on the budget. */
@@ -36,8 +39,8 @@ export class GoalService {
         this.goals = goals;
     }
 
-    async listSubjects() {
-        return this.goals.findSubjects();
+    async listSubjects(curriculumId: string) {
+        return this.goals.findSubjects(curriculumId);
     }
 
     async getActive(userId: string): Promise<GoalView | null> {
@@ -94,6 +97,7 @@ export class GoalService {
             examDate: input.examDate,
             dailyMinutes: input.dailyMinutes,
             subjectIds,
+            curriculumId: input.curriculumId,
         });
 
         return this.toView(created, subjectIds);
@@ -105,6 +109,7 @@ export class GoalService {
             title: string;
             exam_date: string;
             daily_minutes: number;
+            curriculum_id?: string | null;
         },
         subjectIds: string[]
     ): GoalView {
@@ -116,6 +121,7 @@ export class GoalService {
             examDate: goal.exam_date,
             dailyMinutes: goal.daily_minutes,
             subjectIds,
+            curriculumId: goal.curriculum_id ?? null,
             daysRemaining,
             totalMinutesAvailable: Math.max(0, daysRemaining) * goal.daily_minutes,
         };

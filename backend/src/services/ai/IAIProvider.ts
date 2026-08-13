@@ -9,6 +9,17 @@
  * anything the application will act on, and free text, for anything a person will read.
  */
 
+/**
+ * How much capability a call needs, said in terms of the work rather than a model name.
+ *
+ *   high     the answer becomes data other things depend on, so being wrong is expensive
+ *   standard the answer is read by a person who can judge it, and the call happens often
+ *
+ * Deliberately not a model id: the whole point of this interface is that nothing above it knows
+ * which model exists. The provider maps these to whatever it runs.
+ */
+export type AIQuality = 'standard' | 'high';
+
 export interface AIUsage {
     inputTokens: number;
     outputTokens: number;
@@ -26,12 +37,21 @@ export interface AIJsonRequest {
      */
     schema: Record<string, unknown>;
     maxTokens?: number;
+    /** Defaults to `high`: structured output usually becomes stored data. */
+    quality?: AIQuality;
 }
 
 export interface AITextRequest {
     system: string;
     prompt: string;
     maxTokens?: number;
+    /** Defaults to `standard`: free text is read by a person, not consumed by code. */
+    quality?: AIQuality;
+    /**
+     * Earlier turns, oldest first, for a conversation that should remember itself. Left out for
+     * one-shot requests so nothing extra is sent or paid for.
+     */
+    history?: { role: 'user' | 'assistant'; content: string }[];
 }
 
 export interface AIJsonResponse {

@@ -4,7 +4,7 @@ import { adminDb, userDb } from '@/config/database.js';
 import { authOf } from '@/middleware/authMiddleware.js';
 import { GoalRepository } from '@/repositories/goalRepository.js';
 import { GoalService } from '@/services/learning/goalService.js';
-import { sendOk } from '@/utils/http.js';
+import { AppError, sendOk } from '@/utils/http.js';
 
 /**
  * Note what is absent: user_id. The learner is whoever the verified token says they are.
@@ -16,6 +16,7 @@ import { sendOk } from '@/utils/http.js';
  */
 export const createGoalSchema = z.object({
     title: z.string().trim().min(1).max(120),
+    curriculumId: z.string().uuid(),
     examDate: z
         .string()
         .regex(/^\d{4}-\d{2}-\d{2}$/, 'must be a date in YYYY-MM-DD form'),
@@ -23,13 +24,32 @@ export const createGoalSchema = z.object({
     subjectIds: z.array(z.string().uuid()).min(1).max(20),
 });
 
-/** GET /api/v1/goals/subjects — what a learner can choose from. */
+/**
+ * GET /api/v1/goals/subjects?curriculumId=… — subjects within one syllabus.
+ *
+ * Scoped to a curriculum rather than listing everything: curricula are shared, so a global list
+ * would offer a class 10 learner somebody else's GATE subjects.
+ */
 export async function listSubjects(req: Request, res: Response) {
     const { accessToken } = authOf(req);
 
+    const query = z
+        .object({ curriculumId: z.string().uuid() })
+        .safeParse(req.query);
+
+    if (!query.success) {
+        throw new AppError(
+            400,
+            'INVALID_INPUT',
+            'curriculumId is required and must be a uuid.'
+        );
+    }
+
     const service = new GoalService(new GoalRepository(userDb(accessToken)));
 
-    sendOk(res, { subjects: await service.listSubjects() });
+    sendOk(res, {
+        subjects: await service.listSubjects(query.data.curriculumId),
+    });
 }
 
 /**
@@ -61,6 +81,7 @@ export async function createGoal(req: Request, res: Response) {
 
     const goal = await service.create({
         userId,
+        curriculumId: body.curriculumId,
         title: body.title,
         examDate: body.examDate,
         dailyMinutes: body.dailyMinutes,

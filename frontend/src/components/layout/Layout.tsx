@@ -24,6 +24,9 @@ export function Layout({ children }: { children: ReactNode }) {
                 </Link>
 
                 <div className="row" style={{ gap: 12 }}>
+                    <Link to="/tutor" className="faint" style={{ textDecoration: 'none' }}>
+                        Ask
+                    </Link>
                     <Link to="/goals" className="faint" style={{ textDecoration: 'none' }}>
                         Goal
                     </Link>

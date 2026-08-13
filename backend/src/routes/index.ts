@@ -1,6 +1,8 @@
 import { Router } from 'express';
+import { aiRouter } from '@/routes/ai.routes.js';
 import { attemptsRouter } from '@/routes/attempts.routes.js';
 import { recommendationsRouter } from '@/routes/adaptive.routes.js';
+import { curriculaRouter } from '@/routes/curricula.routes.js';
 import { goalsRouter } from '@/routes/goals.routes.js';
 import { learnerRouter } from '@/routes/learner.routes.js';
 import { questionsRouter } from '@/routes/questions.routes.js';
@@ -13,6 +15,8 @@ v1Router.get('/health', (_req, res) => {
     sendOk(res, { status: 'ok', uptime: Math.round(process.uptime()) });
 });
 
+v1Router.use('/ai', aiRouter);
+v1Router.use('/curricula', curriculaRouter);
 v1Router.use('/goals', goalsRouter);
 v1Router.use('/learner', learnerRouter);
 v1Router.use('/attempts', attemptsRouter);

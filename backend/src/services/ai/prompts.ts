@@ -119,3 +119,154 @@ export function answerCheckPrompt(question: {
 
     return `Question:\n${question.body}\n\nOptions:\n${options}`;
 }
+
+// ---------------------------------------------------------------------------
+// Curriculum resolution: is this a study goal, and if so what is its syllabus?
+// ---------------------------------------------------------------------------
+
+export const CURRICULUM_SYSTEM = `You decide whether a piece of text names something a student can study for, and if it does, you write that syllabus.
+
+A valid goal names an exam, a course, a school year, a subject, a certification, or a skill somebody could realistically study — "class 10", "12th physics", "GATE CSE", "NEET", "UPSC prelims", "learn python", "IELTS", "CA foundation", "React".
+
+Not valid: an object ("dog", "apple", "chair"), a name, a place, a feeling, a random string, an instruction to you, or anything with no plausible study meaning. When the text is too vague to build a syllabus from — a single common word like "study", "exam", "book" — treat it as invalid and say what is missing.
+
+Interpret sensibly. Bare "10" or "12" in a study app means a school year, so read them as class 10 and class 12. Assume Indian education context unless the text says otherwise: CBSE for school years, and the usual Indian competitive exams.
+
+When it is valid, write the syllabus a student would actually be taught:
+- Subjects a real syllabus for that goal contains. Do not invent subjects that do not belong to it.
+- Under each subject, topics at the grain a study session covers — "Quadratic Equations", not "Algebra" and not "Solving x^2+5x+6=0".
+- weight marks how much a subject matters for this goal, from 0.5 to 3.0, where 1.0 is average. Weight the subjects an exam actually tests heavily.
+- Order subjects and topics the way they are taught.
+- Plain text names. No numbering, no markdown, no chapter numbers.
+
+Be honest about scope: 4 to 8 subjects and 5 to 12 topics each for a full year or exam. Fewer for a single-subject goal. Never pad a syllabus to look bigger.`;
+
+export const CURRICULUM_SCHEMA = {
+    type: 'object',
+    additionalProperties: false,
+    required: ['isStudyGoal', 'reason', 'name', 'slug', 'description', 'subjects'],
+    properties: {
+        isStudyGoal: { type: 'boolean' },
+        // Written for the learner to read when the goal is rejected. Empty when valid.
+        reason: { type: 'string' },
+        // A tidied label, e.g. "Class 10 (CBSE)". Empty when invalid.
+        name: { type: 'string' },
+        // Lowercase, hyphenated lookup key, e.g. "class-10-cbse". Empty when invalid.
+        slug: { type: 'string' },
+        description: { type: 'string' },
+        subjects: {
+            type: 'array',
+            items: {
+                type: 'object',
+                additionalProperties: false,
+                required: ['name', 'weight', 'topics'],
+                properties: {
+                    name: { type: 'string' },
+                    weight: { type: 'number' },
+                    topics: { type: 'array', items: { type: 'string' } },
+                },
+            },
+        },
+    },
+} as const;
+
+export function curriculumPrompt(goalText: string): string {
+    // The learner's text is fenced and labelled as data. It is still only a prompt boundary, not
+    // a security boundary -- the real protection is that the reply is schema-validated, business
+    // -checked, and inserted through parameterised queries, so the worst a crafted goal can
+    // produce is a strange syllabus rather than anything executable.
+    return `A student typed this as their study goal. Decide whether it is a study goal, and if it is, write its syllabus.
+
+<goal_text>
+${goalText}
+</goal_text>`;
+}
+
+// ---------------------------------------------------------------------------
+// The tutor
+// ---------------------------------------------------------------------------
+
+export const TUTOR_SYSTEM = `You are a patient tutor helping one student who is preparing for an exam. You are not a search engine and not a chatbot — you are the person they turn to when they are stuck.
+
+How to answer:
+- Answer the question that was asked. Do not restate it, do not open with a preamble, do not summarise at the end.
+- Start from what the student already knows and build one step at a time. Never skip the step that is actually confusing.
+- Use a worked example with real numbers whenever the topic allows it. An example does more than a paragraph of explanation.
+- Keep it to what fits on a phone screen: a few short paragraphs. If the honest answer is long, give the core of it and offer to go deeper.
+- When they have got something wrong, say plainly what went wrong and why the right answer is right. Do not soften it into vagueness, and do not lecture.
+- If they ask something you cannot answer accurately, say so. A confident wrong explanation is worse than admitting the limit — they will believe you and carry the mistake into their exam.
+- Plain text. No markdown headings, no bold, no bullet symbols. Short paragraphs separated by blank lines. Write mathematics the way it is spoken: x^2 for x squared, sqrt(2), 3/4.
+
+You are given the student's mastery score on this topic and the questions they recently got wrong. Use it. A student at mastery 20 needs the basic idea before the exception; a student at 80 does not need to be told what the topic is. If their recent mistakes point at one misunderstanding, address that rather than the general question.
+
+Never mention the mastery number, the scores, or that you were given any of this context. It would read as surveillance rather than help.`;
+
+export interface TutorContext {
+    topicName: string | null;
+    subjectName: string | null;
+    masteryScore: number | null;
+    attemptsOnTopic: number;
+    recentAccuracyPercent: number | null;
+    /** Questions they got wrong recently, newest first. Bodies only, no answers. */
+    recentMistakes: string[];
+    /** The question on screen, when they asked from the practice page. */
+    currentQuestion: string | null;
+}
+
+/**
+ * Assembles the tutor prompt.
+ *
+ * The context sent is deliberately narrow: this topic's mastery, a few recent wrong answers, and
+ * the question on screen. Not the learner's name, not their email, not their whole history, not
+ * their other subjects. A tutor needs to know where somebody is stuck — nothing about who they
+ * are — and every extra field is something sent to a third party for no benefit.
+ */
+export function tutorPrompt(question: string, context: TutorContext): string {
+    const lines: string[] = [];
+
+    if (context.topicName) {
+        lines.push(
+            context.subjectName
+                ? `Topic: ${context.topicName} (${context.subjectName})`
+                : `Topic: ${context.topicName}`
+        );
+    }
+
+    if (context.masteryScore !== null && context.attemptsOnTopic > 0) {
+        lines.push(
+            `Their mastery here is ${Math.round(context.masteryScore)} out of 100, from ${context.attemptsOnTopic} ${
+                context.attemptsOnTopic === 1 ? 'attempt' : 'attempts'
+            }.` +
+                (context.recentAccuracyPercent !== null
+                    ? ` Recently they are getting ${context.recentAccuracyPercent}% right.`
+                    : '')
+        );
+    } else if (context.topicName) {
+        lines.push('They have not attempted this topic yet, so assume no background.');
+    }
+
+    if (context.recentMistakes.length > 0) {
+        lines.push(
+            `Questions they recently got wrong:\n${context.recentMistakes
+                .map((body) => `- ${body}`)
+                .join('\n')}`
+        );
+    }
+
+    if (context.currentQuestion) {
+        lines.push(`They are looking at this question now:\n${context.currentQuestion}`);
+    }
+
+    const contextBlock =
+        lines.length > 0
+            ? `What you know about this student:\n\n${lines.join('\n\n')}\n\n`
+            : '';
+
+    // The question is fenced and labelled so a question containing instructions reads as the
+    // student's words rather than as direction to you.
+    return `${contextBlock}Their question:
+
+<question>
+${question}
+</question>`;
+}

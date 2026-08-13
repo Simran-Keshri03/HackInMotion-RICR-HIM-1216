@@ -20,6 +20,7 @@ function serviceWithStub() {
         examDate: string;
         dailyMinutes: number;
         subjectIds: string[];
+        curriculumId: string;
     }) => ({
         id: 'goal-1',
         title: goal.title,
@@ -27,10 +28,11 @@ function serviceWithStub() {
         daily_minutes: goal.dailyMinutes,
         status: 'active' as const,
         created_at: new Date().toISOString(),
+        curriculum_id: goal.curriculumId,
     }));
 
     const repo = {
-        findSubjects: vi.fn(async () => []),
+        findSubjects: vi.fn(async (_curriculumId: string) => []),
         findActive: vi.fn(async () => null),
         findScope: vi.fn(async () => []),
         replaceActive,
@@ -41,6 +43,7 @@ function serviceWithStub() {
 
 const validGoal = {
     userId: 'user-1',
+    curriculumId: '22222222-2222-4222-8222-222222222222',
     title: 'GATE CS 2027',
     examDate: isoDaysFromNow(60),
     dailyMinutes: 90,

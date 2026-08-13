@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Empty, Failed, Loading } from '@/components/Loading/States';
 import { useApi } from '@/hooks/useApi';
 import { api } from '@/lib/api';
@@ -252,6 +252,17 @@ export default function Practice() {
                             </p>
                         </div>
                     )}
+
+                    {/* The moment a learner is most likely to have a doubt is right after seeing
+                        they got something wrong, so the tutor is offered here rather than only
+                        from the menu. The topic and question travel with the link so the answer is
+                        about this question, not the subject in general. */}
+                    <Link
+                        to={`/tutor?topic=${question.topic_id}&question=${encodeURIComponent(question.body)}`}
+                        className="faint"
+                    >
+                        Still not clear? Ask Adigam about this question
+                    </Link>
 
                     <MasteryChange mastery={result.mastery} />
 

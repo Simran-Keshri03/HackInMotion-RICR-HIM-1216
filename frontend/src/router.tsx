@@ -16,6 +16,7 @@ const Login = lazy(() => import('@/pages/Login/Login'));
 const Dashboard = lazy(() => import('@/pages/Dashboard/Dashboard'));
 const Practice = lazy(() => import('@/pages/Practice/Practice'));
 const LearningGoals = lazy(() => import('@/pages/LearningGoals/LearningGoals'));
+const AITutor = lazy(() => import('@/pages/AITutor/AITutor'));
 
 /**
  * Everything behind this needs a session.
@@ -64,6 +65,7 @@ export function AppRoutes() {
                     <Route path="/dashboard" element={<Dashboard />} />
                     <Route path="/practice" element={<Practice />} />
                     <Route path="/goals" element={<LearningGoals />} />
+                    <Route path="/tutor" element={<AITutor />} />
                 </Route>
 
                 {/* Anything unknown goes to the dashboard, which itself redirects to login

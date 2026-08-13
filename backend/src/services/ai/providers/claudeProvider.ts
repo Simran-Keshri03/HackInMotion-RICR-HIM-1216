@@ -3,6 +3,7 @@ import { env } from '@/config/environment.js';
 import type {
     AIJsonRequest,
     AIJsonResponse,
+    AIQuality,
     AITextRequest,
     AITextResponse,
     IAIProvider,
@@ -30,7 +31,20 @@ import { AIProviderError } from '@/utils/errors.js';
  *    model in the same call instead of handing us the refusal.
  */
 
-const MODEL = 'claude-opus-5';
+/**
+ * Which model serves which kind of work.
+ *
+ * high     Opus. Used for anything whose output becomes stored data — a generated question with a
+ *          wrong answer key would mark a learner wrong for being right, and the mastery engine
+ *          would then record that as evidence. Being right is worth the price.
+ * standard Sonnet. Used for explanations a learner reads and judges themselves. The tutor is
+ *          asked the same kind of question dozens of times in a session, and writing a clear
+ *          explanation is well inside Sonnet's range.
+ */
+const MODELS: Record<AIQuality, { id: string; serverSideFallback: boolean }> = {
+    high: { id: 'claude-opus-5', serverSideFallback: true },
+    standard: { id: 'claude-sonnet-5', serverSideFallback: false },
+};
 
 const DEFAULT_MAX_TOKENS = 8000;
 
@@ -38,7 +52,7 @@ const DEFAULT_MAX_TOKENS = 8000;
 const REQUEST_TIMEOUT_MS = 90_000;
 
 export class ClaudeProvider implements IAIProvider {
-    readonly name = MODEL;
+    readonly name = 'claude';
 
     private readonly client: Anthropic;
 
@@ -57,6 +71,7 @@ export class ClaudeProvider implements IAIProvider {
             prompt: request.prompt,
             maxTokens: request.maxTokens ?? DEFAULT_MAX_TOKENS,
             schema: request.schema,
+            quality: request.quality ?? 'high',
         });
 
         const text = firstTextOf(response);
@@ -87,6 +102,8 @@ export class ClaudeProvider implements IAIProvider {
             system: request.system,
             prompt: request.prompt,
             maxTokens: request.maxTokens ?? DEFAULT_MAX_TOKENS,
+            quality: request.quality ?? 'standard',
+            history: request.history,
         });
 
         const text = firstTextOf(response);
@@ -106,18 +123,34 @@ export class ClaudeProvider implements IAIProvider {
         system: string;
         prompt: string;
         maxTokens: number;
+        quality: AIQuality;
         schema?: Record<string, unknown>;
+        history?: { role: 'user' | 'assistant'; content: string }[];
     }) {
+        const model = MODELS[options.quality];
+
         try {
             const response = await this.client.beta.messages.create({
-                model: MODEL,
+                model: model.id,
                 max_tokens: options.maxTokens,
-                // If a request is declined, let the API retry it on a fallback model
-                // rather than returning us a refusal.
-                betas: ['server-side-fallback-2026-07-01'],
-                fallbacks: 'default',
+                // Server-side fallbacks are per-model, not universal: a model without safety
+                // classifiers strict enough to need them rejects the parameter outright with a
+                // 400. Sending it unconditionally broke every standard-tier call.
+                ...(model.serverSideFallback
+                    ? {
+                          betas: ['server-side-fallback-2026-07-01' as const],
+                          // If a request is declined, let the API retry it on another model
+                          // rather than handing us the refusal.
+                          fallbacks: 'default' as const,
+                      }
+                    : {}),
                 system: options.system,
-                messages: [{ role: 'user', content: options.prompt }],
+                messages: [
+                    // Earlier turns first, so the model sees the conversation in order and the
+                    // new question last.
+                    ...(options.history ?? []),
+                    { role: 'user' as const, content: options.prompt },
+                ],
                 ...(options.schema
                     ? {
                           output_config: {

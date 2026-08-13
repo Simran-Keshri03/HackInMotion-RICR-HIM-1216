@@ -108,3 +108,26 @@ export interface Goal {
     /** dailyMinutes x daysRemaining — the budget the planner divides work by. */
     totalMinutesAvailable: number;
 }
+
+export interface ConversationSummary {
+    id: string;
+    title: string;
+    topicId: string | null;
+    lastMessageAt: string;
+    /** False when the question was saved but the model never answered — an outage. */
+    answered: boolean;
+}
+
+export interface TutorMessage {
+    role: 'learner' | 'tutor';
+    content: string;
+    createdAt: string;
+}
+
+export interface TutorReply {
+    conversationId: string;
+    title: string;
+    answer: string;
+    messages: TutorMessage[];
+    usage: { inputTokens: number; outputTokens: number; model: string };
+}

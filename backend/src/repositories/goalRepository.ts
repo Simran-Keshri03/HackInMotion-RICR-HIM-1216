@@ -7,6 +7,8 @@ export interface GoalRow {
     daily_minutes: number;
     status: 'active' | 'archived';
     created_at: string;
+    /** Null on goals created before curricula existed; their scope is still explicit topic ids. */
+    curriculum_id: string | null;
 }
 
 export interface SubjectWithTopics {
@@ -29,11 +31,17 @@ export class GoalRepository {
         this.db = db;
     }
 
-    /** Subjects a learner can pick from, with how many topics each contains. */
-    async findSubjects(): Promise<SubjectWithTopics[]> {
+    /**
+     * Subjects a learner can pick from, within one curriculum.
+     *
+     * Scoped rather than global: since curricula are shared, listing every subject in the table
+     * would offer a class 10 learner somebody else's GATE subjects.
+     */
+    async findSubjects(curriculumId: string): Promise<SubjectWithTopics[]> {
         const { data, error } = await this.db
             .from('topics')
             .select('id, name, weight, parent_id')
+            .eq('curriculum_id', curriculumId)
             .order('sort_order');
 
         if (error) throw error;
@@ -65,7 +73,7 @@ export class GoalRepository {
     async findActive(userId: string): Promise<GoalRow | null> {
         const { data, error } = await this.db
             .from('learning_goals')
-            .select('id, title, exam_date, daily_minutes, status, created_at')
+            .select('id, title, exam_date, daily_minutes, status, created_at, curriculum_id')
             .eq('user_id', userId)
             .eq('status', 'active')
             .maybeSingle();
@@ -100,6 +108,7 @@ export class GoalRepository {
             examDate: string;
             dailyMinutes: number;
             subjectIds: string[];
+            curriculumId: string;
         }
     ): Promise<GoalRow> {
         const { error: archiveError } = await this.db
@@ -117,8 +126,9 @@ export class GoalRepository {
                 title: goal.title,
                 exam_date: goal.examDate,
                 daily_minutes: goal.dailyMinutes,
+                curriculum_id: goal.curriculumId,
             })
-            .select('id, title, exam_date, daily_minutes, status, created_at')
+            .select('id, title, exam_date, daily_minutes, status, created_at, curriculum_id')
             .single();
 
         if (error) throw error;
