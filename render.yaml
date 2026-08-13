@@ -1,0 +1,45 @@
+# Render blueprint for the Adigam AI backend.
+#
+# Render reads this from the repository root, so `rootDir` points it at backend/. With the
+# blueprint checked in, a redeploy is a git push rather than a form to fill in again.
+#
+# Secrets are deliberately NOT here: `sync: false` means Render prompts for the value once and
+# stores it encrypted. Committing a service-role key or an API key to the repository would be
+# the single worst thing this project could do.
+services:
+    - type: web
+      name: adigam-api
+      runtime: node
+      plan: free
+      region: singapore # closest Render region to India
+      rootDir: backend
+
+      buildCommand: npm ci
+      startCommand: npm start
+
+      # Render restarts the service if this stops answering. It also gives the keep-alive
+      # ping something cheap to hit.
+      healthCheckPath: /api/v1/health
+
+      envVars:
+          - key: NODE_ENV
+            value: production
+
+          # Render assigns the port and expects the app to bind to it. The app already reads
+          # PORT from the environment.
+          - key: PORT
+            value: 10000
+
+          # Must be the deployed frontend origin, with no trailing slash. Set this after the
+          # Vercel deploy, or CORS will block every browser request.
+          - key: CORS_ORIGINS
+            sync: false
+
+          - key: SUPABASE_URL
+            sync: false
+          - key: SUPABASE_PUBLISHABLE_KEY
+            sync: false
+          - key: SUPABASE_SECRET_KEY
+            sync: false
+          - key: ANTHROPIC_API_KEY
+            sync: false
