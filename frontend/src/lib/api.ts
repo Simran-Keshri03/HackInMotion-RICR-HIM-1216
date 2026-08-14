@@ -42,7 +42,10 @@ export class ApiError extends Error {
             this.code === 'AI_TIMEOUT' ||
             this.code === 'AI_UNAVAILABLE' ||
             // A request that timed out may well succeed on a second try — the free host cold-starts.
-            this.code === 'TIMEOUT'
+            this.code === 'TIMEOUT' ||
+            // A token a second too new for the database's clock. Always worth retrying: it becomes
+            // valid on its own, and the wait is under a second.
+            this.code === 'TOKEN_NOT_YET_VALID'
         );
     }
 }
@@ -57,6 +60,9 @@ export class ApiError extends Error {
  * retry turns that into a slightly slower load.
  */
 const RETRY_DELAY_MS = 700;
+
+/** First gap when the database says a token is from the future. See the retry loop for why. */
+const SKEW_RETRY_DELAY_MS = 1200;
 
 /**
  * How long to wait for a response before giving up.
@@ -183,8 +189,23 @@ export const api = {
                 if (!(error instanceof ApiError) || !error.retryable) throw error;
 
                 if (attempt < 2) {
+                    /**
+                     * A token the database thinks is from the future needs a longer wait than a
+                     * dropped request does.
+                     *
+                     * The ordinary backoff is 700ms then 1400ms — about two seconds in total, which
+                     * turned out to be shorter than the clock skew between the auth server and the
+                     * database. All three attempts failed inside the window and the learner met an
+                     * error on the first screen after signing in. Waiting 1.2s then 2.4s covers it,
+                     * and only applies to that one code, so nothing else is made slower.
+                     */
+                    const gap =
+                        error.code === 'TOKEN_NOT_YET_VALID'
+                            ? SKEW_RETRY_DELAY_MS
+                            : RETRY_DELAY_MS;
+
                     await new Promise((resolve) =>
-                        setTimeout(resolve, RETRY_DELAY_MS * (attempt + 1))
+                        setTimeout(resolve, gap * (attempt + 1))
                     );
                 }
             }

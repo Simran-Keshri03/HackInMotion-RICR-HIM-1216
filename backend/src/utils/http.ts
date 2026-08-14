@@ -65,7 +65,47 @@ export function errorHandler(
         return;
     }
 
+    /**
+     * A token that is valid but a second too new.
+     *
+     * PostgREST rejects a JWT whose `iat` is ahead of the database's own clock with PGRST303, "JWT
+     * issued at future". The token is genuine — Supabase's auth server minted it and this backend
+     * verified it — the two clocks simply disagree by a fraction of a second, and the database is the
+     * one that is behind.
+     *
+     * Left unmapped it became a 500 on the learner's very first request after signing in, which is the
+     * worst possible moment: the dashboard is the first thing they see and it showed an error for
+     * something that fixes itself. Reported instead as 503 with its own code, which the client
+     * recognises as worth waiting a beat and retrying rather than as a broken screen.
+     *
+     * The only honest fix on our side is to retry; the alternative would be to stop enforcing
+     * row-level security on these reads, and a timing quirk is not worth trading that for.
+     */
+    if (isClockSkew(err)) {
+        console.warn('PostgREST rejected a just-issued token (clock skew); asking the client to retry.');
+        sendError(
+            res,
+            503,
+            'TOKEN_NOT_YET_VALID',
+            'Your session is still being set up. One moment.'
+        );
+        return;
+    }
+
     // Unexpected: log the real error server-side, tell the client nothing useful.
     console.error('Unhandled error:', err);
     sendError(res, 500, 'INTERNAL_ERROR', 'Something went wrong.');
+}
+
+/** PostgREST's code for a JWT whose issued-at time is ahead of the database's clock. */
+function isClockSkew(err: unknown): boolean {
+    if (typeof err !== 'object' || err === null) return false;
+
+    const candidate = err as { code?: unknown; message?: unknown };
+
+    return (
+        candidate.code === 'PGRST303' ||
+        (typeof candidate.message === 'string' &&
+            /issued at future/i.test(candidate.message))
+    );
 }
