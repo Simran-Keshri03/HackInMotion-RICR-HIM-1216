@@ -882,7 +882,11 @@ Sign up  →  Goal in plain words ("GATE CSE")  →  AI resolves the syllabus
 
 # 21. Presentation
 
-**In progress.** Story arc:
+**
+[4bdf50dc-2c4f-436e-a971-9a77172d16af.pptx](https://github.com/user-attachments/files/31072621/4bdf50dc-2c4f-436e-a971-9a77172d16af.pptx)
+
+
+** Story arc:
 
 | # | Section |
 |---|---|
