@@ -1,0 +1,13 @@
+# Build output and dependencies.
+node_modules/
+dist/
+coverage/
+
+# Binary and generated assets.
+*.gif
+*.png
+*.pptx
+
+# Lockfiles are the package manager's format, not ours; reformatting them is noise and
+# risks a diff nobody can review.
+package-lock.json
