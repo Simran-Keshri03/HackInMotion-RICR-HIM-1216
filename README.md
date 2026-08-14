@@ -4,13 +4,14 @@
 
 ## 👥 Team
 
-| Name | Role |
+**Team code — RICR-HIM-1216**
 
-| Team Name | **[RICR-HIM-1216]** 
-| Team Member 1 | **[Harsh Kumar]** | Database |
-| Team Member 2 | **[Ayush Kumar]** | Backend |
-| Team Member 3 | **[Soumya Raghuwanshi]** | Frontend |
-| Team Member 4 | **[Simran Kumari Keshri]** | Frontend |
+| Name | Role |
+|---|---|
+| Harsh Kumar | Database |
+| Ayush Kumar | Backend |
+| Soumya Raghuwanshi | Frontend |
+| Simran Kumari Keshri | Frontend |
 
 
 ---
@@ -22,10 +23,11 @@
 | App | **https://adigamai.vercel.app** |
 | API | **https://adigam-api.onrender.com/api/v1** |
 
-**Developers picking the work back up:** start at
-[`docs/CONTINUE-HERE.md`](docs/CONTINUE-HERE.md) — current state, remaining work in order, and
-the conventions to follow. [`docs/architecture.md`](docs/architecture.md) is the technical
-walkthrough; [`docs/deployment.md`](docs/deployment.md) covers both hosts.
+**Reading the code:** [`docs/architecture.md`](docs/architecture.md) is the technical walkthrough —
+how the layers fit together and which decisions were deliberate.
+[`docs/security.md`](docs/security.md) covers what a learner's browser can and cannot reach, with the
+commands to verify it. [`docs/challenges.md`](docs/challenges.md) tracks the five problem-statement
+challenges. [`docs/deployment.md`](docs/deployment.md) covers both hosts and the free-tier limits.
 
 # ❗ Problem Statement
 
@@ -757,49 +759,23 @@ Additional protections include:
 
 # 🖥️ Screenshots
 
-Add final product screenshots here before submission.
+### Sign in
 
-### Landing Page
+![Sign in](docs/screenshots/landing.png)
 
-```text
-docs/screenshots/landing.png
-```
+### The rest
 
-![Landing Page](docs/screenshots/landing.png)
+The live app is the better tour, and it is two links up. Signed in, the screens are:
 
-### Student Dashboard
+| Screen | What it shows |
+|---|---|
+| Dashboard | the next action with the engine's reason for choosing it, a year of activity, and the badge shelf |
+| Knowledge check | the diagnostic that tells the plan where to start |
+| Study plan | today first, the rest of the term collapsed, every session explained |
+| Practice | subject picker, then one question at a time with the mastery change after each |
+| Mock tests | a paper marked at the end, broken down by topic |
+| Groups | a leaderboard, and a plain statement of what it does and does not reveal |
 
-```text
-docs/screenshots/dashboard.png
-```
-
-![Dashboard](docs/screenshots/dashboard.png)
-
-### Adaptive Recommendation
-
-```text
-docs/screenshots/recommendation.png
-```
-
-![Adaptive Recommendation](docs/screenshots/recommendation.png)
-
-### Assessment
-
-```text
-docs/screenshots/assessment.png
-```
-
-![Assessment](docs/screenshots/assessment.png)
-
-### AI Tutor
-
-```text
-docs/screenshots/ai-tutor.png
-```
-
-![AI Tutor](docs/screenshots/ai-tutor.png)
-
-> Replace these paths with the actual screenshots committed to the repository.
 
 ---
 
