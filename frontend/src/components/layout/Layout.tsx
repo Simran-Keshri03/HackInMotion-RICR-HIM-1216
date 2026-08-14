@@ -32,6 +32,7 @@ const LEARNING: NavItem[] = [
     { label: 'Knowledge Check', icon: 'target', to: '/assessment' },
     { label: 'Mock Tests', icon: 'file', to: '/mock-tests' },
     { label: 'Study Plan', icon: 'calendar', to: '/plan' },
+    { label: 'Exam Readiness', icon: 'chart', to: '/readiness' },
     { label: 'Ask Adigam', icon: 'sparkles', to: '/tutor' },
     { label: 'Groups', icon: 'users', to: '/groups' },
     { label: 'Your Goal', icon: 'target', to: '/goals' },
