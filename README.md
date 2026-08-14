@@ -781,19 +781,18 @@ The live app is the better tour, and it is two links up. Signed in, the screens 
 
 # 🚀 Deployment
 
-### Frontend
+Both halves are live, and both are on free tiers.
 
-**Deployment URL:** `[ADD DEPLOYMENT LINK]`
+| Part | Host | URL |
+|---|---|---|
+| Frontend | Vercel | https://adigamai.vercel.app |
+| Backend API | Render (Singapore) | https://adigam-api.onrender.com/api/v1 |
+| Database | Supabase | PostgreSQL 17, Mumbai region |
 
-### Backend API
-
-**API URL:** `[ADD API DEPLOYMENT LINK]`
-
-### Database
-
-Supabase PostgreSQL.
-
-> If deployment is not available yet, write `Coming Soon` rather than adding a placeholder URL.
+`GET /api/v1/health/deep` reports whether the process is up **and** whether the database answered, which
+is what a scheduled job pings every ten minutes — the free backend sleeps after fifteen minutes idle and
+the free database pauses after a week, so one request keeps both awake. Details and the limits that make
+that a judgement call are in [`docs/deployment.md`](docs/deployment.md).
 
 ---
 
