@@ -19,14 +19,24 @@ export type Theme = 'dark' | 'light' | 'system';
 /** Shared with the inline script in index.html. Changing it here means changing it there. */
 const STORAGE_KEY = 'adigam-theme';
 
-/** Reads whatever the inline script stored, tolerating storage being unavailable. */
+/**
+ * Reads whatever the inline script stored, tolerating storage being unavailable.
+ *
+ * Falls back to `dark` rather than `system`, and that default matters: following the operating system
+ * meant anybody on a light-mode machine opened a study app in a palette they never picked. Dark is the
+ * brand, and it is the right default for the hours this is used in. `system` is now something a learner
+ * opts into rather than something they get by accident.
+ */
 function storedTheme(): Theme {
     try {
         const saved = localStorage.getItem(STORAGE_KEY);
-        return saved === 'dark' || saved === 'light' ? saved : 'system';
+
+        return saved === 'dark' || saved === 'light' || saved === 'system'
+            ? saved
+            : 'dark';
     } catch {
         // Private windows throw on localStorage in some browsers.
-        return 'system';
+        return 'dark';
     }
 }
 
@@ -77,10 +87,10 @@ export function useTheme(): {
         setStored(next);
 
         try {
-            // 'system' is stored as an absence, so the inline script's fallback is the same decision
-            // this hook would make. Storing the word would mean two places that have to agree.
-            if (next === 'system') localStorage.removeItem(STORAGE_KEY);
-            else localStorage.setItem(STORAGE_KEY, next);
+            // All three are stored explicitly now, including 'system'. When the default was 'system'
+            // an absent key could stand in for it; now that the default is dark, "follow the device"
+            // has to be recorded or it would be lost on the next load.
+            localStorage.setItem(STORAGE_KEY, next);
         } catch {
             // The theme still applies for this session; it just will not be remembered.
         }

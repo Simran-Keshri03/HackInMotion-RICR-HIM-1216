@@ -18,10 +18,19 @@
     -->
     <script>
       try {
+        // Dark unless the learner explicitly asked for light.
+        //
+        // This used to follow the operating system when no preference was stored, which meant anybody
+        // whose machine is in light mode — most machines, by default — opened a study app in a bright
+        // palette they never chose. Dark is the brand and the better default for the hours this gets
+        // used in, so it is the default rather than a coin flip on somebody's system settings.
+        //
+        // "Match device" is still available in Settings; choosing it stores 'system' and this reads it.
         var saved = localStorage.getItem('adigam-theme');
         var wantsLight =
           saved === 'light' ||
-          (saved !== 'dark' && window.matchMedia('(prefers-color-scheme: light)').matches);
+          (saved === 'system' &&
+            window.matchMedia('(prefers-color-scheme: light)').matches);
         if (wantsLight) document.documentElement.setAttribute('data-theme', 'light');
       } catch (e) {}
     </script>
