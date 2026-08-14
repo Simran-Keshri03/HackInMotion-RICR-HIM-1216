@@ -1,9 +1,9 @@
-import { type FormEvent, useState } from 'react';
+import { type FormEvent, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Failed, Loading } from '@/components/Loading/States';
 import { useApi } from '@/hooks/useApi';
 import { api } from '@/lib/api';
-import type { Goal, Subject } from '@/types/api';
+import type { Curriculum, Goal, ResolveOutcome, Subject } from '@/types/api';
 
 /**
  * What the learner is preparing for, by when, and with how much time per day.
@@ -11,6 +11,15 @@ import type { Goal, Subject } from '@/types/api';
  * This is the input everything downstream depends on. Without a goal the adaptive engine falls
  * back to the entire syllabus, which is technically defensible and practically useless — a
  * learner sitting a DBMS paper next month does not want Probability questions.
+ *
+ * It asks in two steps, because the second question cannot be written until the first is
+ * answered. A learner types what they are studying for in their own words — "class 10", "12th
+ * boards", "GATE CSE" — and the model turns that into a syllabus. Only then does the app know
+ * which subjects to offer. A fixed subject list would have to guess, and would be wrong for
+ * everybody it did not guess for.
+ *
+ * Text that is not a study goal is refused here rather than accepted and left to produce an
+ * empty app: "dog" comes back rejected with a reason, and the learner stays on step one.
  *
  * The daily budget is shown as it is typed rather than after saving. "60 minutes a day" means
  * nothing on its own; "45 hours before the exam" is a number a person can judge, and judging it
@@ -49,36 +58,92 @@ function describeBudget(minutes: number): string {
     return `${hours} ${hours === 1 ? 'hour' : 'hours'}`;
 }
 
+/** The syllabus in view, and the subjects inside it. Null until step one is answered. */
+interface Resolved {
+    curriculum: Curriculum;
+    subjects: Subject[];
+}
+
 export default function LearningGoals() {
     const navigate = useNavigate();
 
-    const subjects = useApi<{ subjects: Subject[] }>(() =>
-        api.get<{ subjects: Subject[] }>('/goals/subjects')
-    );
     const existing = useApi<{ goal: Goal | null }>(() =>
         api.get<{ goal: Goal | null }>('/goals')
     );
 
+    // Step one.
+    const [goalText, setGoalText] = useState('');
+    const [resolving, setResolving] = useState(false);
+    const [rejection, setRejection] = useState<string | null>(null);
+    const [resolved, setResolved] = useState<Resolved | null>(null);
+
+    // Step two.
     const [title, setTitle] = useState('');
+    /**
+     * The title this screen filled in by itself, so a later syllabus can replace it.
+     *
+     * Without it, "only fill the title when it is empty" silently keeps the wrong name: pick one
+     * syllabus, go back, pick another, and the title still reads the first one's — which is then
+     * what gets saved unless the learner notices and retypes it. Comparing against what was
+     * auto-filled tells the two cases apart, so a name the learner actually wrote survives and one
+     * this screen guessed does not.
+     */
+    const [autoTitle, setAutoTitle] = useState('');
     const [examDate, setExamDate] = useState(isoDaysFromNow(DEFAULT_DAYS_AHEAD));
     const [dailyMinutes, setDailyMinutes] = useState(DEFAULT_DAILY_MINUTES);
     const [chosen, setChosen] = useState<string[]>([]);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    // Prefill from the current goal the first time it arrives, so editing does not start from a
-    // blank form. Guarded on `title` rather than a separate flag: once the learner has typed
-    // anything, their input is never overwritten by a late response.
     const current = existing.data?.goal ?? null;
+
+    /**
+     * Editing an existing goal skips step one: the syllabus is already decided, so its subjects
+     * are fetched directly and the form opens filled in. Without this, changing an exam date
+     * would mean re-answering "what are you studying for" and paying for a lookup to be told
+     * something the goal already records.
+     */
     const [prefilled, setPrefilled] = useState(false);
 
-    if (current && !prefilled) {
+    useEffect(() => {
+        if (prefilled || !current?.curriculumId) return;
+
         setPrefilled(true);
         setTitle(current.title);
         setExamDate(current.examDate);
         setDailyMinutes(current.dailyMinutes);
         setChosen(current.subjectIds);
-    }
+
+        const curriculumId = current.curriculumId;
+
+        void (async () => {
+            try {
+                const { subjects } = await api.get<{ subjects: Subject[] }>(
+                    `/goals/subjects?curriculumId=${curriculumId}`
+                );
+
+                // The goal records a curriculum id, not its name, and the learner is not choosing
+                // a syllabus on this path — so the heading uses their own goal title rather than
+                // a second request to look up a name they already wrote.
+                setResolved({
+                    curriculum: {
+                        id: curriculumId,
+                        slug: '',
+                        name: current.title,
+                        description: null,
+                        isAiGenerated: false,
+                    },
+                    subjects,
+                });
+            } catch (cause) {
+                setError(
+                    cause instanceof Error
+                        ? cause.message
+                        : 'Could not load your syllabus.'
+                );
+            }
+        })();
+    }, [current, prefilled]);
 
     const daysRemaining = daysUntil(examDate);
     const dateIsSane = !Number.isNaN(daysRemaining) && daysRemaining >= 1;
@@ -91,14 +156,78 @@ export default function LearningGoals() {
         );
     }
 
-    async function handleSubmit(event: FormEvent) {
+    /** Step one: hand what they typed to the model and see whether it names something studiable. */
+    async function handleResolve(event: FormEvent) {
         event.preventDefault();
+
+        const text = goalText.trim();
+        if (text.length < 2 || resolving) return;
+
+        setRejection(null);
+        setError(null);
+        setResolving(true);
+
+        try {
+            const outcome = await api.post<ResolveOutcome>('/curricula/resolve', {
+                goalText: text,
+            });
+
+            if (outcome.status === 'rejected' || !outcome.curriculum) {
+                setRejection(
+                    outcome.message ??
+                        'That does not look like something to study for. Try an exam, a class, or a subject.'
+                );
+                return;
+            }
+
+            setResolved({
+                curriculum: outcome.curriculum,
+                subjects: outcome.subjects ?? [],
+            });
+
+            /**
+             * Nothing pre-picked. The learner chooses.
+             *
+             * This screen used to tick every subject in the syllabus, on the theory that most
+             * people want all of it and narrowing is easier than building up. In use that theory
+             * is wrong in a way that matters: a learner who wanted two subjects out of ten never
+             * made a choice at all, and the engine — correctly following a goal covering
+             * everything — sent them to the first topic of a subject they had not asked for. The
+             * app looked like it had decided for them, because it had.
+             *
+             * Ten empty checkboxes ask a question. Ten ticked ones only look like an answer.
+             */
+            setChosen([]);
+
+            // The name the model settled on reads better than the learner's phrasing
+            // ("class-10" -> "Class 10"), and it is still theirs to edit.
+            if (title.trim() === '' || title === autoTitle) {
+                setTitle(outcome.curriculum.name);
+                setAutoTitle(outcome.curriculum.name);
+            }
+        } catch (cause) {
+            setError(
+                cause instanceof Error
+                    ? cause.message
+                    : 'Could not look that up. Try again.'
+            );
+        } finally {
+            setResolving(false);
+        }
+    }
+
+    async function handleSave(event: FormEvent) {
+        event.preventDefault();
+
+        if (!resolved) return;
+
         setError(null);
         setSaving(true);
 
         try {
             await api.post<{ goal: Goal }>('/goals', {
                 title: title.trim(),
+                curriculumId: resolved.curriculum.id,
                 examDate,
                 dailyMinutes,
                 subjectIds: chosen,
@@ -114,29 +243,79 @@ export default function LearningGoals() {
         }
     }
 
-    if (subjects.loading || existing.loading) {
-        return <Loading label="Loading subjects…" />;
+    if (existing.loading) return <Loading label="Loading your goal…" />;
+
+    if (existing.error) {
+        return <Failed error={existing.error} onRetry={existing.reload} />;
     }
 
-    if (subjects.error) {
-        return <Failed error={subjects.error} onRetry={subjects.reload} />;
+    // ---------------------------------------------------------------- step one
+    if (!resolved) {
+        return (
+            <form className="stack" onSubmit={handleResolve}>
+                <div>
+                    <span className="label">
+                        {current ? 'Your goal' : 'Set your goal'}
+                    </span>
+                    <h1>What are you preparing for?</h1>
+                    <p className="muted" style={{ margin: 0 }}>
+                        Type it however you say it — <em>class 10</em>,{' '}
+                        <em>12th boards</em>, <em>GATE CSE</em>. The syllabus is worked
+                        out from that, and everything you practise comes from it.
+                    </p>
+                </div>
+
+                {rejection && <div className="banner banner--error">{rejection}</div>}
+                {error && <div className="banner banner--error">{error}</div>}
+
+                <div className="card stack">
+                    <div className="field">
+                        <label htmlFor="goalText">Exam, class, or subject</label>
+                        <input
+                            id="goalText"
+                            value={goalText}
+                            maxLength={120}
+                            placeholder="class 10"
+                            autoFocus
+                            required
+                            disabled={resolving}
+                            onChange={(e) => setGoalText(e.target.value)}
+                        />
+                        <span className="faint">
+                            A syllabus somebody has already looked up is instant. A new one
+                            takes a few seconds to work out.
+                        </span>
+                    </div>
+
+                    <button
+                        type="submit"
+                        className="primary wide"
+                        disabled={resolving || goalText.trim().length < 2}
+                    >
+                        {resolving ? 'Working out your syllabus…' : 'Continue'}
+                    </button>
+                </div>
+
+                {resolving && <Loading label="Reading the syllabus…" />}
+            </form>
+        );
     }
 
-    const topicsChosen = (subjects.data?.subjects ?? [])
+    // ---------------------------------------------------------------- step two
+    const topicsChosen = resolved.subjects
         .filter((subject) => chosen.includes(subject.id))
         .reduce((total, subject) => total + subject.topicCount, 0);
 
     return (
-        <form className="stack" onSubmit={handleSubmit}>
+        <form className="stack" onSubmit={handleSave}>
             <div>
-                <span className="label">
-                    {current ? 'Your goal' : 'Set your goal'}
-                </span>
-                <h1>What are you preparing for?</h1>
-                <p className="muted" style={{ margin: 0 }}>
-                    Everything else follows from this — which topics you practise, how
-                    hard the questions are, and how much you need to cover each day.
-                </p>
+                <span className="label">{resolved.curriculum.name}</span>
+                <h1>How much time do you have?</h1>
+                {resolved.curriculum.description && (
+                    <p className="muted" style={{ margin: 0 }}>
+                        {resolved.curriculum.description}
+                    </p>
+                )}
             </div>
 
             {error && <div className="banner banner--error">{error}</div>}
@@ -155,7 +334,7 @@ export default function LearningGoals() {
                         id="title"
                         value={title}
                         maxLength={120}
-                        placeholder="DBMS endsem"
+                        placeholder="Class 10 boards"
                         required
                         onChange={(e) => setTitle(e.target.value)}
                     />
@@ -208,13 +387,14 @@ export default function LearningGoals() {
 
             <div className="card stack">
                 <div>
-                    <span className="label">Subjects</span>
+                    <span className="label">What do you want to study?</span>
                     <p className="faint" style={{ margin: '6px 0 0' }}>
-                        Only topics inside the subjects you pick will be practised.
+                        Pick the subjects you are sitting. Only these will be practised —
+                        questions never come from a subject you did not choose.
                     </p>
                 </div>
 
-                {(subjects.data?.subjects ?? []).map((subject) => {
+                {resolved.subjects.map((subject) => {
                     const picked = chosen.includes(subject.id);
 
                     return (
@@ -225,9 +405,7 @@ export default function LearningGoals() {
                             aria-pressed={picked}
                             onClick={() => toggleSubject(subject.id)}
                         >
-                            <span className="option__mark">
-                                {picked ? '✓' : ''}
-                            </span>
+                            <span className="option__mark">{picked ? '✓' : ''}</span>
                             <span>
                                 {subject.name}
                                 <span className="faint">
@@ -239,7 +417,13 @@ export default function LearningGoals() {
                     );
                 })}
 
-                {chosen.length === 0 && (
+                {resolved.subjects.length === 0 && (
+                    <span className="faint">
+                        This syllabus has no subjects yet. Pick a different goal.
+                    </span>
+                )}
+
+                {resolved.subjects.length > 0 && chosen.length === 0 && (
                     <span className="faint">Pick at least one subject.</span>
                 )}
             </div>
@@ -255,9 +439,7 @@ export default function LearningGoals() {
                             <div className="faint">days left</div>
                         </div>
                         <div>
-                            <div className="big">
-                                {describeBudget(totalMinutes)}
-                            </div>
+                            <div className="big">{describeBudget(totalMinutes)}</div>
                             <div className="faint">total study time</div>
                         </div>
                         <div>
@@ -268,26 +450,38 @@ export default function LearningGoals() {
                     {topicsChosen > 0 && (
                         <p className="faint" style={{ marginTop: 12, marginBottom: 0 }}>
                             About{' '}
-                            {describeBudget(
-                                Math.round(totalMinutes / topicsChosen)
-                            )}{' '}
-                            per topic, if you keep to it.
+                            {describeBudget(Math.round(totalMinutes / topicsChosen))} per
+                            topic, if you keep to it.
                         </p>
                     )}
                 </div>
             )}
 
-            <button
-                type="submit"
-                className="primary wide"
-                disabled={!canSave || saving}
-            >
-                {saving
-                    ? 'Saving…'
-                    : current
-                      ? 'Update goal'
-                      : 'Save goal and start'}
-            </button>
+            <div className="row" style={{ gap: 10 }}>
+                <button
+                    type="button"
+                    onClick={() => {
+                        setResolved(null);
+                        setChosen([]);
+                        setRejection(null);
+                        setError(null);
+                    }}
+                >
+                    Change goal
+                </button>
+
+                <button
+                    type="submit"
+                    className="primary wide"
+                    disabled={!canSave || saving}
+                >
+                    {saving
+                        ? 'Saving…'
+                        : current
+                          ? 'Update goal'
+                          : 'Save goal and start'}
+                </button>
+            </div>
         </form>
     );
 }
