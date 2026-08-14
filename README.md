@@ -773,7 +773,7 @@ read `correct_answer`.
 
 ![Sign in](docs/screenshots/landing.png)
 
-### Dahboards
+### Dashboard
 <img width="1470" height="835" alt="dashboard" src="https://github.com/user-attachments/assets/4ded0952-4792-4e27-87ee-94c2d9de6a92" />
 <img width="1464" height="823" alt="dashboard2" src="https://github.com/user-attachments/assets/8dcfefba-cb89-4d09-a44f-5db037aeadfd" />
 
@@ -784,7 +784,7 @@ read `correct_answer`.
 ### Goal setup
 <img width="1470" height="839" alt="goalsetup" src="https://github.com/user-attachments/assets/11e67298-e612-4306-9a5f-23f918bdde4f" />
 
-### Knowledgecheck
+### Knowledge check
 <img width="1470" height="832" alt="Knowledgecheck" src="https://github.com/user-attachments/assets/f0d0d731-3681-42ec-9fa4-9533a9575dab" />
 
 ### Landing page
@@ -793,20 +793,20 @@ read `correct_answer`.
 ### Login page
 <img width="1434" height="822" alt="loginpage" src="https://github.com/user-attachments/assets/42821830-3cb7-4b0f-a0fa-d1112ad57a19" />
 
-### Practice and knowledgecheck
+### Practice
 <img width="1470" height="832" alt="practiceknowledgecheck" src="https://github.com/user-attachments/assets/31266a39-74fd-4f2c-bf44-9425bdad98da" />
 <img width="1470" height="831" alt="Practice" src="https://github.com/user-attachments/assets/ce16850a-71d4-40ac-b7c2-e38123ae76c7" />
 
-### Student plan
+### Study plan
 <img width="1470" height="837" alt="studypaln" src="https://github.com/user-attachments/assets/847a9de0-b559-491c-8355-d2f6842bfbaf" />
 
-### Studygroup
+### Study group
 <img width="1469" height="833" alt="studygroup" src="https://github.com/user-attachments/assets/9a47d732-8508-4a86-be2b-81313781c7dd" />
 
-### progress
+### Progress
 <img width="1470" height="835" alt="progress" src="https://github.com/user-attachments/assets/07d12c7b-cda6-4406-90c7-125042acaa6f" />
 
-### voice module
+### Voice module
 <img width="1468" height="838" alt="Voicemodule" src="https://github.com/user-attachments/assets/23e356f2-7c60-4305-a90d-94020afc926a" />
 <img width="1470" height="834" alt="studyplan2" src="https://github.com/user-attachments/assets/962390b0-36dc-4736-8b66-4d5e0e8df9e9" />
 
@@ -916,8 +916,9 @@ tracing (DKT/BKT) rather than a weighted formula · multi-exam parallel preparat
 
 # 20. Demo video
 
-**Drive LINK: https://drive.google.com/file/d/1OZOz8_7u6kZ3lz69ClFEG-mfdVaGTqsQ/view?usp=sharing** 
-Planned flow:
+**[Watch the demo](https://drive.google.com/file/d/1OZOz8_7u6kZ3lz69ClFEG-mfdVaGTqsQ/view?usp=sharing)**
+
+What it covers:
 
 ```text
 Sign up  →  Goal in plain words ("GATE CSE")  →  AI resolves the syllabus
@@ -930,11 +931,9 @@ Sign up  →  Goal in plain words ("GATE CSE")  →  AI resolves the syllabus
 
 # 21. Presentation
 
-**
-[4bdf50dc-2c4f-436e-a971-9a77172d16af.pptx](https://github.com/user-attachments/files/31072621/4bdf50dc-2c4f-436e-a971-9a77172d16af.pptx)
+**[Download the slide deck](https://github.com/user-attachments/files/31072621/4bdf50dc-2c4f-436e-a971-9a77172d16af.pptx)**
 
-
-** Story arc:
+Story arc:
 
 | # | Section |
 |---|---|
