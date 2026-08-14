@@ -234,3 +234,44 @@ move. That last step is the only one that proves the whole stack.
 | Sign-up says `email_address_invalid` | Reserved test domain | Part 5, item 2 |
 | Question generation returns 503 | `ANTHROPIC_API_KEY` not set on Render | Add it in Render → Environment |
 | Everything works but mastery never changes | The frontend is talking to a different backend | Check `VITE_API_URL` includes `/api/v1` |
+
+## Keeping the free tier awake
+
+Two free-tier deadlines apply, and neither is a billing problem — nothing here is on a paid plan and no
+card is attached.
+
+**The backend sleeps.** Render's free plan spins the instance down after roughly fifteen minutes without
+a request. The next visitor waits through a cold start, which on a slow morning is long enough that
+somebody opening the link would reasonably conclude the site is broken. This is also why the client's
+fetch timeout is sixty seconds rather than ten: a ten-second timeout would abort the very request that
+was waking the server up.
+
+**The database pauses.** Supabase pauses a free project after about a week of inactivity, and a paused
+project is not a slow app — it is a dead one that needs somebody to log into a dashboard and resume it.
+
+`.github/workflows/keep-alive.yml` pings `GET /api/v1/health/deep` every ten minutes. Ten rather than
+fifteen because GitHub's scheduler is routinely several minutes late under load, and a fifteen-minute
+interval would race the timeout it exists to prevent. It can also be run by hand from the Actions tab,
+which is the thing to do a few minutes before a demo.
+
+**Why the deep check and not `/health`.** The shallow one returns `process.uptime()` and touches nothing
+else, so pinging it would keep the instance warm and quietly let the database pause anyway. The deep
+check does one counted read against a two-row table — about as small as a real round trip gets — so a
+single request satisfies both deadlines. It is unauthenticated because a scheduled job has no session,
+and it returns nothing but a status, a latency and an uptime; there is no data in it to leak.
+
+It answers 503 rather than 200 when the database is unreachable, and the workflow retries five times
+with a widening gap before failing the run. Both of those are deliberate: a keep-alive that reports
+green while the thing it watches is down is worse than not having one, and a single failed attempt
+during a cold start is the expected case rather than an outage.
+
+### The limit to watch
+
+Render's free plan allows 750 instance hours a month across the account. A service kept awake around the
+clock uses roughly 730 of them, which fits — with **one** service. A second free service on the same
+account would push the total past the limit and get the whole thing suspended until the next month,
+which is considerably worse than cold starts. Check the Render dashboard before assuming this is safe.
+
+If that becomes a problem, the schedule can be narrowed to the hours a demo actually needs, or the
+workflow left on `workflow_dispatch` only and triggered by hand.
+

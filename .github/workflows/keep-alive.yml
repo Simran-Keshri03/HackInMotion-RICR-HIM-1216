@@ -1,0 +1,72 @@
+# Keeps the free-tier deployment awake, and says so loudly when it is not.
+#
+# Two separate free-tier deadlines make this worth having, and neither is a billing problem:
+#
+#   The backend host spins the instance down after roughly fifteen minutes without a request, so the
+#   next visitor waits through a cold start — long enough that a judge opening the link would
+#   reasonably conclude the site is broken.
+#
+#   The database provider pauses a free project after about a week without activity. A paused database
+#   is not a slow app, it is a dead one, and resuming it needs somebody to log in to a dashboard.
+#
+# This pings /health/deep rather than /health, which is the whole point: the shallow check touches only
+# Express, so it would keep the instance warm and quietly let the database pause anyway. The deep check
+# does one cheap counted read, so a single request satisfies both.
+#
+# Cost: nothing. Actions minutes are free for public repositories, and both hosts are on free plans.
+#
+# What this does NOT do: it keeps the service reachable, it does not make it fast on the first request
+# after a deploy, and it cannot help if the free monthly instance-hours are exhausted. Running a service
+# awake around the clock uses roughly 730 of the 750 hours a month the free plan allows, so this is
+# comfortable with one service on the account and not with two.
+
+name: Keep alive
+
+on:
+  schedule:
+    # Every ten minutes. The idle timeout is fifteen, and GitHub's scheduler is routinely several
+    # minutes late under load — a fifteen-minute interval would race the very thing it is preventing.
+    - cron: '*/10 * * * *'
+  # So it can be triggered by hand a few minutes before a demo rather than waiting for the schedule.
+  workflow_dispatch:
+
+# Two runs pinging at once would achieve nothing and could overlap confusingly in the log.
+concurrency:
+  group: keep-alive
+  cancel-in-progress: false
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Wake the API and the database
+        run: |
+          URL="https://adigam-api.onrender.com/api/v1/health/deep"
+
+          # Up to five tries with a widening gap. A cold start on the free plan can take the best part
+          # of a minute, so the first attempt failing is the expected case rather than a problem — this
+          # loop is what turns "the instance was asleep" into a success instead of a red run.
+          for attempt in 1 2 3 4 5; do
+            body=$(curl --silent --show-error --max-time 90 --write-out '\n%{http_code}' "$URL" || true)
+            code=$(printf '%s' "$body" | tail -n1)
+            payload=$(printf '%s' "$body" | sed '$d')
+
+            if [ "$code" = "200" ]; then
+              echo "awake on attempt $attempt"
+              echo "$payload"
+              exit 0
+            fi
+
+            echo "attempt $attempt: HTTP ${code:-no response}"
+            [ -n "$payload" ] && echo "$payload"
+
+            # No sleep after the final attempt — it would only delay the failure.
+            [ "$attempt" -lt 5 ] && sleep $((attempt * 15))
+          done
+
+          # Deliberately fails the run. A keep-alive that swallows a real outage is worse than none,
+          # because it reports green while the thing it watches is down.
+          echo "::error::The API did not return 200 after five attempts. It may be down, or the free monthly instance hours may be exhausted."
+          exit 1
