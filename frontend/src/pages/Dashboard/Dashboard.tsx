@@ -1,5 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { ActivityHeatmap } from '@/components/Activity/ActivityHeatmap';
+import { Icon } from '@/components/Icon/Icon';
 import { Badges } from '@/components/Activity/Badges';
 import { Empty, Failed, Loading } from '@/components/Loading/States';
 import { useApi } from '@/hooks/useApi';
@@ -66,7 +67,8 @@ export default function Dashboard() {
                 fixing it. The heading is only held back until the request settles, to avoid a flash
                 of "Welcome back" before "Welcome back, Ayush". */}
             {!profile.loading && (
-                <div>
+                <div className="spread" style={{ alignItems: 'flex-start', gap: 16 }}>
+                    <div style={{ minWidth: 0 }}>
                     <span className="label">{greetingFor(new Date())}</span>
                     <h1 style={{ marginBottom: 0 }}>
                         {name ? `Welcome back, ${name}` : 'Welcome back'}
@@ -77,6 +79,12 @@ export default function Dashboard() {
                             properly.
                         </p>
                     )}
+                    </div>
+
+                    {/* The page's mark, matching every other screen. */}
+                    <span className="hero-mark" aria-hidden="true">
+                        <Icon name="grid" size={40} />
+                    </span>
                 </div>
             )}
 

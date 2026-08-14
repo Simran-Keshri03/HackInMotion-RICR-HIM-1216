@@ -1,4 +1,5 @@
 import { type FormEvent, useEffect, useState } from 'react';
+import { Icon } from '@/components/Icon/Icon';
 import { useNavigate } from 'react-router-dom';
 import { Failed, Loading } from '@/components/Loading/States';
 import { useApi } from '@/hooks/useApi';
@@ -253,16 +254,25 @@ export default function LearningGoals() {
     if (!resolved) {
         return (
             <form className="stack" onSubmit={handleResolve}>
-                <div>
+                <div className="spread" style={{ alignItems: 'flex-start', gap: 16 }}>
+                    <div style={{ minWidth: 0 }}>
                     <span className="label">
                         {current ? 'Your goal' : 'Set your goal'}
                     </span>
-                    <h1>What are you preparing for?</h1>
+                    <h1 style={{ marginBottom: 6 }}>What are you preparing for?</h1>
                     <p className="muted" style={{ margin: 0 }}>
                         Type it however you say it — <em>class 10</em>,{' '}
                         <em>12th boards</em>, <em>GATE CSE</em>. The syllabus is worked
                         out from that, and everything you practise comes from it.
                     </p>
+                    </div>
+
+                {/* The page's mark. Every screen has one so a page is recognisable at a glance
+                    rather than being a heading above a stack of dark rectangles. Hidden on narrow
+                    screens, where it would push the heading onto two awkward lines. */}
+                    <span className="hero-mark" aria-hidden="true">
+                        <Icon name="target" size={40} />
+                    </span>
                 </div>
 
                 {rejection && <div className="banner banner--error">{rejection}</div>}

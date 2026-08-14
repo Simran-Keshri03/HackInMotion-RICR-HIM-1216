@@ -29,6 +29,7 @@ interface NavItem {
 const LEARNING: NavItem[] = [
     { label: 'Dashboard', icon: 'grid', to: '/dashboard' },
     { label: 'Practice', icon: 'code', to: '/practice' },
+    { label: 'Knowledge Check', icon: 'target', to: '/assessment' },
     { label: 'Mock Tests', icon: 'file', to: '/mock-tests' },
     { label: 'Study Plan', icon: 'calendar', to: '/plan' },
     { label: 'Ask Adigam', icon: 'sparkles', to: '/tutor' },
@@ -162,7 +163,13 @@ export function Layout({ children }: { children: ReactNode }) {
                     </div>
                 </aside>
 
-                <main className="workspace">{children}</main>
+                {/* Keyed on the path so the element remounts on navigation and the entrance
+                    animation replays. Without the key React reuses the node, the CSS animation does
+                    not restart, and a route change redraws instantly — which reads as a page reload
+                    rather than as one app. */}
+                <main className="workspace" key={location.pathname}>
+                    {children}
+                </main>
             </div>
         </>
     );

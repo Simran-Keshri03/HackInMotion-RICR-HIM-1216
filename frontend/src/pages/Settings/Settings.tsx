@@ -1,4 +1,5 @@
 import { type FormEvent, useEffect, useState } from 'react';
+import { Icon } from '@/components/Icon/Icon';
 import { Failed, Loading } from '@/components/Loading/States';
 import { useApi } from '@/hooks/useApi';
 import { type Theme, useTheme } from '@/hooks/useTheme';
@@ -94,9 +95,18 @@ export default function Settings() {
 
     return (
         <div className="stack">
-            <div>
-                <span className="label">Settings</span>
-                <h1>Your account</h1>
+            <div className="spread" style={{ alignItems: 'flex-start', gap: 16 }}>
+                <div style={{ minWidth: 0 }}>
+                    <span className="label">Settings</span>
+                    <h1 style={{ marginBottom: 0 }}>Your account</h1>
+                </div>
+
+                {/* The page's mark. Every screen has one so a page is recognisable at a glance
+                    rather than being a heading above a stack of dark rectangles. Hidden on narrow
+                    screens, where it would push the heading onto two awkward lines. */}
+                <span className="hero-mark" aria-hidden="true">
+                    <Icon name="settings" size={40} />
+                </span>
             </div>
 
             {profile.error ? (
