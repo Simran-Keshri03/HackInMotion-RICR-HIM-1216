@@ -1,10 +1,13 @@
 import type { Request, Response } from 'express';
 import { z } from 'zod';
-import { adminDb } from '@/config/database.js';
+import { adminDb, userDb } from '@/config/database.js';
 import { authOf } from '@/middleware/authMiddleware.js';
 import { AttemptRepository } from '@/repositories/attemptRepository.js';
+import { GoalRepository } from '@/repositories/goalRepository.js';
 import { LearnerRepository } from '@/repositories/learnerRepository.js';
 import { MasteryRepository } from '@/repositories/masteryRepository.js';
+import { RevisionRepository } from '@/repositories/revisionRepository.js';
+import { GoalService } from '@/services/learning/goalService.js';
 import { PracticeService } from '@/services/practice/practiceService.js';
 import { sendOk } from '@/utils/http.js';
 
@@ -38,7 +41,7 @@ export const submitAttemptSchema = z
     );
 
 export async function submitAttempt(req: Request, res: Response) {
-    const { userId } = authOf(req);
+    const { userId, accessToken } = authOf(req);
     const body = req.body as z.infer<typeof submitAttemptSchema>;
 
     // Elevated client on purpose: grading reads the correct answer, and the attempt log
@@ -47,8 +50,16 @@ export async function submitAttempt(req: Request, res: Response) {
     const service = new PracticeService(
         new AttemptRepository(adminDb),
         new MasteryRepository(adminDb),
-        new LearnerRepository(adminDb)
+        new LearnerRepository(adminDb),
+        new RevisionRepository(adminDb)
     );
+
+    // The exam date caps how far out a review can be scheduled. Read as the learner: it is their own
+    // row, and a missing goal is a normal state rather than an error — the schedule then falls back
+    // to its ordinary interval ceiling.
+    const goal = await new GoalService(
+        new GoalRepository(userDb(accessToken))
+    ).getActive(userId);
 
     const result = await service.submit({
         userId,
@@ -59,6 +70,7 @@ export async function submitAttempt(req: Request, res: Response) {
                 : { value: body.value as number },
         timeTakenSeconds: body.timeTakenSeconds,
         source: body.source,
+        daysUntilExam: goal?.daysRemaining ?? null,
     });
 
     sendOk(res, result, 201);
