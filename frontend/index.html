@@ -6,6 +6,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Adigam AI — Adaptive Learning</title>
       <meta name="theme-color" content="#0e1117" />
+    <!--
+      Applies the saved theme before the first paint.
+
+      Inline and blocking on purpose. Doing this from React means the dark palette renders and then
+      flips a frame later — a white flash on every load, which is worse than not offering light mode
+      at all. It has to run before the browser paints, so it cannot live in the bundle.
+
+      Wrapped in try/catch because localStorage throws outright in a private window on some
+      browsers, and a themed page is not worth a blank one.
+    -->
+    <script>
+      try {
+        var saved = localStorage.getItem('adigam-theme');
+        var wantsLight =
+          saved === 'light' ||
+          (saved !== 'dark' && window.matchMedia('(prefers-color-scheme: light)').matches);
+        if (wantsLight) document.documentElement.setAttribute('data-theme', 'light');
+      } catch (e) {}
+    </script>
+
   </head>
   <body>
     <div id="root"></div>
