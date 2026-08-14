@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import type { ReactElement, ReactNode } from 'react';
 import { ApiError } from '@/lib/api';
 
@@ -9,11 +10,37 @@ import { ApiError } from '@/lib/api';
  * them once and none of them can drift.
  */
 
-export function Loading({ label = 'Loading…' }: { label?: string }): ReactElement {
+/**
+ * How long a wait can go unexplained before it reads as a hang.
+ *
+ * Under a second covers almost every request here. The exception is a topic nobody has practised
+ * yet, where the server writes its questions before answering and takes around twenty seconds — a
+ * spinner saying "Loading…" for that long is indistinguishable from something broken, and a person
+ * watching it reloads the page, which starts the wait again.
+ */
+const SLOW_AFTER_MS = 4000;
+
+export function Loading({
+    label = 'Loading…',
+    /** Shown instead of `label` once the wait is long enough to need explaining. */
+    slowLabel,
+}: {
+    label?: string;
+    slowLabel?: string;
+}): ReactElement {
+    const [slow, setSlow] = useState(false);
+
+    useEffect(() => {
+        if (!slowLabel) return;
+
+        const timer = setTimeout(() => setSlow(true), SLOW_AFTER_MS);
+        return () => clearTimeout(timer);
+    }, [slowLabel]);
+
     return (
         <div className="state">
             <div className="spinner" />
-            {label}
+            {slow && slowLabel ? slowLabel : label}
         </div>
     );
 }

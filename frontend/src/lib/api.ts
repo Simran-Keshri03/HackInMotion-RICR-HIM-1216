@@ -40,7 +40,9 @@ export class ApiError extends Error {
             // so without this the learner sees a broken screen once every twenty clicks.
             this.code === 'BAD_RESPONSE' ||
             this.code === 'AI_TIMEOUT' ||
-            this.code === 'AI_UNAVAILABLE'
+            this.code === 'AI_UNAVAILABLE' ||
+            // A request that timed out may well succeed on a second try — the free host cold-starts.
+            this.code === 'TIMEOUT'
         );
     }
 }
@@ -55,6 +57,21 @@ export class ApiError extends Error {
  * retry turns that into a slightly slower load.
  */
 const RETRY_DELAY_MS = 700;
+
+/**
+ * How long to wait for a response before giving up.
+ *
+ * `fetch` has no timeout of its own: a request the server never answers leaves the promise pending
+ * for ever, which on screen is a spinner that never stops. That is the "broken screen" failure mode
+ * in its purest form — nothing errored, so no error state renders, and the learner is left looking at
+ * a loading state with no way forward but a reload.
+ *
+ * Generous on purpose. A recommendation for a topic with no questions writes them first, which was
+ * measured at 23 seconds and four AI calls; a 10-second timeout would abort the very request the
+ * feature depends on. Sixty seconds is longer than anything this app legitimately does and far
+ * shorter than for ever.
+ */
+const TIMEOUT_MS = 60_000;
 
 async function request<T>(
     path: string,
@@ -77,10 +94,33 @@ async function request<T>(
     let response: Response;
 
     try {
-        response = await fetch(`${BASE_URL}${path}`, { ...init, headers });
-    } catch {
-        // A dropped connection is the single most likely failure on a slow network, and it
-        // deserves a message that says so rather than "failed to fetch".
+        response = await fetch(`${BASE_URL}${path}`, {
+            ...init,
+            headers,
+            signal: AbortSignal.timeout(TIMEOUT_MS),
+        });
+    } catch (cause) {
+        // A timeout and a dropped connection both land here and need different messages: one says
+        // "try again", the other says "check your connection", and telling somebody to check a
+        // working connection is how an app loses trust.
+        if (cause instanceof DOMException && cause.name === 'TimeoutError') {
+            throw new ApiError(
+                0,
+                'TIMEOUT',
+                'The server took too long to answer. Try again.'
+            );
+        }
+
+        // Being offline is worth naming separately, because there is nothing the server can do about
+        // it and retrying immediately will not help.
+        if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+            throw new ApiError(
+                0,
+                'OFFLINE',
+                'You appear to be offline. Reconnect and try again.'
+            );
+        }
+
         throw new ApiError(
             0,
             'NETWORK',
@@ -101,6 +141,24 @@ async function request<T>(
     }
 
     if (!body.success) {
+        /**
+         * A dead session ends the session.
+         *
+         * Without this the app dead-ends: Supabase hands over a token it still believes in, the
+         * server rejects it, and every screen shows "Invalid or expired token" for ever. Supabase's
+         * own refresh covers an *expired* token, but not one whose refresh token is also gone — a
+         * revoked session, a changed password, a project restart. The learner is then signed in as far
+         * as the client is concerned and refused by the server, with no route out except noticing the
+         * Sign out button.
+         *
+         * Signing out is the honest recovery: the session really is over, so the login screen is
+         * where they should be. Fire-and-forget because this path is already throwing, and awaiting a
+         * sign-out to report a different error would only delay the message.
+         */
+        if (response.status === 401) {
+            void supabase.auth.signOut();
+        }
+
         throw new ApiError(response.status, body.error.code, body.error.message);
     }
 
@@ -143,4 +201,15 @@ export const api = {
      */
     post: <T>(path: string, payload: unknown) =>
         request<T>(path, { method: 'POST', body: JSON.stringify(payload) }),
+
+    /**
+     * Also never retried, for a different reason than POST.
+     *
+     * A PATCH here is idempotent — sending the same name twice leaves the same name — so repeating it
+     * would be harmless. It is not retried because a failed settings save should be *reported*: the
+     * learner is sitting in front of the form and can press the button again, and silently succeeding
+     * on the second attempt hides that the first one failed.
+     */
+    patch: <T>(path: string, payload: unknown) =>
+        request<T>(path, { method: 'PATCH', body: JSON.stringify(payload) }),
 };
