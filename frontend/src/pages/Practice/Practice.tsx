@@ -1,343 +1,162 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Empty, Failed, Loading } from '@/components/Loading/States';
 import { useApi } from '@/hooks/useApi';
 import { api } from '@/lib/api';
-import type { AttemptResult, NextSession } from '@/types/api';
+import { PracticeSession } from '@/pages/Practice/PracticeSession';
+import type { GoalSubject } from '@/types/api';
 
 /**
- * One question at a time, then the answer, the explanation, and the mastery change.
+ * Practice: pick a subject, or let the engine pick for you.
  *
- * The mastery number moving after an answer is the moment the product justifies itself, so it
- * is shown explicitly — before, after, and the delta — rather than left for the learner to
- * notice on a dashboard later.
+ * The subjects are the ones from the learner's **goal**, not the whole syllabus. Offering subjects
+ * they deliberately left out would undo the choice the goal screen exists to let them make.
  *
- * Note what this screen does not have: the correct answer, until the attempt is submitted. It
- * cannot have it. The browser has no column privilege on `questions.correct_answer`, so
- * grading happens on the server and the answer arrives in the response. That is why a mock
- * test here is worth something.
+ * Both routes in are here on purpose. Choosing a subject is what somebody wants when they know what
+ * today is for — a Databases test on Friday. Letting the engine choose is what the product is
+ * actually for, and it stays the first and most prominent option because "the weakest thing across
+ * everything you are studying" is a better answer than anything a learner picks by mood.
+ *
+ * Progress on each card is **topics started**, not average mastery. A subject whose topics are mostly
+ * untouched has a low average, which on a bar is indistinguishable from "you are bad at this" when the
+ * truth is "you have not begun". Coverage is the honest number; mastery is shown next to it in words.
  */
 export default function Practice() {
-    const navigate = useNavigate();
-
-    const session = useApi<NextSession>(() =>
-        api.get<NextSession>('/recommendations/next')
+    const subjects = useApi<{ subjects: GoalSubject[] }>(() =>
+        api.get<{ subjects: GoalSubject[] }>('/learner/subjects')
     );
 
-    const [index, setIndex] = useState(0);
-    const [selected, setSelected] = useState<number[]>([]);
-    const [numericValue, setNumericValue] = useState('');
-    const [result, setResult] = useState<AttemptResult | null>(null);
-    const [submitting, setSubmitting] = useState(false);
-    const [submitError, setSubmitError] = useState<string | null>(null);
-    const [startedAt, setStartedAt] = useState(() => Date.now());
+    /**
+     * Null means the picker; a `{ subjectId }` object means a session is running.
+     *
+     * An object rather than a plain string, because `null` has to mean "not started" while the
+     * adaptive path legitimately runs with no subject id at all.
+     */
+    const [running, setRunning] = useState<{ subjectId: string | null } | null>(null);
 
-    if (session.loading) return <Loading label="Getting your questions…" />;
-
-    if (session.error) {
-        return <Failed error={session.error} onRetry={session.reload} />;
-    }
-
-    const questions = session.data?.questions ?? [];
-    const recommendation = session.data?.recommendation;
-
-    if (!recommendation || questions.length === 0) {
+    if (running) {
         return (
-            <Empty
-                title="No questions available"
-                action={
-                    <button type="button" onClick={() => navigate('/dashboard')}>
-                        Back to dashboard
-                    </button>
-                }
-            >
-                <p className="muted">
-                    {session.data?.reason ??
-                        'There is nothing to practise on this topic yet.'}
-                </p>
-            </Empty>
-        );
-    }
-
-    const question = questions[index];
-
-    // Defensive: an index past the end means the set was exhausted, which the finished screen
-    // below normally catches first.
-    if (!question) {
-        return (
-            <Empty
-                title="Session finished"
-                action={
-                    <button
-                        type="button"
-                        className="primary"
-                        onClick={() => navigate('/dashboard')}
-                    >
-                        Back to dashboard
-                    </button>
-                }
+            <PracticeSession
+                subjectId={running.subjectId}
+                // Back to the picker, not the dashboard. Finishing a set and wanting another is the
+                // common case, and this screen is now the only place practice starts from.
+                onExit={() => {
+                    setRunning(null);
+                    subjects.reload();
+                }}
             />
         );
     }
 
-    const isLast = index === questions.length - 1;
-    const isChoice = question.question_type !== 'numeric';
-    const isMulti = question.question_type === 'msq';
-
-    const canSubmit = isChoice ? selected.length > 0 : numericValue.trim() !== '';
-
-    function toggleOption(optionIndex: number) {
-        if (result) return; // answered; the options are now read-only
-
-        setSelected((current) => {
-            if (isMulti) {
-                return current.includes(optionIndex)
-                    ? current.filter((i) => i !== optionIndex)
-                    : [...current, optionIndex];
-            }
-            return [optionIndex];
-        });
+    if (subjects.loading) return <Loading label="Loading your subjects…" />;
+    if (subjects.error) {
+        return <Failed error={subjects.error} onRetry={subjects.reload} />;
     }
 
-    async function submit() {
-        setSubmitting(true);
-        setSubmitError(null);
+    const list = subjects.data?.subjects ?? [];
 
-        try {
-            const payload = {
-                questionId: question.id,
-                // Exactly one of these, matching what the backend's schema requires.
-                ...(isChoice
-                    ? { selectedOptions: selected }
-                    : { value: Number(numericValue) }),
-                timeTakenSeconds: Math.min(
-                    3600,
-                    Math.round((Date.now() - startedAt) / 1000)
-                ),
-                source: 'practice' as const,
-            };
+    if (list.length === 0) {
+        return (
+            <div className="stack">
+                <div>
+                    <span className="label">Practice</span>
+                    <h1>Nothing to practise yet</h1>
+                </div>
 
-            setResult(await api.post<AttemptResult>('/attempts', payload));
-        } catch (cause) {
-            setSubmitError(
-                cause instanceof Error
-                    ? cause.message
-                    : 'Could not save your answer.'
-            );
-        } finally {
-            setSubmitting(false);
-        }
+                <Empty title="Set a goal first">
+                    <p className="muted" style={{ margin: 0 }}>
+                        Practice is drawn from the subjects in your goal. Tell us what you
+                        are preparing for and they will appear here.
+                    </p>
+                    <p className="faint" style={{ marginTop: 10, marginBottom: 0 }}>
+                        <Link to="/goals">Set your goal</Link>
+                    </p>
+                </Empty>
+            </div>
+        );
     }
-
-    function next() {
-        setIndex((i) => i + 1);
-        setSelected([]);
-        setNumericValue('');
-        setResult(null);
-        setSubmitError(null);
-        setStartedAt(Date.now());
-    }
-
-    // Which options to mark once the answer is known. The correct answer arrives only in the
-    // attempt response, so this is empty until then.
-    const correctIndexes =
-        result && Array.isArray(result.correctAnswer)
-            ? (result.correctAnswer as number[])
-            : [];
 
     return (
         <div className="stack">
-            <div className="spread">
+            <div>
+                <span className="label">Practice</span>
+                <h1>Practice by subject</h1>
+                <p className="muted" style={{ margin: 0 }}>
+                    Pick a subject, or let Adigam choose the topic you need most.
+                </p>
+            </div>
+
+            {/* First, and deliberately. The adaptive choice is the product; a subject grid is the
+                convenience next to it. */}
+            <div className="card card--accent stack">
                 <div>
-                    <span className="label">{recommendation.topic.name}</span>
-                    <div className="faint">
-                        Question {index + 1} of {questions.length}
-                    </div>
-                </div>
-                <span className={`pill pill--${question.difficulty}`}>
-                    {question.difficulty}
-                </span>
-            </div>
-
-            <div className="card stack">
-                <p style={{ margin: 0, fontSize: '1.05rem' }}>{question.body}</p>
-
-                {isMulti && !result && (
-                    <p className="faint" style={{ margin: 0 }}>
-                        Select every correct option — partial answers score nothing.
+                    <span className="label">Recommended</span>
+                    <p style={{ margin: '6px 0 0' }}>
+                        Across everything in your goal, weakest and most overdue first.
                     </p>
-                )}
-
-                {isChoice && question.options && (
-                    <div className="stack" style={{ gap: 8 }}>
-                        {question.options.map((option, optionIndex) => {
-                            const chosen = selected.includes(optionIndex);
-                            const isCorrect = correctIndexes.includes(optionIndex);
-
-                            // After answering: mark every correct option, and mark a wrong
-                            // option only if the learner picked it.
-                            const marking = result
-                                ? isCorrect
-                                    ? ' option--correct'
-                                    : chosen
-                                      ? ' option--wrong'
-                                      : ''
-                                : '';
-
-                            return (
-                                <button
-                                    key={optionIndex}
-                                    type="button"
-                                    className={`option${marking}`}
-                                    aria-pressed={chosen}
-                                    disabled={result !== null}
-                                    onClick={() => toggleOption(optionIndex)}
-                                >
-                                    <span className="option__mark">
-                                        {String.fromCharCode(65 + optionIndex)}
-                                    </span>
-                                    <span>{option}</span>
-                                </button>
-                            );
-                        })}
-                    </div>
-                )}
-
-                {!isChoice && (
-                    <div className="field">
-                        <label htmlFor="answer">Your answer</label>
-                        <input
-                            id="answer"
-                            type="number"
-                            step="any"
-                            inputMode="decimal"
-                            value={numericValue}
-                            disabled={result !== null}
-                            onChange={(e) => setNumericValue(e.target.value)}
-                        />
-                    </div>
-                )}
-
-                {submitError && (
-                    <div className="banner banner--error">{submitError}</div>
-                )}
-
-                {!result && (
-                    <button
-                        type="button"
-                        className="primary wide"
-                        disabled={!canSubmit || submitting}
-                        onClick={submit}
-                    >
-                        {submitting ? 'Checking…' : 'Submit answer'}
-                    </button>
-                )}
+                </div>
+                <button
+                    type="button"
+                    className="primary wide"
+                    onClick={() => setRunning({ subjectId: null })}
+                >
+                    Start practice
+                </button>
             </div>
 
-            {result && (
-                <div className="card stack">
-                    <div
-                        className={`banner banner--${result.isCorrect ? 'good' : 'error'}`}
-                    >
-                        <strong>
-                            {result.isCorrect ? 'Correct' : 'Not quite'}
-                        </strong>
-                    </div>
-
-                    {result.explanation && (
-                        <div>
-                            <span className="label">Why</span>
-                            <p style={{ marginTop: 8, marginBottom: 0 }}>
-                                {result.explanation}
-                            </p>
-                        </div>
-                    )}
-
-                    {/* The moment a learner is most likely to have a doubt is right after seeing
-                        they got something wrong, so the tutor is offered here rather than only
-                        from the menu. The topic and question travel with the link so the answer is
-                        about this question, not the subject in general. */}
-                    <Link
-                        to={`/tutor?topic=${question.topic_id}&question=${encodeURIComponent(question.body)}`}
-                        className="faint"
-                    >
-                        Still not clear? Ask Adigam about this question
-                    </Link>
-
-                    <MasteryChange mastery={result.mastery} />
-
-                    {isLast ? (
-                        <div className="stack" style={{ gap: 8 }}>
-                            <button
-                                type="button"
-                                className="primary wide"
-                                onClick={() => navigate('/dashboard')}
-                            >
-                                Finish — see what is next
-                            </button>
-                            <p className="faint" style={{ margin: 0, textAlign: 'center' }}>
-                                Your next recommendation is already updated.
-                            </p>
-                        </div>
-                    ) : (
-                        <button
-                            type="button"
-                            className="primary wide"
-                            onClick={next}
-                        >
-                            Next question
-                        </button>
-                    )}
-                </div>
-            )}
+            <div className="subjects">
+                {list.map((subject) => (
+                    <SubjectCard
+                        key={subject.id}
+                        subject={subject}
+                        onStart={() => setRunning({ subjectId: subject.id })}
+                    />
+                ))}
+            </div>
         </div>
     );
 }
 
-/**
- * The payoff. Shows the score before, the score after, and the change — because "your mastery
- * went from 44 to 52" is the sentence that makes the whole system legible to a learner.
- */
-function MasteryChange({ mastery }: { mastery: AttemptResult['mastery'] }) {
-    const { before, after, change, attemptsOnTopic } = mastery;
-    const rose = change !== null && change > 0;
+function SubjectCard({
+    subject,
+    onStart,
+}: {
+    subject: GoalSubject;
+    onStart: () => void;
+}) {
+    const coverage =
+        subject.topicCount > 0
+            ? Math.round((subject.topicsStarted / subject.topicCount) * 100)
+            : 0;
 
     return (
-        <div>
-            <span className="label">Mastery on this topic</span>
-
-            <div className="row" style={{ marginTop: 8, gap: 10 }}>
-                {before !== null && (
-                    <>
-                        <span className="mono muted">{Math.round(before)}</span>
-                        <span className="faint">→</span>
-                    </>
-                )}
-
-                <span className="big mono">{Math.round(after)}</span>
-
-                {change !== null && change !== 0 && (
-                    <span
-                        className="mono"
-                        style={{ color: rose ? 'var(--good)' : 'var(--bad)' }}
-                    >
-                        {rose ? '+' : ''}
-                        {change.toFixed(1)}
-                    </span>
-                )}
+        <div className="card stack" style={{ gap: 10 }}>
+            <div className="spread" style={{ alignItems: 'flex-start', gap: 8 }}>
+                <strong>{subject.name}</strong>
+                {/* Exam weight, not difficulty. It is what the planner and the ranking actually
+                    multiply by, so showing anything else here would be decoration that disagrees
+                    with how the app behaves. */}
+                {subject.weight >= 1.3 && <span className="pill pill--hard">high weight</span>}
             </div>
 
-            <div className="meter" style={{ marginTop: 8 }}>
-                <div style={{ width: `${after}%` }} />
+            <div>
+                <div className="subjects__bar">
+                    <span style={{ width: `${coverage}%` }} />
+                </div>
+                <div className="faint" style={{ marginTop: 6 }}>
+                    {subject.topicsStarted} of {subject.topicCount} topics started
+                    {subject.averageMastery !== null && (
+                        <> · mastery {Math.round(subject.averageMastery)}</>
+                    )}
+                    {subject.topicsMastered > 0 && (
+                        <> · {subject.topicsMastered} mastered</>
+                    )}
+                </div>
             </div>
 
-            {/* Honest framing: early scores move a lot because there is little evidence, and a
-                learner should understand that rather than reading a low number as a verdict. */}
-            <p className="faint" style={{ marginTop: 8, marginBottom: 0 }}>
-                Based on {attemptsOnTopic}{' '}
-                {attemptsOnTopic === 1 ? 'attempt' : 'attempts'}. Scores move
-                more while there is less evidence.
-            </p>
+            <button type="button" className="primary wide" onClick={onStart}>
+                Start practice
+            </button>
         </div>
     );
 }
