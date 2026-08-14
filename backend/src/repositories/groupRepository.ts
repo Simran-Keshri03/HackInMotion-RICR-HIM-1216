@@ -79,7 +79,9 @@ export class GroupRepository {
                       }
                     : null;
             })
-            .filter((row): row is { group: GroupRow; role: string; memberCount: number } => row !== null);
+            .filter(
+                (row): row is { group: GroupRow; role: string; memberCount: number } => row !== null
+            );
     }
 
     async findByInviteCode(code: string): Promise<GroupRow | null> {
@@ -206,12 +208,22 @@ export class GroupRepository {
     ): Promise<
         Map<
             string,
-            { displayName: string; questionsAnswered: number; currentStreakDays: number; topicsMastered: number }
+            {
+                displayName: string;
+                questionsAnswered: number;
+                currentStreakDays: number;
+                topicsMastered: number;
+            }
         >
     > {
         const result = new Map<
             string,
-            { displayName: string; questionsAnswered: number; currentStreakDays: number; topicsMastered: number }
+            {
+                displayName: string;
+                questionsAnswered: number;
+                currentStreakDays: number;
+                topicsMastered: number;
+            }
         >();
 
         if (userIds.length === 0) return result;
@@ -236,17 +248,20 @@ export class GroupRepository {
         if (mastery.error) throw mastery.error;
 
         const names = new Map(
-            ((profiles.data ?? []) as { id: string; display_name: string | null }[]).map(
-                (row) => [row.id, row.display_name]
-            )
+            ((profiles.data ?? []) as { id: string; display_name: string | null }[]).map((row) => [
+                row.id,
+                row.display_name,
+            ])
         );
 
         const stats = new Map(
-            ((learnerProfiles.data ?? []) as {
-                user_id: string;
-                total_attempts: number;
-                current_streak_days: number;
-            }[]).map((row) => [row.user_id, row])
+            (
+                (learnerProfiles.data ?? []) as {
+                    user_id: string;
+                    total_attempts: number;
+                    current_streak_days: number;
+                }[]
+            ).map((row) => [row.user_id, row])
         );
 
         const mastered = new Map<string, number>();

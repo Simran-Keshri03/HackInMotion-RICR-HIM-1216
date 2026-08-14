@@ -57,12 +57,7 @@ v1Router.get(
         if (error) {
             console.error('Deep health check failed:', error.message);
 
-            sendError(
-                res,
-                503,
-                'DATABASE_UNREACHABLE',
-                'The database did not answer.'
-            );
+            sendError(res, 503, 'DATABASE_UNREACHABLE', 'The database did not answer.');
             return;
         }
 

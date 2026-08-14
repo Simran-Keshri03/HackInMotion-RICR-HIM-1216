@@ -1,13 +1,7 @@
-import type {
-    CurriculumRepository,
-    SubjectRow,
-} from '@/repositories/curriculumRepository.js';
+import type { CurriculumRepository, SubjectRow } from '@/repositories/curriculumRepository.js';
 import { CURRICULUM_SCHEMA, CURRICULUM_SYSTEM, curriculumPrompt } from '@/services/ai/prompts.js';
 import type { IAIProvider } from '@/services/ai/IAIProvider.js';
-import {
-    toSlug,
-    validateCurriculumReply,
-} from '@/services/learning/curriculumValidator.js';
+import { toSlug, validateCurriculumReply } from '@/services/learning/curriculumValidator.js';
 import { AppError } from '@/utils/http.js';
 
 export interface ResolveOutcome {
@@ -66,11 +60,7 @@ export class CurriculumService {
         const curriculum = await this.curricula.findDefault();
 
         if (!curriculum) {
-            throw new AppError(
-                500,
-                'NO_DEFAULT_CURRICULUM',
-                'No default syllabus is available.'
-            );
+            throw new AppError(500, 'NO_DEFAULT_CURRICULUM', 'No default syllabus is available.');
         }
 
         return {
@@ -86,8 +76,7 @@ export class CurriculumService {
         if (goalText.length < 2) {
             return {
                 status: 'rejected',
-                message:
-                    'Type what you are studying for — an exam, a class, or a subject.',
+                message: 'Type what you are studying for — an exam, a class, or a subject.',
             };
         }
 

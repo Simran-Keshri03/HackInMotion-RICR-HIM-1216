@@ -107,9 +107,7 @@ export class AssessmentRepository {
      * returned nothing once already, and a diagnostic quietly built from no topics would look like an
      * empty question bank rather than a bug.
      */
-    async findAssessableTopics(
-        goalId: string
-    ): Promise<
+    async findAssessableTopics(goalId: string): Promise<
         {
             topicId: string;
             name: string;
@@ -168,9 +166,10 @@ export class AssessmentRepository {
         }
 
         const subjectById = new Map(
-            ((subjects ?? []) as { id: string; name: string; weight: number }[]).map(
-                (row) => [row.id, row]
-            )
+            ((subjects ?? []) as { id: string; name: string; weight: number }[]).map((row) => [
+                row.id,
+                row,
+            ])
         );
 
         return leafRows.flatMap((leaf) => {
@@ -269,10 +268,7 @@ export class AssessmentRepository {
     }
 
     /** Every question of the paper in one request. */
-    async addQuestions(
-        assessmentId: string,
-        questionIds: string[]
-    ): Promise<void> {
+    async addQuestions(assessmentId: string, questionIds: string[]): Promise<void> {
         if (questionIds.length === 0) return;
 
         const { error } = await this.db.from('assessment_questions').insert(
@@ -287,11 +283,7 @@ export class AssessmentRepository {
     }
 
     /** Links a question to the attempt that answered it. */
-    async linkAttempt(
-        assessmentId: string,
-        questionId: string,
-        attemptId: string
-    ): Promise<void> {
+    async linkAttempt(assessmentId: string, questionId: string, attemptId: string): Promise<void> {
         const { error } = await this.db
             .from('assessment_questions')
             .update({ attempt_id: attemptId })
@@ -301,10 +293,7 @@ export class AssessmentRepository {
         if (error) throw error;
     }
 
-    async complete(
-        assessmentId: string,
-        correctCount: number
-    ): Promise<AssessmentRow> {
+    async complete(assessmentId: string, correctCount: number): Promise<AssessmentRow> {
         const { data, error } = await this.db
             .from('assessments')
             .update({

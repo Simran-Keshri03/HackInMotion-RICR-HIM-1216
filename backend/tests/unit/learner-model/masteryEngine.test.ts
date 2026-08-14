@@ -148,9 +148,7 @@ describe('summariseAttempts', () => {
         return {
             isCorrect,
             difficulty,
-            attemptedAt: new Date(
-                now.getTime() - daysAgo * 86_400_000
-            ).toISOString(),
+            attemptedAt: new Date(now.getTime() - daysAgo * 86_400_000).toISOString(),
         };
     }
 
@@ -185,9 +183,9 @@ describe('summariseAttempts', () => {
             now
         );
 
-        expect(
-            result.easy.attempts + result.medium.attempts + result.hard.attempts
-        ).toBe(result.totalAttempts);
+        expect(result.easy.attempts + result.medium.attempts + result.hard.attempts).toBe(
+            result.totalAttempts
+        );
     });
 
     it('counts the streak from the newest attempt and stops at the first miss', () => {

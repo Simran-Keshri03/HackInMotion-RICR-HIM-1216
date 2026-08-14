@@ -6,10 +6,7 @@ import { AssessmentRepository } from '@/repositories/assessmentRepository.js';
 import { AttemptRepository } from '@/repositories/attemptRepository.js';
 import { GoalRepository } from '@/repositories/goalRepository.js';
 import { MasteryRepository } from '@/repositories/masteryRepository.js';
-import {
-    AssessmentService,
-    DIAGNOSTIC_CONFIG,
-} from '@/services/assessment/assessmentService.js';
+import { AssessmentService, DIAGNOSTIC_CONFIG } from '@/services/assessment/assessmentService.js';
 import { GoalService } from '@/services/learning/goalService.js';
 import { AppError, sendOk } from '@/utils/http.js';
 
@@ -28,9 +25,7 @@ function service(): AssessmentService {
 
 /** The learner's active goal, or a 400 explaining that an assessment needs one. */
 async function requireGoal(userId: string, accessToken: string) {
-    const goal = await new GoalService(
-        new GoalRepository(userDb(accessToken))
-    ).getActive(userId);
+    const goal = await new GoalService(new GoalRepository(userDb(accessToken))).getActive(userId);
 
     if (!goal) {
         throw new AppError(

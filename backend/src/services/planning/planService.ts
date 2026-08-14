@@ -69,11 +69,7 @@ export class PlanService {
     private readonly learners: LearnerRepository;
     private readonly revision: RevisionRepository;
 
-    constructor(
-        plans: PlanRepository,
-        learners: LearnerRepository,
-        revision: RevisionRepository
-    ) {
+    constructor(plans: PlanRepository, learners: LearnerRepository, revision: RevisionRepository) {
         this.plans = plans;
         this.learners = learners;
         this.revision = revision;
@@ -158,11 +154,7 @@ export class PlanService {
      * `before: today` on purpose — today's session is still live, and marking it missed at breakfast
      * would be both wrong and the fastest way to make the feature look broken.
      */
-    private async settlePastSessions(
-        userId: string,
-        planId: string,
-        today: string
-    ): Promise<void> {
+    private async settlePastSessions(userId: string, planId: string, today: string): Promise<void> {
         const pending = await this.plans.findUnreconciledSessions(planId, today);
         if (pending.length === 0) return;
 
@@ -175,9 +167,10 @@ export class PlanService {
 
         await this.plans.settleSessions(
             pending.map((session) => {
-                const actual = attempts.get(
-                    `${session.topic_id}|${session.scheduled_date}`
-                ) ?? { answered: 0, correct: 0 };
+                const actual = attempts.get(`${session.topic_id}|${session.scheduled_date}`) ?? {
+                    answered: 0,
+                    correct: 0,
+                };
 
                 const reconciled = {
                     scheduledDate: session.scheduled_date,
@@ -205,10 +198,9 @@ export class PlanService {
     ): Promise<ReplanVerdict> {
         const settled = await this.plans.findSettledSessions(plan.id, today);
 
-        const topics = await this.plans.findTopicPerformance(
-            userId,
-            [...new Set(settled.map((session) => session.topic_id))]
-        );
+        const topics = await this.plans.findTopicPerformance(userId, [
+            ...new Set(settled.map((session) => session.topic_id)),
+        ]);
 
         return shouldReplan({
             today,

@@ -49,8 +49,18 @@ jobs:
         run: npm run typecheck
         working-directory: backend
 
+      # `npm run lint`, not `npx oxlint`: the linter is a declared devDependency with its own
+      # config now, so CI runs the same command a developer does rather than pulling a floating
+      # version at random. The previous `npx` form worked and was invisible to anything reading
+      # package.json — which is exactly how the qualifier audit concluded the backend had no linter.
       - name: Lint
-        run: npx oxlint
+        run: npm run lint
+        working-directory: backend
+
+      # `--check` rather than `--write`: CI reports drift, it does not silently rewrite the tree.
+      # The config lives at the repository root so both halves are formatted the same way.
+      - name: Format check
+        run: npm run format:check
         working-directory: backend
 
       # No environment file, and that is the point: every one of these is a unit test over pure
@@ -79,6 +89,10 @@ jobs:
 
       - name: Lint
         run: npm run lint
+        working-directory: frontend
+
+      - name: Format check
+        run: npm run format:check
         working-directory: frontend
 
       - name: Test

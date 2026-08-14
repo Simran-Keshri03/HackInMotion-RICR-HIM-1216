@@ -7,9 +7,7 @@ import { z } from 'zod';
  * as a confusing 500 on the first request.
  */
 const schema = z.object({
-    NODE_ENV: z
-        .enum(['development', 'production', 'test'])
-        .default('development'),
+    NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
     PORT: z.coerce.number().default(4000),
     // Comma-separated list of origins allowed to call this API.
     CORS_ORIGINS: z.string().default('http://localhost:5173'),
@@ -33,10 +31,7 @@ const presentEnv = Object.fromEntries(
 const parsed = schema.safeParse(presentEnv);
 
 if (!parsed.success) {
-    console.error(
-        'Invalid environment:',
-        z.flattenError(parsed.error).fieldErrors
-    );
+    console.error('Invalid environment:', z.flattenError(parsed.error).fieldErrors);
     process.exit(1);
 }
 

@@ -31,9 +31,7 @@ describe('businessCheck - accepts a good question', () => {
 
     it('passes a well-formed multi-answer question', () => {
         expect(
-            businessCheck(
-                question({ questionType: 'msq', correctOptionIndexes: [0, 2] })
-            )
+            businessCheck(question({ questionType: 'msq', correctOptionIndexes: [0, 2] }))
         ).toBeNull();
     });
 });
@@ -41,9 +39,7 @@ describe('businessCheck - accepts a good question', () => {
 describe('businessCheck - rejects what the schema cannot catch', () => {
     it('THE IMPORTANT ONE: an answer index past the end of the options', () => {
         // This is the failure that would mark a learner wrong for being right.
-        expect(businessCheck(question({ correctOptionIndexes: [7] }))).toMatch(
-            /does not exist/i
-        );
+        expect(businessCheck(question({ correctOptionIndexes: [7] }))).toMatch(/does not exist/i);
     });
 
     it('a single-answer question with two answers', () => {
@@ -53,16 +49,14 @@ describe('businessCheck - rejects what the schema cannot catch', () => {
     });
 
     it('a multi-answer question with only one answer', () => {
-        expect(
-            businessCheck(question({ questionType: 'msq', correctOptionIndexes: [1] }))
-        ).toMatch(/fewer than two/i);
+        expect(businessCheck(question({ questionType: 'msq', correctOptionIndexes: [1] }))).toMatch(
+            /fewer than two/i
+        );
     });
 
     it('the same option marked correct twice', () => {
         expect(
-            businessCheck(
-                question({ questionType: 'msq', correctOptionIndexes: [1, 1] })
-            )
+            businessCheck(question({ questionType: 'msq', correctOptionIndexes: [1, 1] }))
         ).toMatch(/correct twice/i);
     });
 
@@ -80,9 +74,7 @@ describe('businessCheck - rejects what the schema cannot catch', () => {
 
     it('two identical options', () => {
         expect(
-            businessCheck(
-                question({ options: ['Hash table', 'hash table ', 'Stack', 'Queue'] })
-            )
+            businessCheck(question({ options: ['Hash table', 'hash table ', 'Stack', 'Queue'] }))
         ).toMatch(/identical/i);
     });
 
@@ -98,9 +90,7 @@ describe('businessCheck - rejects what the schema cannot catch', () => {
 
     it('a question that refers to something the learner cannot see', () => {
         expect(
-            businessCheck(
-                question({ body: 'Based on the figure, which traversal is shown?' })
-            )
+            businessCheck(question({ body: 'Based on the figure, which traversal is shown?' }))
         ).toMatch(/cannot see/i);
     });
 
@@ -171,8 +161,7 @@ describe('agreesWithProposedAnswer', () => {
 
     it('verifies when the independent check agrees', () => {
         expect(
-            agreesWithProposedAnswer([1], { ...confident, correctOptionIndexes: [1] })
-                .verified
+            agreesWithProposedAnswer([1], { ...confident, correctOptionIndexes: [1] }).verified
         ).toBe(true);
     });
 

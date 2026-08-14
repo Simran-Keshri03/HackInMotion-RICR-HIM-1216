@@ -86,9 +86,7 @@ describe('planDiagnostic — breadth is the whole point', () => {
             perSubject.set(pick.subjectId, (perSubject.get(pick.subjectId) ?? 0) + 1);
         }
 
-        expect(perSubject.get('deep')).toBeLessThanOrEqual(
-            DIAGNOSTIC_CONFIG.maxPerSubject
-        );
+        expect(perSubject.get('deep')).toBeLessThanOrEqual(DIAGNOSTIC_CONFIG.maxPerSubject);
         expect(perSubject.get('thin1')).toBe(1);
         expect(perSubject.get('thin2')).toBe(1);
     });
@@ -117,9 +115,7 @@ describe('planDiagnostic — breadth is the whole point', () => {
     it('numbers the questions from one, in order', () => {
         const plan = planDiagnostic(syllabus, 12);
 
-        expect(plan.picks.map((pick) => pick.position)).toEqual(
-            plan.picks.map((_, i) => i + 1)
-        );
+        expect(plan.picks.map((pick) => pick.position)).toEqual(plan.picks.map((_, i) => i + 1));
     });
 
     it('skips topics with no questions and names the subjects it could not assess', () => {
@@ -202,11 +198,7 @@ describe('summariseDiagnostic', () => {
             answer('s3', 'Middling', false),
         ]);
 
-        expect(result.subjects.map((s) => s.subjectName)).toEqual([
-            'Bad',
-            'Middling',
-            'Good',
-        ]);
+        expect(result.subjects.map((s) => s.subjectName)).toEqual(['Bad', 'Middling', 'Good']);
     });
 
     it('names the weak subjects in the verdict, tied to what happens next', () => {

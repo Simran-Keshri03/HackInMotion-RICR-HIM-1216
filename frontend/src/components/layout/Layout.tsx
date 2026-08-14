@@ -98,9 +98,7 @@ export function Layout({ children }: { children: ReactNode }) {
                             key={item.to}
                             to={item.to}
                             className={({ isActive }) =>
-                                isActive
-                                    ? 'topnav__link topnav__link--active'
-                                    : 'topnav__link'
+                                isActive ? 'topnav__link topnav__link--active' : 'topnav__link'
                             }
                         >
                             {item.label}

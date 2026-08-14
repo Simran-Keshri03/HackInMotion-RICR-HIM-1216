@@ -48,9 +48,7 @@ export async function createGroup(req: Request, res: Response) {
     const { userId, accessToken } = authOf(req);
     const body = req.body as z.infer<typeof createGroupSchema>;
 
-    const goal = await new GoalService(
-        new GoalRepository(userDb(accessToken))
-    ).getActive(userId);
+    const goal = await new GoalService(new GoalRepository(userDb(accessToken))).getActive(userId);
 
     sendOk(
         res,

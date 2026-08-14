@@ -140,8 +140,7 @@ function difficultyHandling(evidence: TopicEvidence): number | null {
     if (buckets.length === 0) return null;
 
     const weightedSum = buckets.reduce(
-        (sum, { bucket, weight }) =>
-            sum + weight * (bucket.correct / bucket.attempts),
+        (sum, { bucket, weight }) => sum + weight * (bucket.correct / bucket.attempts),
         0
     );
     const totalWeight = buckets.reduce((sum, { weight }) => sum + weight, 0);
@@ -155,24 +154,25 @@ function difficultyHandling(evidence: TopicEvidence): number | null {
         buckets.reduce((sum, { bucket, weight }) => sum + weight * bucket.attempts, 0) /
         (attemptCount * hardestWeight);
 
-    const levelFactor =
-        difficultyLevelFloor + (1 - difficultyLevelFloor) * attemptedLevel;
+    const levelFactor = difficultyLevelFloor + (1 - difficultyLevelFloor) * attemptedLevel;
 
     return weightedAccuracy * levelFactor;
 }
 
 export function computeMastery(evidence: TopicEvidence): MasteryResult {
-    const { weights, streakForFullConsistency, evidenceHalfWeight, neutralPrior, decayAfterDays, maxDecay } =
-        MASTERY_CONFIG;
+    const {
+        weights,
+        streakForFullConsistency,
+        evidenceHalfWeight,
+        neutralPrior,
+        decayAfterDays,
+        maxDecay,
+    } = MASTERY_CONFIG;
 
     const recent = ratio(evidence.recentCorrect, evidence.recentAttempts);
     const historical = ratio(evidence.correctAttempts, evidence.totalAttempts);
     const difficulty = difficultyHandling(evidence);
-    const consistency = clamp(
-        evidence.correctStreak / streakForFullConsistency,
-        0,
-        1
-    );
+    const consistency = clamp(evidence.correctStreak / streakForFullConsistency, 0, 1);
 
     // Components with no evidence are dropped and the remaining weights are rescaled, so
     // a missing component cannot silently drag the score towards zero.
@@ -184,29 +184,25 @@ export function computeMastery(evidence: TopicEvidence): MasteryResult {
     ];
 
     const components = allComponents.filter(
-        (component): component is { value: number; weight: number } =>
-            component.value !== null
+        (component): component is { value: number; weight: number } => component.value !== null
     );
 
     const usedWeight = components.reduce((sum, c) => sum + c.weight, 0);
 
     const rawScore =
         usedWeight > 0
-            ? components.reduce((sum, c) => sum + c.weight * c.value, 0) /
-              usedWeight
+            ? components.reduce((sum, c) => sum + c.weight * c.value, 0) / usedWeight
             : neutralPrior;
 
     // Shrinkage towards the neutral prior when the evidence is thin.
-    const confidence =
-        evidence.totalAttempts / (evidence.totalAttempts + evidenceHalfWeight);
+    const confidence = evidence.totalAttempts / (evidence.totalAttempts + evidenceHalfWeight);
 
     const shrunk = rawScore * confidence + neutralPrior * (1 - confidence);
 
     // Mild decay for a topic left alone. Full decay is capped, because a well-learned
     // topic does not become unknown in a month.
     const idleDays = evidence.daysSinceLastAttempt ?? 0;
-    const decayFactor =
-        1 - clamp(idleDays / decayAfterDays, 0, 1) * maxDecay;
+    const decayFactor = 1 - clamp(idleDays / decayAfterDays, 0, 1) * maxDecay;
 
     return {
         score: round2(clamp(shrunk * decayFactor * 100, 0, 100)),
@@ -238,10 +234,7 @@ export interface AttemptRecord {
  *
  * `attempts` must be newest first.
  */
-export function summariseAttempts(
-    attempts: AttemptRecord[],
-    now: Date
-): TopicEvidence {
+export function summariseAttempts(attempts: AttemptRecord[], now: Date): TopicEvidence {
     const empty = (): DifficultyBucket => ({ attempts: 0, correct: 0 });
     const evidence: TopicEvidence = {
         totalAttempts: attempts.length,
@@ -279,8 +272,7 @@ export function summariseAttempts(
         const millisecondsPerDay = 86_400_000;
         evidence.daysSinceLastAttempt = Math.max(
             0,
-            (now.getTime() - new Date(latest.attemptedAt).getTime()) /
-                millisecondsPerDay
+            (now.getTime() - new Date(latest.attemptedAt).getTime()) / millisecondsPerDay
         );
     }
 

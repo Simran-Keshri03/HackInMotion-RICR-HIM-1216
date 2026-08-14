@@ -1,9 +1,6 @@
 import type { AttemptRepository } from '@/repositories/attemptRepository.js';
 import type { LearnerRepository } from '@/repositories/learnerRepository.js';
-import type {
-    MockTestRepository,
-    MockTestRow,
-} from '@/repositories/mockTestRepository.js';
+import type { MockTestRepository, MockTestRow } from '@/repositories/mockTestRepository.js';
 import type { PlanRepository } from '@/repositories/planRepository.js';
 import type { PracticeQuestion } from '@/repositories/questionRepository.js';
 import {
@@ -34,7 +31,12 @@ export interface MockTestView {
         byTopic: (MockTestResult['byTopic'][number] & { name: string })[];
     };
     /** Which topics the test covers and why, shown before it starts. */
-    coverage?: { name: string; subjectName: string | null; questionCount: number; reason: string }[];
+    coverage?: {
+        name: string;
+        subjectName: string | null;
+        questionCount: number;
+        reason: string;
+    }[];
     omitted?: { name: string; reason: string }[];
 }
 
@@ -105,13 +107,11 @@ export class MockTestService {
         const rows = await this.tests.findTestQuestions(test.id);
 
         if (test.status === 'submitted') {
-            const details = await this.tests.findTopicDetails(
-                [...new Set(rows.map((row) => row.topic_id).filter(Boolean))] as string[]
-            );
+            const details = await this.tests.findTopicDetails([
+                ...new Set(rows.map((row) => row.topic_id).filter(Boolean)),
+            ] as string[]);
 
-            const names = new Map(
-                [...details.entries()].map(([id, detail]) => [id, detail.name])
-            );
+            const names = new Map([...details.entries()].map(([id, detail]) => [id, detail.name]));
 
             const marked = markMockTest(
                 rows.map((row) => ({
@@ -135,9 +135,7 @@ export class MockTestService {
         }
 
         // Open: bodies in the test's own order, and nothing else.
-        const bodies = await this.tests.findQuestionBodies(
-            rows.map((row) => row.question_id)
-        );
+        const bodies = await this.tests.findQuestionBodies(rows.map((row) => row.question_id));
 
         const byId = new Map(bodies.map((body) => [body.id, body]));
 
@@ -156,10 +154,7 @@ export class MockTestService {
      * the old one is over, and refusing them until they finish a paper they walked away from is the
      * app arguing with them.
      */
-    async generate(
-        userId: string,
-        requestedQuestions: number
-    ): Promise<MockTestView> {
+    async generate(userId: string, requestedQuestions: number): Promise<MockTestView> {
         const plan = await this.plans.findActivePlan(userId);
 
         const candidates = plan
@@ -181,9 +176,7 @@ export class MockTestService {
         const built = planMockTest(
             candidates,
             requestedQuestions,
-            profile?.avg_seconds_per_question
-                ? Number(profile.avg_seconds_per_question)
-                : null
+            profile?.avg_seconds_per_question ? Number(profile.avg_seconds_per_question) : null
         );
 
         if (built.allocations.length === 0) {
@@ -317,9 +310,9 @@ export class MockTestService {
 
         await this.tests.markQuestions(test.id, marks);
 
-        const details = await this.tests.findTopicDetails(
-            [...new Set(rows.map((row) => row.topic_id).filter(Boolean))] as string[]
-        );
+        const details = await this.tests.findTopicDetails([
+            ...new Set(rows.map((row) => row.topic_id).filter(Boolean)),
+        ] as string[]);
 
         const marked = markMockTest(
             rows.map((row) => {
@@ -344,10 +337,7 @@ export class MockTestService {
     }
 
     /** Plan topics, enriched with mastery, names and how many questions each has. */
-    private async topicsFromPlan(
-        userId: string,
-        planId: string
-    ): Promise<MockTestTopic[]> {
+    private async topicsFromPlan(userId: string, planId: string): Promise<MockTestTopic[]> {
         const planned = await this.tests.findPlanTopics(planId);
         if (planned.length === 0) return [];
 
@@ -359,9 +349,7 @@ export class MockTestService {
             this.plans.findTopicPerformance(userId, topicIds),
         ]);
 
-        const mastery = new Map(
-            performance.map((entry) => [entry.topicId, entry.masteryScore])
-        );
+        const mastery = new Map(performance.map((entry) => [entry.topicId, entry.masteryScore]));
 
         return planned.flatMap((entry) => {
             const detail = details.get(entry.topicId);
@@ -450,8 +438,7 @@ function toView(test: MockTestRow): MockTestView {
         startedAt: test.started_at,
         submittedAt: test.submitted_at,
         correctCount: test.correct_count,
-        scorePercent:
-            test.score_percent === null ? null : Number(test.score_percent),
+        scorePercent: test.score_percent === null ? null : Number(test.score_percent),
     };
 }
 

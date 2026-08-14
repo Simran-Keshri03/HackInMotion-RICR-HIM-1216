@@ -1,4 +1,9 @@
-import Anthropic from '@anthropic-ai/sdk';
+import Anthropic, {
+    APIConnectionError,
+    APIConnectionTimeoutError,
+    APIError,
+    RateLimitError,
+} from '@anthropic-ai/sdk';
 import { env } from '@/config/environment.js';
 import type {
     AIJsonRequest,
@@ -77,10 +82,7 @@ export class ClaudeProvider implements IAIProvider {
         const text = firstTextOf(response);
 
         if (!text) {
-            throw new AIProviderError(
-                'AI_MALFORMED',
-                'The model returned no text to parse.'
-            );
+            throw new AIProviderError('AI_MALFORMED', 'The model returned no text to parse.');
         }
 
         try {
@@ -109,10 +111,7 @@ export class ClaudeProvider implements IAIProvider {
         const text = firstTextOf(response);
 
         if (!text) {
-            throw new AIProviderError(
-                'AI_MALFORMED',
-                'The model returned an empty answer.'
-            );
+            throw new AIProviderError('AI_MALFORMED', 'The model returned an empty answer.');
         }
 
         return { text, usage: usageOf(response), model: response.model };
@@ -165,10 +164,7 @@ export class ClaudeProvider implements IAIProvider {
 
             // A refusal is a 200. Check it before touching content.
             if (response.stop_reason === 'refusal') {
-                throw new AIProviderError(
-                    'AI_REFUSED',
-                    'The model declined this request.'
-                );
+                throw new AIProviderError('AI_REFUSED', 'The model declined this request.');
             }
 
             // Truncated output is not usable output, and half a JSON document parses to
@@ -187,9 +183,7 @@ export class ClaudeProvider implements IAIProvider {
     }
 }
 
-function firstTextOf(response: {
-    content: Array<{ type: string }>;
-}): string | null {
+function firstTextOf(response: { content: Array<{ type: string }> }): string | null {
     // With thinking enabled the reply can contain more than one kind of block, so pick
     // the text one rather than assuming index 0.
     for (const block of response.content) {
@@ -201,9 +195,7 @@ function firstTextOf(response: {
     return null;
 }
 
-function usageOf(response: {
-    usage: { input_tokens: number; output_tokens: number };
-}) {
+function usageOf(response: { usage: { input_tokens: number; output_tokens: number } }) {
     return {
         inputTokens: response.usage.input_tokens,
         outputTokens: response.usage.output_tokens,
@@ -214,11 +206,11 @@ function usageOf(response: {
 function translate(error: unknown): AIProviderError {
     if (error instanceof AIProviderError) return error;
 
-    if (error instanceof Anthropic.APIConnectionTimeoutError) {
+    if (error instanceof APIConnectionTimeoutError) {
         return new AIProviderError('AI_TIMEOUT', 'The model took too long.', true);
     }
 
-    if (error instanceof Anthropic.RateLimitError) {
+    if (error instanceof RateLimitError) {
         return new AIProviderError(
             'AI_RATE_LIMITED',
             'Too many AI requests right now. Try again shortly.',
@@ -226,15 +218,11 @@ function translate(error: unknown): AIProviderError {
         );
     }
 
-    if (error instanceof Anthropic.APIConnectionError) {
-        return new AIProviderError(
-            'AI_UNAVAILABLE',
-            'Could not reach the model.',
-            true
-        );
+    if (error instanceof APIConnectionError) {
+        return new AIProviderError('AI_UNAVAILABLE', 'Could not reach the model.', true);
     }
 
-    if (error instanceof Anthropic.APIError) {
+    if (error instanceof APIError) {
         // 5xx is worth retrying; a 4xx caused by this code or its configuration is not.
         const status = error.status ?? 500;
         const retryable = status >= 500;
@@ -248,9 +236,7 @@ function translate(error: unknown): AIProviderError {
          * a service that is briefly unavailable. The distinction the learner *can* act on is whether
          * waiting will help, which is exactly what `retryable` already carries.
          */
-        console.error(
-            `Anthropic API error ${status}: ${error.message ?? 'no message'}`
-        );
+        console.error(`Anthropic API error ${status}: ${error.message ?? 'no message'}`);
 
         return new AIProviderError(
             'AI_UNAVAILABLE',

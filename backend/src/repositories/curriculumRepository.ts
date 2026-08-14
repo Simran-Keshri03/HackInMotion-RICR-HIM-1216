@@ -78,10 +78,7 @@ export class CurriculumRepository {
         const childCount = new Map<string, number>();
         for (const row of rows) {
             if (row.parent_id) {
-                childCount.set(
-                    row.parent_id,
-                    (childCount.get(row.parent_id) ?? 0) + 1
-                );
+                childCount.set(row.parent_id, (childCount.get(row.parent_id) ?? 0) + 1);
             }
         }
 
@@ -141,10 +138,7 @@ export class CurriculumRepository {
         if (subjectError) throw subjectError;
 
         const subjectIdByName = new Map(
-            ((subjects ?? []) as { id: string; name: string }[]).map((s) => [
-                s.name,
-                s.id,
-            ])
+            ((subjects ?? []) as { id: string; name: string }[]).map((s) => [s.name, s.id])
         );
 
         const topicRows = curriculum.subjects.flatMap((subject) => {
@@ -163,9 +157,7 @@ export class CurriculumRepository {
         });
 
         if (topicRows.length > 0) {
-            const { error: topicError } = await this.db
-                .from('topics')
-                .insert(topicRows);
+            const { error: topicError } = await this.db.from('topics').insert(topicRows);
 
             if (topicError) throw topicError;
         }

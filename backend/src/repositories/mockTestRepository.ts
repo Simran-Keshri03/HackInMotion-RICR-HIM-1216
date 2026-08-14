@@ -127,10 +127,7 @@ export class MockTestRepository {
      * reuse a question somebody answered a month ago would empty the bank and make repeat tests
      * impossible.
      */
-    async findQuestionsForTopic(
-        topicId: string,
-        limit: number
-    ): Promise<{ id: string }[]> {
+    async findQuestionsForTopic(topicId: string, limit: number): Promise<{ id: string }[]> {
         const { data, error } = await this.db
             .from('questions')
             .select('id')
@@ -168,9 +165,7 @@ export class MockTestRepository {
      * Pending and past sessions both count. A test is about whether the studying is working, and a
      * topic scheduled for tomorrow is as much part of the plan being tested as one from last week.
      */
-    async findPlanTopics(
-        planId: string
-    ): Promise<{ topicId: string; plannedSessions: number }[]> {
+    async findPlanTopics(planId: string): Promise<{ topicId: string; plannedSessions: number }[]> {
         const { data, error } = await this.db
             .from('study_sessions')
             .select('topic_id')
@@ -192,9 +187,7 @@ export class MockTestRepository {
     /** Names, subjects and weights for a set of topics. */
     async findTopicDetails(
         topicIds: string[]
-    ): Promise<
-        Map<string, { name: string; subjectName: string | null; weight: number }>
-    > {
+    ): Promise<Map<string, { name: string; subjectName: string | null; weight: number }>> {
         const details = new Map<
             string,
             { name: string; subjectName: string | null; weight: number }
@@ -236,9 +229,7 @@ export class MockTestRepository {
         for (const row of rows) {
             details.set(row.id, {
                 name: row.name,
-                subjectName: row.parent_id
-                    ? (subjects.get(row.parent_id) ?? null)
-                    : null,
+                subjectName: row.parent_id ? (subjects.get(row.parent_id) ?? null) : null,
                 weight: Number(row.weight),
             });
         }
@@ -274,10 +265,7 @@ export class MockTestRepository {
     }
 
     /** All the test's questions in one request — a paper is fifteen rows, not fifteen round trips. */
-    async addQuestions(
-        testId: string,
-        questionIds: string[]
-    ): Promise<void> {
+    async addQuestions(testId: string, questionIds: string[]): Promise<void> {
         if (questionIds.length === 0) return;
 
         const { error } = await this.db.from('mock_test_questions').insert(

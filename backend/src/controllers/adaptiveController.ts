@@ -6,10 +6,7 @@ import { LearnerRepository } from '@/repositories/learnerRepository.js';
 import { QuestionRepository } from '@/repositories/questionRepository.js';
 import { TopicRepository } from '@/repositories/topicRepository.js';
 import { QuestionSelector } from '@/services/adaptive/questionSelector.js';
-import {
-    finaliseAction,
-    planSession,
-} from '@/services/adaptive/recommendationEngine.js';
+import { finaliseAction, planSession } from '@/services/adaptive/recommendationEngine.js';
 import { claudeProvider } from '@/services/ai/providers/claudeProvider.js';
 import { QuestionBankService } from '@/services/questions/questionBankService.js';
 import { AppError, sendOk } from '@/utils/http.js';
@@ -152,10 +149,7 @@ async function fillBank(
     try {
         // Elevated client: the generation pipeline reads and writes columns learners hold no
         // privilege on, and the answer key is one of them.
-        const bank = new QuestionBankService(
-            claudeProvider(),
-            new QuestionRepository(adminDb)
-        );
+        const bank = new QuestionBankService(claudeProvider(), new QuestionRepository(adminDb));
 
         return await bank.fillIfEmpty({
             topicId,

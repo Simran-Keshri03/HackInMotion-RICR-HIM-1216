@@ -52,7 +52,12 @@
     --gap: 16px;
 
     color-scheme: dark;
-    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    font-family:
+        system-ui,
+        -apple-system,
+        'Segoe UI',
+        Roboto,
+        sans-serif;
     line-height: 1.55;
 }
 
@@ -260,7 +265,9 @@ button {
     background: var(--surface-raised);
     color: var(--text);
     padding: 10px 16px;
-    transition: border-color 0.12s, background 0.12s;
+    transition:
+        border-color 0.12s,
+        background 0.12s;
 }
 
 button:hover:not(:disabled) {
@@ -391,8 +398,12 @@ input:focus {
 
 /* A learner four months out is *supposed* to score low, so a low band is not red. Red would say
    "something is wrong" about a number that is behaving exactly as expected. */
-.dial--warn { --dial-tone: var(--warn); }
-.dial--ok { --dial-tone: var(--good); }
+.dial--warn {
+    --dial-tone: var(--warn);
+}
+.dial--ok {
+    --dial-tone: var(--good);
+}
 
 /* ---------------------------------------------------------------- meter */
 
@@ -534,10 +545,18 @@ input:focus {
 /* Four shades of the same green used for correctness elsewhere, so the colour keeps one meaning
    across the app. Steps are perceptual rather than even — the darkest has to read as clearly more
    than the one below it on a cheap screen in daylight. */
-.heatmap__cell[data-level='1'] { background: #0e4429; }
-.heatmap__cell[data-level='2'] { background: #196c34; }
-.heatmap__cell[data-level='3'] { background: #26a641; }
-.heatmap__cell[data-level='4'] { background: #3fb950; }
+.heatmap__cell[data-level='1'] {
+    background: #0e4429;
+}
+.heatmap__cell[data-level='2'] {
+    background: #196c34;
+}
+.heatmap__cell[data-level='3'] {
+    background: #26a641;
+}
+.heatmap__cell[data-level='4'] {
+    background: #3fb950;
+}
 
 .heatmap__months {
     display: flex;
@@ -610,7 +629,6 @@ input:focus {
     background: var(--accent);
 }
 
-
 /* ---------------------------------------------------------------- light theme
    Chosen against white, not derived from the dark palette. The accent and status colours are
    darkened because #4c8dff on white fails contrast at small sizes, and a study app puts a lot of
@@ -636,12 +654,21 @@ input:focus {
 
 /* The heatmap's greens are set explicitly rather than through variables, so they need their own
    light values — the dark shades disappear against a white card. */
-[data-theme='light'] .heatmap__cell { background: #e6eaef; }
-[data-theme='light'] .heatmap__cell[data-level='1'] { background: #aceebb; }
-[data-theme='light'] .heatmap__cell[data-level='2'] { background: #4ac26b; }
-[data-theme='light'] .heatmap__cell[data-level='3'] { background: #2da44e; }
-[data-theme='light'] .heatmap__cell[data-level='4'] { background: #116329; }
-
+[data-theme='light'] .heatmap__cell {
+    background: #e6eaef;
+}
+[data-theme='light'] .heatmap__cell[data-level='1'] {
+    background: #aceebb;
+}
+[data-theme='light'] .heatmap__cell[data-level='2'] {
+    background: #4ac26b;
+}
+[data-theme='light'] .heatmap__cell[data-level='3'] {
+    background: #2da44e;
+}
+[data-theme='light'] .heatmap__cell[data-level='4'] {
+    background: #116329;
+}
 
 /* ---------------------------------------------------------------- subject grid
    Two or three across on a desktop, one on a phone. `auto-fill` with a minimum rather than fixed
@@ -745,7 +772,9 @@ input:focus {
     font-size: 0.9rem;
     text-decoration: none;
     color: var(--text-dim);
-    transition: background var(--ease), color var(--ease);
+    transition:
+        background var(--ease),
+        color var(--ease);
 }
 
 .sidebar__link:hover {
@@ -769,8 +798,6 @@ input:focus {
 
 /* Items whose screens are not built. Rendered rather than hidden so the shape of the product is
    visible, and unclickable rather than linked so nothing promises a page that does not exist. */
-
-
 
 .sidebar__icon {
     flex: 0 0 18px;
@@ -839,7 +866,10 @@ input:focus {
 
 .card {
     box-shadow: var(--shadow-card);
-    transition: border-color var(--ease), box-shadow var(--ease), transform var(--ease);
+    transition:
+        border-color var(--ease),
+        box-shadow var(--ease),
+        transform var(--ease);
 }
 
 /* Lift only where a card is actually interactive. A page where everything moves under the
@@ -857,8 +887,12 @@ input:focus {
 
 button,
 .btn {
-    transition: background var(--ease), border-color var(--ease), color var(--ease),
-        transform var(--ease), box-shadow var(--ease);
+    transition:
+        background var(--ease),
+        border-color var(--ease),
+        color var(--ease),
+        transform var(--ease),
+        box-shadow var(--ease);
 }
 
 button:active:not(:disabled) {
@@ -903,7 +937,9 @@ button:disabled,
 input,
 select,
 textarea {
-    transition: border-color var(--ease), box-shadow var(--ease);
+    transition:
+        border-color var(--ease),
+        box-shadow var(--ease);
 }
 
 /* A visible focus ring, on purpose. Keyboard users are the ones who need it and the ones most
@@ -931,7 +967,9 @@ a:focus-visible {
     border-radius: 9px;
     background: var(--bg);
     overflow: hidden;
-    transition: border-color var(--ease), box-shadow var(--ease);
+    transition:
+        border-color var(--ease),
+        box-shadow var(--ease);
 }
 
 .inputwrap:focus-within {
@@ -997,7 +1035,9 @@ a:focus-visible {
     text-align: left;
     color: inherit;
     cursor: pointer;
-    transition: background var(--ease), border-color var(--ease);
+    transition:
+        background var(--ease),
+        border-color var(--ease);
 }
 
 .row-item:hover {
@@ -1018,7 +1058,9 @@ a:focus-visible {
 .row-item__chev {
     flex: 0 0 auto;
     color: var(--text-faint);
-    transition: transform var(--ease), color var(--ease);
+    transition:
+        transform var(--ease),
+        color var(--ease);
 }
 
 .row-item:hover .row-item__chev {
@@ -1038,10 +1080,26 @@ a:focus-visible {
     border: 1px solid var(--border);
 }
 
-.tile--blue   { background: rgb(59 130 246 / 0.12); color: #60a5fa; border-color: rgb(59 130 246 / 0.25); }
-.tile--violet { background: rgb(139 92 246 / 0.12); color: #a78bfa; border-color: rgb(139 92 246 / 0.25); }
-.tile--green  { background: rgb(34 197 94 / 0.12);  color: #4ade80; border-color: rgb(34 197 94 / 0.25); }
-.tile--fire   { background: rgb(251 146 60 / 0.12); color: #fdba74; border-color: rgb(251 146 60 / 0.25); }
+.tile--blue {
+    background: rgb(59 130 246 / 0.12);
+    color: #60a5fa;
+    border-color: rgb(59 130 246 / 0.25);
+}
+.tile--violet {
+    background: rgb(139 92 246 / 0.12);
+    color: #a78bfa;
+    border-color: rgb(139 92 246 / 0.25);
+}
+.tile--green {
+    background: rgb(34 197 94 / 0.12);
+    color: #4ade80;
+    border-color: rgb(34 197 94 / 0.25);
+}
+.tile--fire {
+    background: rgb(251 146 60 / 0.12);
+    color: #fdba74;
+    border-color: rgb(251 146 60 / 0.25);
+}
 
 /* ---------------------------------------------------------------- step list */
 
@@ -1085,19 +1143,26 @@ a:focus-visible {
 }
 
 @keyframes shimmer {
-    from { background-position: 100% 50%; }
-    to   { background-position: 0 50%; }
+    from {
+        background-position: 100% 50%;
+    }
+    to {
+        background-position: 0 50%;
+    }
 }
 
 /* Anybody who has asked for less motion gets a static placeholder rather than none — the layout
    still holds, it simply does not shimmer. */
 @media (prefers-reduced-motion: reduce) {
-    .skeleton { animation: none; }
-    .card--hover:hover { transform: none; }
+    .skeleton {
+        animation: none;
+    }
+    .card--hover:hover {
+        transform: none;
+    }
 }
 
 /* ---------------------------------------------------------------- upgrade card */
-
 
 /* ---------------------------------------------------------------- page bits */
 
@@ -1150,8 +1215,7 @@ a:focus-visible {
     min-height: 100vh;
     background:
         radial-gradient(900px 500px at 12% 0%, rgb(59 130 246 / 0.1), transparent 60%),
-        radial-gradient(800px 500px at 92% 12%, rgb(139 92 246 / 0.12), transparent 60%),
-        var(--bg);
+        radial-gradient(800px 500px at 92% 12%, rgb(139 92 246 / 0.12), transparent 60%), var(--bg);
 }
 
 .authpage__inner {
@@ -1221,10 +1285,6 @@ a:focus-visible {
 
 /* "or continue with", with a rule either side. Two pseudo-element lines rather than a border and
    a background-coloured span, which breaks the moment the card colour changes. */
-
-
-
-
 
 .authfoot {
     padding: 18px 24px 28px;
@@ -1320,26 +1380,48 @@ a:focus-visible {
    ============================================================================ */
 
 @keyframes rise {
-    from { opacity: 0; transform: translateY(18px) scale(0.985); }
-    to   { opacity: 1; transform: none; }
+    from {
+        opacity: 0;
+        transform: translateY(18px) scale(0.985);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
 }
 
 @keyframes fade {
-    from { opacity: 0; }
-    to   { opacity: 1; }
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
 }
 
 @keyframes pop {
-    0%   { opacity: 0; transform: scale(0.94); }
-    60%  { transform: scale(1.01); }
-    100% { opacity: 1; transform: scale(1); }
+    0% {
+        opacity: 0;
+        transform: scale(0.94);
+    }
+    60% {
+        transform: scale(1.01);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
 }
 
 /* A slow sweep across the wordmark's gradient. 6s so it registers as ambient rather than as
    something demanding attention. */
 @keyframes sweep {
-    from { background-position: 0% 50%; }
-    to   { background-position: 200% 50%; }
+    from {
+        background-position: 0% 50%;
+    }
+    to {
+        background-position: 200% 50%;
+    }
 }
 
 /* ---------------------------------------------------------------- page entrance
@@ -1359,17 +1441,29 @@ a:focus-visible {
 }
 
 .workspace > .stack > *:nth-child(1),
-.workspace > .worksplit > .stack > *:nth-child(1) { animation-delay: 0ms; }
+.workspace > .worksplit > .stack > *:nth-child(1) {
+    animation-delay: 0ms;
+}
 .workspace > .stack > *:nth-child(2),
-.workspace > .worksplit > .stack > *:nth-child(2) { animation-delay: 70ms; }
+.workspace > .worksplit > .stack > *:nth-child(2) {
+    animation-delay: 70ms;
+}
 .workspace > .stack > *:nth-child(3),
-.workspace > .worksplit > .stack > *:nth-child(3) { animation-delay: 140ms; }
+.workspace > .worksplit > .stack > *:nth-child(3) {
+    animation-delay: 140ms;
+}
 .workspace > .stack > *:nth-child(4),
-.workspace > .worksplit > .stack > *:nth-child(4) { animation-delay: 210ms; }
+.workspace > .worksplit > .stack > *:nth-child(4) {
+    animation-delay: 210ms;
+}
 .workspace > .stack > *:nth-child(5),
-.workspace > .worksplit > .stack > *:nth-child(5) { animation-delay: 280ms; }
+.workspace > .worksplit > .stack > *:nth-child(5) {
+    animation-delay: 280ms;
+}
 .workspace > .stack > *:nth-child(n + 6),
-.workspace > .worksplit > .stack > *:nth-child(n + 6) { animation-delay: 340ms; }
+.workspace > .worksplit > .stack > *:nth-child(n + 6) {
+    animation-delay: 340ms;
+}
 
 /* The insights rail follows the main column, so the eye lands on the content first. */
 .worksplit > aside {
@@ -1459,12 +1553,7 @@ body {
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(
-        100deg,
-        transparent 20%,
-        rgb(255 255 255 / 0.22),
-        transparent 80%
-    );
+    background: linear-gradient(100deg, transparent 20%, rgb(255 255 255 / 0.22), transparent 80%);
     transform: translateX(-100%);
     transition: transform 520ms ease;
 }
@@ -1477,7 +1566,10 @@ body {
    change fighting the active state. */
 .row-item,
 .option {
-    transition: background var(--ease), border-color var(--ease), transform var(--ease);
+    transition:
+        background var(--ease),
+        border-color var(--ease),
+        transform var(--ease);
 }
 
 .row-item:hover,
@@ -1510,8 +1602,12 @@ body {
 }
 
 @keyframes growx {
-    from { transform: scaleX(0); }
-    to   { transform: scaleX(1); }
+    from {
+        transform: scaleX(0);
+    }
+    to {
+        transform: scaleX(1);
+    }
 }
 
 /* Big numbers pop in, because they are the thing a learner came to read. */
@@ -1525,13 +1621,27 @@ body {
     animation: fade 500ms ease both;
 }
 
-.heatmap__cell:nth-child(7n + 1) { animation-delay: 0ms; }
-.heatmap__cell:nth-child(7n + 2) { animation-delay: 40ms; }
-.heatmap__cell:nth-child(7n + 3) { animation-delay: 80ms; }
-.heatmap__cell:nth-child(7n + 4) { animation-delay: 120ms; }
-.heatmap__cell:nth-child(7n + 5) { animation-delay: 160ms; }
-.heatmap__cell:nth-child(7n + 6) { animation-delay: 200ms; }
-.heatmap__cell:nth-child(7n)     { animation-delay: 240ms; }
+.heatmap__cell:nth-child(7n + 1) {
+    animation-delay: 0ms;
+}
+.heatmap__cell:nth-child(7n + 2) {
+    animation-delay: 40ms;
+}
+.heatmap__cell:nth-child(7n + 3) {
+    animation-delay: 80ms;
+}
+.heatmap__cell:nth-child(7n + 4) {
+    animation-delay: 120ms;
+}
+.heatmap__cell:nth-child(7n + 5) {
+    animation-delay: 160ms;
+}
+.heatmap__cell:nth-child(7n + 6) {
+    animation-delay: 200ms;
+}
+.heatmap__cell:nth-child(7n) {
+    animation-delay: 240ms;
+}
 
 /* Banners arrive rather than blink into place. An error that appears instantly is easy to miss, and an
    error nobody notices is the same as no error message. */
@@ -1587,18 +1697,40 @@ body {
 }
 
 @keyframes slidein {
-    from { opacity: 0; transform: translateX(-12px); }
-    to   { opacity: 1; transform: none; }
+    from {
+        opacity: 0;
+        transform: translateX(-12px);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
 }
 
-.sidebar__link:nth-of-type(1) { animation-delay: 60ms; }
-.sidebar__link:nth-of-type(2) { animation-delay: 105ms; }
-.sidebar__link:nth-of-type(3) { animation-delay: 150ms; }
-.sidebar__link:nth-of-type(4) { animation-delay: 195ms; }
-.sidebar__link:nth-of-type(5) { animation-delay: 240ms; }
-.sidebar__link:nth-of-type(6) { animation-delay: 285ms; }
-.sidebar__link:nth-of-type(7) { animation-delay: 330ms; }
-.sidebar__link:nth-of-type(8) { animation-delay: 375ms; }
+.sidebar__link:nth-of-type(1) {
+    animation-delay: 60ms;
+}
+.sidebar__link:nth-of-type(2) {
+    animation-delay: 105ms;
+}
+.sidebar__link:nth-of-type(3) {
+    animation-delay: 150ms;
+}
+.sidebar__link:nth-of-type(4) {
+    animation-delay: 195ms;
+}
+.sidebar__link:nth-of-type(5) {
+    animation-delay: 240ms;
+}
+.sidebar__link:nth-of-type(6) {
+    animation-delay: 285ms;
+}
+.sidebar__link:nth-of-type(7) {
+    animation-delay: 330ms;
+}
+.sidebar__link:nth-of-type(8) {
+    animation-delay: 375ms;
+}
 
 /* ---------------------------------------------------------------- the active page
 
@@ -1610,8 +1742,17 @@ body {
 }
 
 @keyframes breathe {
-    0%, 100% { box-shadow: 0 0 0 1px rgb(59 130 246 / 0.25), 0 4px 20px -4px rgb(99 102 241 / 0.35); }
-    50%      { box-shadow: 0 0 0 1px rgb(59 130 246 / 0.45), 0 6px 26px -4px rgb(99 102 241 / 0.55); }
+    0%,
+    100% {
+        box-shadow:
+            0 0 0 1px rgb(59 130 246 / 0.25),
+            0 4px 20px -4px rgb(99 102 241 / 0.35);
+    }
+    50% {
+        box-shadow:
+            0 0 0 1px rgb(59 130 246 / 0.45),
+            0 6px 26px -4px rgb(99 102 241 / 0.55);
+    }
 }
 
 /* The top-bar active link gets an underline that grows from the middle out. */
@@ -1628,7 +1769,9 @@ body {
     height: 2px;
     border-radius: 2px;
     background: var(--grad);
-    transition: left var(--ease), right var(--ease);
+    transition:
+        left var(--ease),
+        right var(--ease);
 }
 
 .topnav__link--active::after,
@@ -1644,8 +1787,12 @@ body {
    app that feels broken and one that feels busy. */
 button:not(:disabled),
 .btn-link {
-    transition: transform 120ms cubic-bezier(0.16, 1, 0.3, 1), background var(--ease),
-        border-color var(--ease), color var(--ease), box-shadow var(--ease);
+    transition:
+        transform 120ms cubic-bezier(0.16, 1, 0.3, 1),
+        background var(--ease),
+        border-color var(--ease),
+        color var(--ease),
+        box-shadow var(--ease);
 }
 
 button:not(:disabled):active {
@@ -1673,7 +1820,9 @@ button:not(:disabled):active {
 /* ---------------------------------------------------------------- avatars and marks */
 
 .avatar {
-    transition: transform var(--ease), box-shadow var(--ease);
+    transition:
+        transform var(--ease),
+        box-shadow var(--ease);
 }
 
 .row-item:hover .avatar {
@@ -1687,9 +1836,15 @@ button:not(:disabled):active {
     animation: pop 460ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-.step:nth-child(1) .step__n { animation-delay: 120ms; }
-.step:nth-child(2) .step__n { animation-delay: 220ms; }
-.step:nth-child(3) .step__n { animation-delay: 320ms; }
+.step:nth-child(1) .step__n {
+    animation-delay: 120ms;
+}
+.step:nth-child(2) .step__n {
+    animation-delay: 220ms;
+}
+.step:nth-child(3) .step__n {
+    animation-delay: 320ms;
+}
 
 /* ---------------------------------------------------------------- rows arriving
 
@@ -1700,11 +1855,21 @@ button:not(:disabled):active {
     animation: slidein 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-.row-item:nth-of-type(1) { animation-delay: 40ms; }
-.row-item:nth-of-type(2) { animation-delay: 90ms; }
-.row-item:nth-of-type(3) { animation-delay: 140ms; }
-.row-item:nth-of-type(4) { animation-delay: 190ms; }
-.row-item:nth-of-type(n + 5) { animation-delay: 230ms; }
+.row-item:nth-of-type(1) {
+    animation-delay: 40ms;
+}
+.row-item:nth-of-type(2) {
+    animation-delay: 90ms;
+}
+.row-item:nth-of-type(3) {
+    animation-delay: 140ms;
+}
+.row-item:nth-of-type(4) {
+    animation-delay: 190ms;
+}
+.row-item:nth-of-type(n + 5) {
+    animation-delay: 230ms;
+}
 
 /* Subject and badge cards deal out in a grid. */
 .subjects > *,
@@ -1712,23 +1877,51 @@ button:not(:disabled):active {
     animation: pop 460ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-.subjects > *:nth-child(1), .badges > *:nth-child(1) { animation-delay: 40ms; }
-.subjects > *:nth-child(2), .badges > *:nth-child(2) { animation-delay: 90ms; }
-.subjects > *:nth-child(3), .badges > *:nth-child(3) { animation-delay: 140ms; }
-.subjects > *:nth-child(4), .badges > *:nth-child(4) { animation-delay: 190ms; }
-.subjects > *:nth-child(5), .badges > *:nth-child(5) { animation-delay: 240ms; }
-.subjects > *:nth-child(n + 6), .badges > *:nth-child(n + 6) { animation-delay: 280ms; }
+.subjects > *:nth-child(1),
+.badges > *:nth-child(1) {
+    animation-delay: 40ms;
+}
+.subjects > *:nth-child(2),
+.badges > *:nth-child(2) {
+    animation-delay: 90ms;
+}
+.subjects > *:nth-child(3),
+.badges > *:nth-child(3) {
+    animation-delay: 140ms;
+}
+.subjects > *:nth-child(4),
+.badges > *:nth-child(4) {
+    animation-delay: 190ms;
+}
+.subjects > *:nth-child(5),
+.badges > *:nth-child(5) {
+    animation-delay: 240ms;
+}
+.subjects > *:nth-child(n + 6),
+.badges > *:nth-child(n + 6) {
+    animation-delay: 280ms;
+}
 
 /* Options in a question deal out too, so a new question reads as arriving rather than replacing. */
 .card > .stack > .option {
     animation: slidein 380ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-.option:nth-of-type(1) { animation-delay: 30ms; }
-.option:nth-of-type(2) { animation-delay: 75ms; }
-.option:nth-of-type(3) { animation-delay: 120ms; }
-.option:nth-of-type(4) { animation-delay: 165ms; }
-.option:nth-of-type(n + 5) { animation-delay: 200ms; }
+.option:nth-of-type(1) {
+    animation-delay: 30ms;
+}
+.option:nth-of-type(2) {
+    animation-delay: 75ms;
+}
+.option:nth-of-type(3) {
+    animation-delay: 120ms;
+}
+.option:nth-of-type(4) {
+    animation-delay: 165ms;
+}
+.option:nth-of-type(n + 5) {
+    animation-delay: 200ms;
+}
 
 /* ---------------------------------------------------------------- reduced motion, again
 
@@ -1773,17 +1966,29 @@ button:not(:disabled):active {
     animation: rise 560ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-.authpitch > *:nth-child(1) { animation-delay: 60ms; }
-.authpitch > *:nth-child(2) { animation-delay: 160ms; }
-.authpitch > *:nth-child(3) { animation-delay: 260ms; }
+.authpitch > *:nth-child(1) {
+    animation-delay: 60ms;
+}
+.authpitch > *:nth-child(2) {
+    animation-delay: 160ms;
+}
+.authpitch > *:nth-child(3) {
+    animation-delay: 260ms;
+}
 
 .authpitch .row {
     animation: slidein 520ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-.authpitch .stack > .row:nth-child(1) { animation-delay: 340ms; }
-.authpitch .stack > .row:nth-child(2) { animation-delay: 430ms; }
-.authpitch .stack > .row:nth-child(3) { animation-delay: 520ms; }
+.authpitch .stack > .row:nth-child(1) {
+    animation-delay: 340ms;
+}
+.authpitch .stack > .row:nth-child(2) {
+    animation-delay: 430ms;
+}
+.authpitch .stack > .row:nth-child(3) {
+    animation-delay: 520ms;
+}
 
 /* The headline's gradient sweeps like the wordmark, so the two read as the same brand rather than as
    two blue things. Slower here — it is large type and a fast sweep across it is distracting. */
@@ -1802,8 +2007,14 @@ button:not(:disabled):active {
 }
 
 @keyframes cardin {
-    from { opacity: 0; transform: translateY(22px) scale(0.97); }
-    to   { opacity: 1; transform: none; }
+    from {
+        opacity: 0;
+        transform: translateY(22px) scale(0.97);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
 }
 
 /* Fields inside it follow, so the form fills itself in rather than appearing complete. */
@@ -1811,22 +2022,43 @@ button:not(:disabled):active {
     animation: rise 460ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-.authcard > *:nth-child(1) { animation-delay: 320ms; }
-.authcard > *:nth-child(2) { animation-delay: 390ms; }
-.authcard > *:nth-child(3) { animation-delay: 460ms; }
-.authcard > *:nth-child(n + 4) { animation-delay: 520ms; }
+.authcard > *:nth-child(1) {
+    animation-delay: 320ms;
+}
+.authcard > *:nth-child(2) {
+    animation-delay: 390ms;
+}
+.authcard > *:nth-child(3) {
+    animation-delay: 460ms;
+}
+.authcard > *:nth-child(n + 4) {
+    animation-delay: 520ms;
+}
 
 /* The two washes behind the page drift very slowly. This is the only ambient motion in the app and it
    is deliberately almost imperceptible — 30 seconds for a barely-visible shift — because a login
    screen is looked at for a few seconds and anything faster reads as a distraction rather than depth. */
 .authpage {
-    background-size: 140% 140%, 140% 140%, auto;
+    background-size:
+        140% 140%,
+        140% 140%,
+        auto;
     animation: drift 30s ease-in-out infinite alternate;
 }
 
 @keyframes drift {
-    from { background-position: 0% 0%, 100% 10%, 0 0; }
-    to   { background-position: 8% 6%, 92% 4%, 0 0; }
+    from {
+        background-position:
+            0% 0%,
+            100% 10%,
+            0 0;
+    }
+    to {
+        background-position:
+            8% 6%,
+            92% 4%,
+            0 0;
+    }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1905,7 +2137,9 @@ button:not(:disabled):active {
 }
 
 @keyframes halo {
-    to { --spin: 360deg; }
+    to {
+        --spin: 360deg;
+    }
 }
 
 /* The card that matters most on a screen already carries the accent class, so it gets the halo without
@@ -1961,8 +2195,13 @@ button:not(:disabled):active {
 /* A slow rise and fall. Three pixels — enough to notice out of the corner of the eye, small enough
    that nothing appears to move while being read. */
 @keyframes float {
-    0%, 100% { transform: translateY(0) rotate(0deg); }
-    50%      { transform: translateY(-9px) rotate(-3deg); }
+    0%,
+    100% {
+        transform: translateY(0) rotate(0deg);
+    }
+    50% {
+        transform: translateY(-9px) rotate(-3deg);
+    }
 }
 
 /* A ring that breathes behind the mark, so the corner of the screen has something alive in it. */
@@ -1977,9 +2216,18 @@ button:not(:disabled):active {
 }
 
 @keyframes ripple {
-    0%   { opacity: 0.9; transform: scale(0.9); }
-    70%  { opacity: 0;   transform: scale(1.25); }
-    100% { opacity: 0;   transform: scale(1.25); }
+    0% {
+        opacity: 0.9;
+        transform: scale(0.9);
+    }
+    70% {
+        opacity: 0;
+        transform: scale(1.25);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1.25);
+    }
 }
 
 /* ---------------------------------------------------------------- headline reveal
@@ -2057,17 +2305,31 @@ button:not(:disabled):active {
 }
 
 @keyframes cardscan {
-    0%   { transform: translateX(-160%) skewX(-12deg); }
+    0% {
+        transform: translateX(-160%) skewX(-12deg);
+    }
     /* Crosses in the first quarter, then waits — a constant sweep would be exhausting. */
-    28%  { transform: translateX(360%) skewX(-12deg); }
-    100% { transform: translateX(360%) skewX(-12deg); }
+    28% {
+        transform: translateX(360%) skewX(-12deg);
+    }
+    100% {
+        transform: translateX(360%) skewX(-12deg);
+    }
 }
 
 /* Staggered by position so cards do not scan in unison. */
-.stack > .card:nth-child(2n)::before   { animation-delay: 1.4s; }
-.stack > .card:nth-child(3n)::before   { animation-delay: 2.8s; }
-.subjects > .card:nth-child(2n)::before { animation-delay: 1.1s; }
-.subjects > .card:nth-child(3n)::before { animation-delay: 2.2s; }
+.stack > .card:nth-child(2n)::before {
+    animation-delay: 1.4s;
+}
+.stack > .card:nth-child(3n)::before {
+    animation-delay: 2.8s;
+}
+.subjects > .card:nth-child(2n)::before {
+    animation-delay: 1.1s;
+}
+.subjects > .card:nth-child(3n)::before {
+    animation-delay: 2.2s;
+}
 
 /* Accent cards already carry the rotating halo on ::after, so the scan would be one effect too many
    on the single most important card of a screen. */
@@ -2083,12 +2345,17 @@ button:not(:disabled):active {
 }
 
 @keyframes breathe {
-    0%, 100% {
-        box-shadow: 0 0 0 1px rgb(59 130 246 / 0.3), 0 4px 18px -4px rgb(99 102 241 / 0.4);
+    0%,
+    100% {
+        box-shadow:
+            0 0 0 1px rgb(59 130 246 / 0.3),
+            0 4px 18px -4px rgb(99 102 241 / 0.4);
         transform: translateX(0);
     }
     50% {
-        box-shadow: 0 0 0 1px rgb(147 197 253 / 0.7), 0 8px 30px -4px rgb(139 92 246 / 0.75);
+        box-shadow:
+            0 0 0 1px rgb(147 197 253 / 0.7),
+            0 8px 30px -4px rgb(139 92 246 / 0.75);
         transform: translateX(3px);
     }
 }
@@ -2100,8 +2367,13 @@ button:not(:disabled):active {
 }
 
 @keyframes tilt {
-    0%, 100% { transform: rotate(0deg) scale(1); }
-    50%      { transform: rotate(-8deg) scale(1.08); }
+    0%,
+    100% {
+        transform: rotate(0deg) scale(1);
+    }
+    50% {
+        transform: rotate(-8deg) scale(1.08);
+    }
 }
 
 /* Icon tiles breathe very slightly, which stops a column of them reading as a static list. */
@@ -2110,12 +2382,21 @@ button:not(:disabled):active {
 }
 
 @keyframes tilepulse {
-    0%, 100% { transform: translateY(0) scale(1); }
-    50%      { transform: translateY(-2px) scale(1.04); }
+    0%,
+    100% {
+        transform: translateY(0) scale(1);
+    }
+    50% {
+        transform: translateY(-2px) scale(1.04);
+    }
 }
 
-.tile:nth-of-type(2n) { animation-delay: 0.9s; }
-.tile:nth-of-type(3n) { animation-delay: 1.8s; }
+.tile:nth-of-type(2n) {
+    animation-delay: 0.9s;
+}
+.tile:nth-of-type(3n) {
+    animation-delay: 1.8s;
+}
 
 /* The spinner already spins; this makes a loading state feel like progress rather than a stuck wheel. */
 .state {

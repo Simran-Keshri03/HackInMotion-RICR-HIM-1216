@@ -23,13 +23,7 @@ function icon(family: string): string {
     return FAMILY_ICON[family] ?? '🏅';
 }
 
-export function Badges({
-    badges,
-    upcoming,
-}: {
-    badges: Badge[];
-    upcoming: BadgeProgress[];
-}) {
+export function Badges({ badges, upcoming }: { badges: Badge[]; upcoming: BadgeProgress[] }) {
     return (
         <div className="card stack" style={{ gap: 12 }}>
             <div className="spread">

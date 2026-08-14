@@ -32,10 +32,7 @@ export const resolveCurriculumSchema = z.object({
 export async function resolveCurriculum(req: Request, res: Response) {
     const body = req.body as z.infer<typeof resolveCurriculumSchema>;
 
-    const service = new CurriculumService(
-        claudeProvider(),
-        new CurriculumRepository(adminDb)
-    );
+    const service = new CurriculumService(claudeProvider(), new CurriculumRepository(adminDb));
 
     sendOk(res, await service.resolve(body.goalText));
 }

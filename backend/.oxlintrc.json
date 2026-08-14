@@ -1,0 +1,27 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "oxc", "import", "node", "promise"],
+  "categories": {
+    "correctness": "error",
+    "suspicious": "error",
+    "perf": "warn"
+  },
+  "rules": {
+    "eqeqeq": ["error", "always"],
+    "typescript/no-explicit-any": "error",
+    "typescript/consistent-type-imports": "error",
+    "promise/no-return-wrap": "error",
+
+    // Server logs are how a free-tier deployment is debugged; there is no log aggregator.
+    "no-console": "off",
+    "no-await-in-loop": "off",
+
+    // `import 'dotenv/config'` is a side-effect import by design -- that is the whole
+    // mechanism. The rule cannot tell it from a forgotten binding.
+    "import/no-unassigned-import": "off",
+    // `fn(req, res, next).catch(next)` in utils/http.ts is the canonical Express async
+    // wrapper. Passing `next` to .catch is the correct shape here, not a callback smell.
+    "promise/no-callback-in-promise": "off"
+  },
+  "ignorePatterns": ["node_modules", "dist"]
+}

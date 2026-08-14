@@ -40,9 +40,7 @@ export class TutorService {
 
     async listConversations(userId: string) {
         const rows = await this.conversations.listConversations(userId);
-        const answered = await this.conversations.findAnsweredIds(
-            rows.map((row) => row.id)
-        );
+        const answered = await this.conversations.findAnsweredIds(rows.map((row) => row.id));
 
         return rows.map((row) => ({
             id: row.id,
@@ -57,10 +55,7 @@ export class TutorService {
     }
 
     async getConversation(conversationId: string, userId: string) {
-        const conversation = await this.conversations.findConversation(
-            conversationId,
-            userId
-        );
+        const conversation = await this.conversations.findConversation(conversationId, userId);
         const messages = await this.conversations.listMessages(conversation.id);
 
         return {

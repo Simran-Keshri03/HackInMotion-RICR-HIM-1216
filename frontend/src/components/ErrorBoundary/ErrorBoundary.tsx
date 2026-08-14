@@ -43,8 +43,8 @@ export class ErrorBoundary extends Component<Props, State> {
                 <div className="card stack">
                     <h2>This screen stopped working</h2>
                     <p className="muted">
-                        Something in the page failed to render. Your progress is
-                        saved — reloading will pick up where you left off.
+                        Something in the page failed to render. Your progress is saved — reloading
+                        will pick up where you left off.
                     </p>
                     <p className="faint mono">{error.message}</p>
                     <button

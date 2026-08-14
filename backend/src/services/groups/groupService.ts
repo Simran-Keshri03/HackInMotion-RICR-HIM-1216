@@ -57,11 +57,7 @@ export class GroupService {
      * `curriculumId` is copied from their goal so the group screen can say what everybody is
      * preparing for — comparing progress only means something between people on the same syllabus.
      */
-    async create(
-        userId: string,
-        name: string,
-        curriculumId: string | null
-    ): Promise<GroupSummary> {
+    async create(userId: string, name: string, curriculumId: string | null): Promise<GroupSummary> {
         const trimmed = name.trim();
 
         if (trimmed.length < 2) {

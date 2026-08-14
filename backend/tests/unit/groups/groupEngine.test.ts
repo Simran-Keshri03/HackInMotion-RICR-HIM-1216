@@ -34,11 +34,7 @@ describe('rankMembers', () => {
             member({ userId: 'c', displayName: 'Chetan', questionsAnswered: 60 }),
         ]);
 
-        expect(comparison.members.map((m) => m.displayName)).toEqual([
-            'Bilal',
-            'Chetan',
-            'Asha',
-        ]);
+        expect(comparison.members.map((m) => m.displayName)).toEqual(['Bilal', 'Chetan', 'Asha']);
         expect(comparison.members.map((m) => m.rank)).toEqual([1, 2, 3]);
     });
 

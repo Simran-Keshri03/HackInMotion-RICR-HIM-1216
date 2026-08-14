@@ -69,19 +69,16 @@ describe('chooseDifficulty', () => {
     it('ignores recent form when there is barely any of it', () => {
         // One unlucky answer must not drop a learner off hard questions.
         expect(
-            chooseDifficulty({ masteryScore: 85, recentAccuracy: 0, recentAttempts: 1 })
-                .difficulty
+            chooseDifficulty({ masteryScore: 85, recentAccuracy: 0, recentAttempts: 1 }).difficulty
         ).toBe('hard');
     });
 
     it('cannot step below easy or above hard', () => {
         expect(
-            chooseDifficulty({ masteryScore: 5, recentAccuracy: 0, recentAttempts: 10 })
-                .difficulty
+            chooseDifficulty({ masteryScore: 5, recentAccuracy: 0, recentAttempts: 10 }).difficulty
         ).toBe('easy');
         expect(
-            chooseDifficulty({ masteryScore: 99, recentAccuracy: 1, recentAttempts: 10 })
-                .difficulty
+            chooseDifficulty({ masteryScore: 99, recentAccuracy: 1, recentAttempts: 10 }).difficulty
         ).toBe('hard');
     });
 });

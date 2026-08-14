@@ -47,9 +47,7 @@ export default function StudyPlan() {
     // the plan is re-checked server-side on every load, which is what makes re-planning automatic
     // rather than a button nobody presses.
     const plan = useApi<{ plan: Plan | null; adjustment: PlanAdjustment | null }>(() =>
-        api.get<{ plan: Plan | null; adjustment: PlanAdjustment | null }>(
-            '/study-plan/current'
-        )
+        api.get<{ plan: Plan | null; adjustment: PlanAdjustment | null }>('/study-plan/current')
     );
 
     const [building, setBuilding] = useState(false);
@@ -64,9 +62,7 @@ export default function StudyPlan() {
             const built = await api.post<{ plan: Plan }>('/study-plan/generate', {});
             plan.setData({ plan: built.plan, adjustment: null });
         } catch (cause) {
-            setError(
-                cause instanceof Error ? cause.message : 'Could not build your plan.'
-            );
+            setError(cause instanceof Error ? cause.message : 'Could not build your plan.');
         } finally {
             setBuilding(false);
         }
@@ -91,9 +87,9 @@ export default function StudyPlan() {
 
                 <Empty title="Build a plan from your goal">
                     <p className="muted" style={{ margin: 0 }}>
-                        Your time before the exam gets divided between your topics — the
-                        weakest and heaviest ones get the most of it. Nothing is asked of
-                        the AI here, so it is instant.
+                        Your time before the exam gets divided between your topics — the weakest and
+                        heaviest ones get the most of it. Nothing is asked of the AI here, so it is
+                        instant.
                     </p>
                     <p className="faint" style={{ marginTop: 10, marginBottom: 0 }}>
                         No goal set yet? <Link to="/goals">Set one first.</Link>
@@ -112,10 +108,10 @@ export default function StudyPlan() {
                         <div style={{ minWidth: 0 }}>
                             <span className="label">Get a sharper plan</span>
                             <p style={{ margin: '6px 0 0' }}>
-                                A fifteen-minute knowledge check tells the plan which subjects
-                                you are actually weak at. Without it, time is divided by how
-                                much of the exam each subject is worth — which is a reasonable
-                                guess and nothing more.
+                                A fifteen-minute knowledge check tells the plan which subjects you
+                                are actually weak at. Without it, time is divided by how much of the
+                                exam each subject is worth — which is a reasonable guess and nothing
+                                more.
                             </p>
                         </div>
                     </div>
@@ -140,8 +136,7 @@ export default function StudyPlan() {
     const todayPlan = current.days.find((day) => day.date === today) ?? null;
 
     const revisionCount = current.days.reduce(
-        (total, day) =>
-            total + day.sessions.filter((session) => session.kind === 'revise').length,
+        (total, day) => total + day.sessions.filter((session) => session.kind === 'revise').length,
         0
     );
     const upcoming = current.days.filter((day) => day.date > today);
@@ -150,21 +145,21 @@ export default function StudyPlan() {
     return (
         <div className="stack">
             <div className="spread">
-            <div className="spread" style={{ alignItems: 'flex-start', gap: 16 }}>
-                <div style={{ minWidth: 0 }}>
-                    <span className="label">Study plan</span>
-                    <h1 style={{ marginBottom: 0 }}>
-                        {describeMinutes(current.dailyMinutes)} a day
-                    </h1>
-                </div>
+                <div className="spread" style={{ alignItems: 'flex-start', gap: 16 }}>
+                    <div style={{ minWidth: 0 }}>
+                        <span className="label">Study plan</span>
+                        <h1 style={{ marginBottom: 0 }}>
+                            {describeMinutes(current.dailyMinutes)} a day
+                        </h1>
+                    </div>
 
-                {/* The page's mark. Every screen has one so a page is recognisable at a glance
+                    {/* The page's mark. Every screen has one so a page is recognisable at a glance
                     rather than being a heading above a stack of dark rectangles. Hidden on narrow
                     screens, where it would push the heading onto two awkward lines. */}
-                <span className="hero-mark" aria-hidden="true">
-                    <Icon name="calendar" size={40} />
-                </span>
-            </div>
+                    <span className="hero-mark" aria-hidden="true">
+                        <Icon name="calendar" size={40} />
+                    </span>
+                </div>
                 <button type="button" disabled={building} onClick={() => void build()}>
                     {building ? 'Rebuilding…' : 'Rebuild'}
                 </button>
@@ -194,9 +189,7 @@ export default function StudyPlan() {
                         <div className="faint">days to the exam</div>
                     </div>
                     <div>
-                        <div className="big">
-                            {describeMinutes(current.totalMinutesPlanned)}
-                        </div>
+                        <div className="big">{describeMinutes(current.totalMinutesPlanned)}</div>
                         <div className="faint">planned</div>
                     </div>
                     <div>
@@ -206,9 +199,8 @@ export default function StudyPlan() {
                 </div>
                 {revisionCount > 0 && (
                     <p className="faint" style={{ marginTop: 12, marginBottom: 0 }}>
-                        Includes {revisionCount}{' '}
-                        {revisionCount === 1 ? 'revision' : 'revisions'} of topics you
-                        have already studied, so they do not fade before the exam.
+                        Includes {revisionCount} {revisionCount === 1 ? 'revision' : 'revisions'} of
+                        topics you have already studied, so they do not fade before the exam.
                     </p>
                 )}
                 {current.version > 1 && (
@@ -259,10 +251,7 @@ export default function StudyPlan() {
                                         {session.plannedQuestions} questions
                                     </span>
                                     {session.reason && (
-                                        <div
-                                            className="faint"
-                                            style={{ marginTop: 4 }}
-                                        >
+                                        <div className="faint" style={{ marginTop: 4 }}>
                                             {session.reason}
                                         </div>
                                     )}
@@ -291,9 +280,7 @@ export default function StudyPlan() {
                         <div key={day.date} className="spread">
                             <span className="faint">{shortDate(day.date)}</span>
                             <span>
-                                {day.sessions
-                                    .map((session) => session.topicName)
-                                    .join(', ')}
+                                {day.sessions.map((session) => session.topicName).join(', ')}
                                 <span className="faint">
                                     {' — '}
                                     {describeMinutes(day.totalMinutes)}

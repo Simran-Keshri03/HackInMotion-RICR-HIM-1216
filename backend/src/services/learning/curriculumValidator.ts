@@ -87,15 +87,17 @@ export type CurriculumOutcome =
  * two learners typing the same thing share one syllabus.
  */
 export function toSlug(text: string): string {
-    return text
-        .toLowerCase()
-        .normalize('NFKD')
-        // Drop accents, so "mathématiques" and "mathematiques" are one key.
-        .replace(/[̀-ͯ]/g, '')
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/^-+|-+$/g, '')
-        .slice(0, 80)
-        .replace(/-+$/g, '');
+    return (
+        text
+            .toLowerCase()
+            .normalize('NFKD')
+            // Drop accents, so "mathématiques" and "mathematiques" are one key.
+            .replace(/[̀-ͯ]/g, '')
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/^-+|-+$/g, '')
+            .slice(0, 80)
+            .replace(/-+$/g, '')
+    );
 }
 
 /** Trims, collapses runs of whitespace, and strips characters a syllabus label never needs. */
@@ -131,9 +133,7 @@ function shorten(text: string, limit: number): string {
 function looksLikeProse(name: string): boolean {
     return (
         name.length > 60 ||
-        /[.!?;:]{1}\s|["'`]|\b(sorry|cannot|as an ai|here is|i have|note that)\b/i.test(
-            name
-        ) ||
+        /[.!?;:]{1}\s|["'`]|\b(sorry|cannot|as an ai|here is|i have|note that)\b/i.test(name) ||
         // "Subject 1", "Topic 3" — filler the model produces when it has run out of real content.
         /^(subject|topic|chapter|unit)\s*\d+$/i.test(name)
     );
@@ -145,18 +145,14 @@ function looksLikeProse(name: string): boolean {
  * Returns the learner-facing message rather than throwing, because "that is not a study goal" is
  * a normal outcome of this endpoint and not an error.
  */
-export function validateCurriculumReply(
-    raw: unknown,
-    originalGoalText: string
-): CurriculumOutcome {
+export function validateCurriculumReply(raw: unknown, originalGoalText: string): CurriculumOutcome {
     const parsed = curriculumReplySchema.safeParse(raw);
 
     if (!parsed.success) {
         const issue = parsed.error.issues[0];
         return {
             ok: false,
-            learnerMessage:
-                'Something went wrong working out that goal. Try rewording it.',
+            learnerMessage: 'Something went wrong working out that goal. Try rewording it.',
             logDetail: `reply failed the schema: ${
                 issue ? `${issue.path.join('.')} ${issue.message}` : 'unknown'
             }`,

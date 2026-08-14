@@ -171,10 +171,7 @@ describe('validateCurriculumReply — accepts and normalises a good syllabus', (
     });
 
     it('regenerates the slug rather than trusting the model to make a valid one', () => {
-        const result = validateCurriculumReply(
-            reply({ slug: 'Class 10 !! CBSE' }),
-            'class 10'
-        );
+        const result = validateCurriculumReply(reply({ slug: 'Class 10 !! CBSE' }), 'class 10');
 
         expect(result.ok).toBe(true);
         if (result.ok) {
@@ -183,20 +180,14 @@ describe('validateCurriculumReply — accepts and normalises a good syllabus', (
     });
 
     it('falls back to the learner text when the model returns no usable slug', () => {
-        const result = validateCurriculumReply(
-            reply({ slug: '', name: 'Class 10' }),
-            'class 10'
-        );
+        const result = validateCurriculumReply(reply({ slug: '', name: 'Class 10' }), 'class 10');
 
         expect(result.ok).toBe(true);
         if (result.ok) expect(result.curriculum.slug).toBe('class-10');
     });
 
     it('collapses whitespace in names instead of storing it', () => {
-        const result = validateCurriculumReply(
-            reply({ name: '  Class   10  \n' }),
-            'class 10'
-        );
+        const result = validateCurriculumReply(reply({ name: '  Class   10  \n' }), 'class 10');
 
         expect(result.ok).toBe(true);
         if (result.ok) expect(result.curriculum.name).toBe('Class 10');
@@ -250,9 +241,7 @@ describe('validateCurriculumReply — cleans up what the schema cannot catch', (
 
         expect(result.ok).toBe(true);
         if (result.ok) {
-            expect(result.curriculum.subjects.map((s) => s.name)).toEqual([
-                'Real Subject',
-            ]);
+            expect(result.curriculum.subjects.map((s) => s.name)).toEqual(['Real Subject']);
         }
     });
 
@@ -277,7 +266,7 @@ describe('validateCurriculumReply — cleans up what the schema cannot catch', (
                 subjects: [
                     { name: 'Real Subject', weight: 1, topics: ['A one', 'B two'] },
                     {
-                        name: "Sorry, I cannot build a syllabus for that request.",
+                        name: 'Sorry, I cannot build a syllabus for that request.',
                         weight: 1,
                         topics: ['C three', 'D four'],
                     },
@@ -316,7 +305,7 @@ describe('validateCurriculumReply — cleans up what the schema cannot catch', (
                 subjects: Array.from({ length: 20 }, (_, s) => ({
                     name: `Subject named ${String.fromCharCode(65 + s)}`,
                     weight: 1,
-                    topics: Array.from({ length: 30 }, (_, t) => `Topic ${s}-${t}`),
+                    topics: Array.from({ length: 30 }, (__, t) => `Topic ${s}-${t}`),
                 })),
             }),
             'class 10'
@@ -324,10 +313,7 @@ describe('validateCurriculumReply — cleans up what the schema cannot catch', (
 
         expect(result.ok).toBe(true);
         if (result.ok) {
-            const total = result.curriculum.subjects.reduce(
-                (n, s) => n + s.topics.length,
-                0
-            );
+            const total = result.curriculum.subjects.reduce((n, s) => n + s.topics.length, 0);
             expect(result.curriculum.subjects.length).toBeLessThanOrEqual(12);
             expect(total).toBeLessThanOrEqual(90);
             for (const subject of result.curriculum.subjects) {

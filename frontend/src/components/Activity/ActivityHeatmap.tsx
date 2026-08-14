@@ -42,11 +42,7 @@ function monthsIn(days: { date: string }[]): string[] {
     return seen.map((key) => monthLabel(`${key}-01`));
 }
 
-export function ActivityHeatmap({
-    calendar,
-}: {
-    calendar: ActivityCalendar;
-}) {
+export function ActivityHeatmap({ calendar }: { calendar: ActivityCalendar }) {
     const first = calendar.days[0];
     if (!first) return null;
 
@@ -61,8 +57,8 @@ export function ActivityHeatmap({
                     <div style={{ marginTop: 4 }}>
                         <strong>{calendar.totalAnswered}</strong>{' '}
                         <span className="faint">
-                            {calendar.totalAnswered === 1 ? 'question' : 'questions'} in
-                            the past year
+                            {calendar.totalAnswered === 1 ? 'question' : 'questions'} in the past
+                            year
                         </span>
                     </div>
                 </div>

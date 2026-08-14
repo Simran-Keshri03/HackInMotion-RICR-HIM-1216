@@ -85,10 +85,7 @@ describe('nextReview — passing', () => {
     it('uses the standard fixed second gap rather than multiplying immediately', () => {
         // Ease applied to the first interval would jump 1 day to 3 with no evidence behind it. SM-2
         // uses fixed opening steps for the same reason.
-        const next = nextReview(
-            state({ intervalDays: 1, reviewCount: 0 }),
-            outcome(100)
-        );
+        const next = nextReview(state({ intervalDays: 1, reviewCount: 0 }), outcome(100));
 
         expect(next.intervalDays).toBe(SRS_CONFIG.secondIntervalDays);
         expect(next.reviewCount).toBe(1);
@@ -106,10 +103,7 @@ describe('nextReview — passing', () => {
     });
 
     it('raises ease when reviews keep going well, so easy topics recede', () => {
-        const next = nextReview(
-            state({ reviewCount: 3, easeFactor: 2.5 }),
-            outcome(100)
-        );
+        const next = nextReview(state({ reviewCount: 3, easeFactor: 2.5 }), outcome(100));
 
         expect(next.easeFactor).toBeGreaterThan(2.5);
         expect(next.easeFactor).toBeLessThanOrEqual(SRS_CONFIG.maxEase);
@@ -183,10 +177,7 @@ describe('nextReview — failing', () => {
 
 describe('nextReview — the shaky middle', () => {
     it('grows the interval a little when some of it stuck', () => {
-        const next = nextReview(
-            state({ intervalDays: 10, reviewCount: 3 }),
-            outcome(65)
-        );
+        const next = nextReview(state({ intervalDays: 10, reviewCount: 3 }), outcome(65));
 
         // Neither a reset nor a full step is honest about 65%.
         expect(next.intervalDays).toBeGreaterThan(10);
@@ -219,10 +210,7 @@ describe('nextReview — thin evidence', () => {
     it('still lowers ease on a failure with thin evidence', () => {
         // Getting one of two wrong is still getting it wrong; being cautious here would let a topic
         // escape by being briefly reviewed.
-        const next = nextReview(
-            state({ easeFactor: 2.5 }),
-            outcome(0, { questionsAnswered: 1 })
-        );
+        const next = nextReview(state({ easeFactor: 2.5 }), outcome(0, { questionsAnswered: 1 }));
 
         expect(next.easeFactor).toBeLessThan(2.5);
         expect(next.lapsed).toBe(true);

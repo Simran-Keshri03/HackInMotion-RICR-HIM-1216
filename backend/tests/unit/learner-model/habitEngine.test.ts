@@ -1,9 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-    consistencyPercent,
-    daysBetween,
-    nextHabits,
-} from '@/services/learner/habitEngine.js';
+import { consistencyPercent, daysBetween, nextHabits } from '@/services/learner/habitEngine.js';
 
 /**
  * Streaks are the one number on the dashboard a learner checks every single day, which makes being
@@ -71,7 +67,12 @@ describe('nextHabits — streaks', () => {
 
     it('breaks the streak after a missed day', () => {
         const habits = nextHabits(
-            { ...base, currentStreakDays: 12, longestStreakDays: 12, lastActivityDate: '2026-08-11' },
+            {
+                ...base,
+                currentStreakDays: 12,
+                longestStreakDays: 12,
+                lastActivityDate: '2026-08-11',
+            },
             noTiming
         );
 
@@ -177,9 +178,9 @@ describe('consistencyPercent', () => {
 
     it('never exceeds 100 even when the counts disagree', () => {
         // A client and server in different timezones can record two calendar days for one day.
-        expect(
-            consistencyPercent({ distinctDays: 5, firstDate: '2026-08-12' }, '2026-08-13')
-        ).toBe(100);
+        expect(consistencyPercent({ distinctDays: 5, firstDate: '2026-08-12' }, '2026-08-13')).toBe(
+            100
+        );
     });
 
     it('returns null rather than a made-up number when there is nothing to measure', () => {

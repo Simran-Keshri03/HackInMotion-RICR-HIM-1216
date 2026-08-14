@@ -80,9 +80,7 @@ export default function MockTest() {
             setElapsed(0);
             setPhase('sitting');
         } catch (cause) {
-            setError(
-                cause instanceof Error ? cause.message : 'Could not build a test.'
-            );
+            setError(cause instanceof Error ? cause.message : 'Could not build a test.');
         } finally {
             setBusy(false);
         }
@@ -113,19 +111,16 @@ export default function MockTest() {
         setBusy(true);
 
         try {
-            const result = await api.post<{ test: MockTest }>(
-                `/mock-tests/${test.id}/submit`,
-                {
-                    // Only what was actually answered. A question left out is recorded as skipped,
-                    // which the result reports separately from wrong.
-                    answers: Object.entries(answers).map(([questionId, value]) =>
-                        Array.isArray(value)
-                            ? { questionId, selectedOptions: value }
-                            : { questionId, value }
-                    ),
-                    secondsTaken: elapsed,
-                }
-            );
+            const result = await api.post<{ test: MockTest }>(`/mock-tests/${test.id}/submit`, {
+                // Only what was actually answered. A question left out is recorded as skipped,
+                // which the result reports separately from wrong.
+                answers: Object.entries(answers).map(([questionId, value]) =>
+                    Array.isArray(value)
+                        ? { questionId, selectedOptions: value }
+                        : { questionId, value }
+                ),
+                secondsTaken: elapsed,
+            });
 
             setTest(result.test);
             setPhase('done');
@@ -185,8 +180,7 @@ export default function MockTest() {
                     <div>
                         <span className="label">Mock test</span>
                         <div className="faint">
-                            Question {index + 1} of {questions.length} ·{' '}
-                            {answeredCount} answered
+                            Question {index + 1} of {questions.length} · {answeredCount} answered
                         </div>
                     </div>
 
@@ -242,9 +236,7 @@ export default function MockTest() {
                                     type="button"
                                     className="option"
                                     aria-pressed={selected.includes(optionIndex)}
-                                    onClick={() =>
-                                        choose(question.id, optionIndex, isMulti)
-                                    }
+                                    onClick={() => choose(question.id, optionIndex, isMulti)}
                                 >
                                     <span className="option__mark">
                                         {String.fromCharCode(65 + optionIndex)}
@@ -310,8 +302,8 @@ export default function MockTest() {
 
                 {answeredCount < questions.length && index === questions.length - 1 && (
                     <p className="faint" style={{ margin: 0 }}>
-                        {questions.length - answeredCount} unanswered. Blank counts as
-                        wrong, so it is worth a guess.
+                        {questions.length - answeredCount} unanswered. Blank counts as wrong, so it
+                        is worth a guess.
                     </p>
                 )}
             </div>
@@ -347,9 +339,7 @@ export default function MockTest() {
                             <div className="faint">answered</div>
                         </div>
                         <div>
-                            <div className="big">
-                                {result.passed ? 'Pass' : 'Below target'}
-                            </div>
+                            <div className="big">{result.passed ? 'Pass' : 'Below target'}</div>
                             <div className="faint">against 60%</div>
                         </div>
                     </div>
@@ -409,9 +399,7 @@ export default function MockTest() {
     if (list.loading) return <Loading label="Loading your tests…" />;
     if (list.error) return <Failed error={list.error} onRetry={list.reload} />;
 
-    const history = (list.data?.tests ?? []).filter(
-        (entry) => entry.status === 'submitted'
-    );
+    const history = (list.data?.tests ?? []).filter((entry) => entry.status === 'submitted');
 
     return (
         <div className="worksplit">
@@ -421,9 +409,9 @@ export default function MockTest() {
                         <span className="label">Mock tests</span>
                         <h1 style={{ marginBottom: 6 }}>Test yourself on your plan</h1>
                         <p className="muted" style={{ margin: 0, maxWidth: '54ch' }}>
-                            A paper built from the topics your study plan has scheduled —
-                            so the score tells you whether the studying is working, not
-                            whether you know things you were never asked to learn yet.
+                            A paper built from the topics your study plan has scheduled — so the
+                            score tells you whether the studying is working, not whether you know
+                            things you were never asked to learn yet.
                         </p>
                     </div>
                     <span className="hero-mark" aria-hidden="true">
@@ -437,9 +425,8 @@ export default function MockTest() {
                     <div className="card card--glow stack">
                         <span className="label">Unfinished test</span>
                         <p style={{ margin: 0 }}>
-                            You left {open.title.toLowerCase()} open. Starting it again
-                            begins from the first question — answers are not kept while a
-                            paper is closed.
+                            You left {open.title.toLowerCase()} open. Starting it again begins from
+                            the first question — answers are not kept while a paper is closed.
                         </p>
                         <button
                             type="button"
@@ -456,8 +443,8 @@ export default function MockTest() {
                     <div>
                         <span className="label">New test</span>
                         <p className="faint" style={{ margin: '6px 0 0' }}>
-                            No answers are shown until you finish. That is the point — it
-                            measures what you knew walking in.
+                            No answers are shown until you finish. That is the point — it measures
+                            what you knew walking in.
                         </p>
                     </div>
 
@@ -495,8 +482,7 @@ export default function MockTest() {
                                 <span className="row-item__body">
                                     <strong>{entry.title}</strong>
                                     <div className="faint">
-                                        {entry.correctCount}/{entry.totalQuestions}{' '}
-                                        correct ·{' '}
+                                        {entry.correctCount}/{entry.totalQuestions} correct ·{' '}
                                         {new Date(
                                             entry.submittedAt ?? entry.startedAt
                                         ).toLocaleDateString(undefined, {
@@ -550,9 +536,7 @@ export default function MockTest() {
                                 <Icon name={item.icon as 'lock'} />
                             </span>
                             <div style={{ minWidth: 0 }}>
-                                <strong style={{ fontSize: '0.92rem' }}>
-                                    {item.title}
-                                </strong>
+                                <strong style={{ fontSize: '0.92rem' }}>{item.title}</strong>
                                 <div className="faint">{item.body}</div>
                             </div>
                         </div>
@@ -562,9 +546,9 @@ export default function MockTest() {
                 <div className="card stack" style={{ gap: 10 }}>
                     <strong>Where the questions come from</strong>
                     <p className="faint" style={{ margin: 0 }}>
-                        Topics your plan has scheduled, weighted by how much time it gave
-                        them and how far from mastered they are. Topics with too few
-                        questions in the bank are named and left out rather than padded.
+                        Topics your plan has scheduled, weighted by how much time it gave them and
+                        how far from mastered they are. Topics with too few questions in the bank
+                        are named and left out rather than padded.
                     </p>
                     <Link to="/plan" className="faint">
                         See your plan

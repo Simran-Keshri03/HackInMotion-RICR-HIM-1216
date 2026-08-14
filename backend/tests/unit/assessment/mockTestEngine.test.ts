@@ -30,9 +30,7 @@ function topic(overrides: Partial<MockTestTopic> = {}): MockTestTopic {
 }
 
 const many = (n: number) =>
-    Array.from({ length: n }, (_, i) =>
-        topic({ name: `Topic ${i}`, topicId: `t-${i}` })
-    );
+    Array.from({ length: n }, (_, i) => topic({ name: `Topic ${i}`, topicId: `t-${i}` }));
 
 describe('topicShare', () => {
     it('gives a weak topic more room than a strong one', () => {
@@ -49,9 +47,7 @@ describe('topicShare', () => {
     });
 
     it('gives a heavier topic more room at equal mastery', () => {
-        expect(topicShare(topic({ weight: 2 }))).toBeGreaterThan(
-            topicShare(topic({ weight: 1 }))
-        );
+        expect(topicShare(topic({ weight: 2 }))).toBeGreaterThan(topicShare(topic({ weight: 1 })));
     });
 
     it('treats a topic never attempted as needing the most, not the least', () => {
@@ -75,18 +71,14 @@ describe('planMockTest — the promises a paper must keep', () => {
         const plan = planMockTest(topics, 15, 90);
 
         expect(plan.totalQuestions).toBe(15);
-        expect(
-            plan.allocations.reduce((sum, a) => sum + a.questionCount, 0)
-        ).toBe(15);
+        expect(plan.allocations.reduce((sum, a) => sum + a.questionCount, 0)).toBe(15);
     });
 
     it('never spreads the test so thin that a topic score means nothing', () => {
         const plan = planMockTest(topics, 15, 90);
 
         for (const allocation of plan.allocations) {
-            expect(allocation.questionCount).toBeGreaterThanOrEqual(
-                MOCK_TEST_CONFIG.minPerTopic
-            );
+            expect(allocation.questionCount).toBeGreaterThanOrEqual(MOCK_TEST_CONFIG.minPerTopic);
         }
     });
 
@@ -162,9 +154,7 @@ describe('planMockTest — the promises a paper must keep', () => {
 
     it('returns an empty plan when nothing can be tested', () => {
         expect(planMockTest([], 15, 90).allocations).toEqual([]);
-        expect(
-            planMockTest([topic({ availableQuestions: 0 })], 15, 90).allocations
-        ).toEqual([]);
+        expect(planMockTest([topic({ availableQuestions: 0 })], 15, 90).allocations).toEqual([]);
     });
 
     it('sets a duration from how fast the learner actually works', () => {
@@ -180,9 +170,7 @@ describe('planMockTest — the promises a paper must keep', () => {
         // has no such pause, so the pace is floored.
         const plan = planMockTest(topics, 15, 10);
 
-        expect(plan.durationMinutes).toBeGreaterThanOrEqual(
-            Math.round((15 * 45) / 60)
-        );
+        expect(plan.durationMinutes).toBeGreaterThanOrEqual(Math.round((15 * 45) / 60));
     });
 
     it('explains every topic it chose', () => {
@@ -235,13 +223,7 @@ describe('markMockTest', () => {
 
     it('breaks the score down by topic, weakest first', () => {
         const result = markMockTest(
-            [
-                q('t-a', true),
-                q('t-a', true),
-                q('t-b', false),
-                q('t-b', false),
-                q('t-b', true),
-            ],
+            [q('t-a', true), q('t-a', true), q('t-b', false), q('t-b', false), q('t-b', true)],
             names
         );
 
@@ -269,10 +251,7 @@ describe('markMockTest', () => {
     });
 
     it('reads nothing into a test that was not attempted', () => {
-        const result = markMockTest(
-            [q('t-a', false, false), q('t-a', false, false)],
-            names
-        );
+        const result = markMockTest([q('t-a', false, false), q('t-a', false, false)], names);
 
         expect(result.scorePercent).toBe(0);
         expect(result.verdict).toMatch(/nothing/i);

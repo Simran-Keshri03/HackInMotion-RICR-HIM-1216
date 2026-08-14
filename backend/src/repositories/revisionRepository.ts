@@ -48,11 +48,7 @@ export class RevisionRepository {
     }
 
     /** Writes the schedule for a topic, creating the row on the first review. */
-    async save(
-        userId: string,
-        topicId: string,
-        update: ScheduleUpdate
-    ): Promise<void> {
+    async save(userId: string, topicId: string, update: ScheduleUpdate): Promise<void> {
         const { error } = await this.db.from('revision_schedule').upsert(
             {
                 user_id: userId,
@@ -89,9 +85,7 @@ export class RevisionRepository {
     ): Promise<DueTopic[]> {
         const { data, error } = await this.db
             .from('revision_schedule')
-            .select(
-                'topic_id, due_on, interval_days, lapses, review_count, last_review_accuracy'
-            )
+            .select('topic_id, due_on, interval_days, lapses, review_count, last_review_accuracy')
             .eq('user_id', userId)
             .lte('due_on', today)
             .order('due_on')
@@ -157,9 +151,10 @@ export class RevisionRepository {
         if (masteryError) throw masteryError;
 
         const scores = new Map(
-            ((mastery ?? []) as { topic_id: string; mastery_score: number }[]).map(
-                (row) => [row.topic_id, Number(row.mastery_score)]
-            )
+            ((mastery ?? []) as { topic_id: string; mastery_score: number }[]).map((row) => [
+                row.topic_id,
+                Number(row.mastery_score),
+            ])
         );
 
         const byId = new Map(topicRows.map((row) => [row.id, row]));
@@ -192,9 +187,7 @@ export class RevisionRepository {
                     lapses: Number(row.lapses),
                     reviewCount: Number(row.review_count),
                     lastReviewAccuracy:
-                        row.last_review_accuracy === null
-                            ? null
-                            : Number(row.last_review_accuracy),
+                        row.last_review_accuracy === null ? null : Number(row.last_review_accuracy),
                     masteryScore: scores.get(row.topic_id) ?? null,
                 };
             })

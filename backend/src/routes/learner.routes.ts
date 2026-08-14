@@ -1,11 +1,7 @@
 import { Router } from 'express';
 import { getLearnerSummary } from '@/controllers/learnerController.js';
 import { getActivity, getGoalSubjects } from '@/controllers/activityController.js';
-import {
-    getProfile,
-    updateProfile,
-    updateProfileSchema,
-} from '@/controllers/profileController.js';
+import { getProfile, updateProfile, updateProfileSchema } from '@/controllers/profileController.js';
 import { requireAuth } from '@/middleware/authMiddleware.js';
 import { validateBody } from '@/middleware/validationMiddleware.js';
 import { asyncRoute } from '@/utils/http.js';
@@ -30,8 +26,4 @@ learnerRouter.get('/activity', asyncRoute(getActivity));
 learnerRouter.get('/subjects', asyncRoute(getGoalSubjects));
 
 learnerRouter.get('/profile', asyncRoute(getProfile));
-learnerRouter.patch(
-    '/profile',
-    validateBody(updateProfileSchema),
-    asyncRoute(updateProfile)
-);
+learnerRouter.patch('/profile', validateBody(updateProfileSchema), asyncRoute(updateProfile));

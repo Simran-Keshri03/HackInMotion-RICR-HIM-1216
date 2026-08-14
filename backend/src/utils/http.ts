@@ -10,12 +10,7 @@ export function sendOk<T>(res: Response, data: T, status = 200) {
     res.status(status).json({ success: true, data, error: null });
 }
 
-export function sendError(
-    res: Response,
-    status: number,
-    code: string,
-    message: string
-) {
+export function sendError(res: Response, status: number, code: string, message: string) {
     res.status(status).json({
         success: false,
         data: null,
@@ -46,12 +41,7 @@ export function asyncRoute(
 }
 
 /** Single place where every unhandled error becomes a client response. */
-export function errorHandler(
-    err: unknown,
-    _req: Request,
-    res: Response,
-    _next: NextFunction
-) {
+export function errorHandler(err: unknown, _req: Request, res: Response, _next: NextFunction) {
     if (err instanceof AppError) {
         sendError(res, err.status, err.code, err.message);
         return;
@@ -82,7 +72,9 @@ export function errorHandler(
      * row-level security on these reads, and a timing quirk is not worth trading that for.
      */
     if (isClockSkew(err)) {
-        console.warn('PostgREST rejected a just-issued token (clock skew); asking the client to retry.');
+        console.warn(
+            'PostgREST rejected a just-issued token (clock skew); asking the client to retry.'
+        );
         sendError(
             res,
             503,
@@ -105,7 +97,6 @@ function isClockSkew(err: unknown): boolean {
 
     return (
         candidate.code === 'PGRST303' ||
-        (typeof candidate.message === 'string' &&
-            /issued at future/i.test(candidate.message))
+        (typeof candidate.message === 'string' && /issued at future/i.test(candidate.message))
     );
 }

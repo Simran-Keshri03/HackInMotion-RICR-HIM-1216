@@ -116,8 +116,7 @@ export class LearnerRepository {
             .from('learner_profiles')
             .update({
                 total_attempts: (current?.total_attempts ?? 0) + 1,
-                correct_attempts:
-                    (current?.correct_attempts ?? 0) + (wasCorrect ? 1 : 0),
+                correct_attempts: (current?.correct_attempts ?? 0) + (wasCorrect ? 1 : 0),
                 last_activity_date: habits.lastActivityDate,
                 current_streak_days: habits.currentStreakDays,
                 longest_streak_days: habits.longestStreakDays,
@@ -306,8 +305,12 @@ export class LearnerRepository {
             const subjectId = subjectOf.get(row.topic_id);
             if (!subjectId) continue;
 
-            const entry =
-                stats.get(subjectId) ?? { started: 0, mastered: 0, answered: 0, masterySum: 0 };
+            const entry = stats.get(subjectId) ?? {
+                started: 0,
+                mastered: 0,
+                answered: 0,
+                masterySum: 0,
+            };
 
             entry.started += 1;
             entry.answered += Number(row.total_attempts);
@@ -322,12 +325,14 @@ export class LearnerRepository {
             topicCount.set(row.parent_id, (topicCount.get(row.parent_id) ?? 0) + 1);
         }
 
-        return ((subjects ?? []) as {
-            id: string;
-            name: string;
-            weight: number;
-            sort_order: number;
-        }[])
+        return (
+            (subjects ?? []) as {
+                id: string;
+                name: string;
+                weight: number;
+                sort_order: number;
+            }[]
+        )
             .sort((a, b) => a.sort_order - b.sort_order)
             .map((subject) => {
                 const entry = stats.get(subject.id);
@@ -359,10 +364,7 @@ export class LearnerRepository {
                 .select('topic_id', { count: 'exact', head: true })
                 .eq('user_id', userId)
                 .gte('mastery_score', masteryBar),
-            this.db
-                .from('revision_schedule')
-                .select('review_count')
-                .eq('user_id', userId),
+            this.db.from('revision_schedule').select('review_count').eq('user_id', userId),
         ]);
 
         if (mastered.error) throw mastered.error;

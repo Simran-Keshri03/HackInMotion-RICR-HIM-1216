@@ -1,7 +1,4 @@
-import type {
-    PracticeQuestion,
-    QuestionRepository,
-} from '@/repositories/questionRepository.js';
+import type { PracticeQuestion, QuestionRepository } from '@/repositories/questionRepository.js';
 
 export interface SelectedQuestions {
     questions: PracticeQuestion[];
@@ -36,10 +33,7 @@ export class QuestionSelector {
         difficulty: 'easy' | 'medium' | 'hard';
         count: number;
     }): Promise<SelectedQuestions> {
-        const attempted = await this.questions.findAttemptedIds(
-            options.userId,
-            options.topicId
-        );
+        const attempted = await this.questions.findAttemptedIds(options.userId, options.topicId);
 
         const chosen = await this.questions.findForPractice({
             topicId: options.topicId,
@@ -73,8 +67,7 @@ export class QuestionSelector {
             });
 
             if (seenAgain.length > 0) {
-                note =
-                    'You have seen every question on this topic, so some are repeats.';
+                note = 'You have seen every question on this topic, so some are repeats.';
                 chosen.push(...seenAgain);
             }
         }

@@ -97,9 +97,7 @@ export function nextHabits(previous: HabitState, event: HabitEvent): HabitUpdate
         longestStreakDays: Math.max(previous.longestStreakDays, currentStreakDays),
         lastActivityDate: event.today,
         avgSecondsPerQuestion: nextAverageSeconds(previous, event.secondsTaken),
-        consistencyScore: event.practice
-            ? consistencyPercent(event.practice, event.today)
-            : null,
+        consistencyScore: event.practice ? consistencyPercent(event.practice, event.today) : null,
     };
 }
 
@@ -130,10 +128,7 @@ function nextStreak(
  * average yet — an older profile, or a learner whose earlier answers arrived without timings —
  * this answer starts one, rather than being averaged into nothing.
  */
-function nextAverageSeconds(
-    previous: HabitState,
-    secondsTaken: number | null
-): number | null {
+function nextAverageSeconds(previous: HabitState, secondsTaken: number | null): number | null {
     if (secondsTaken === null || !Number.isFinite(secondsTaken) || secondsTaken < 0) {
         return previous.avgSecondsPerQuestion;
     }
@@ -144,8 +139,7 @@ function nextAverageSeconds(
         return round2(credited);
     }
 
-    const total =
-        previous.avgSecondsPerQuestion * previous.totalAttempts + credited;
+    const total = previous.avgSecondsPerQuestion * previous.totalAttempts + credited;
 
     return round2(total / (previous.totalAttempts + 1));
 }

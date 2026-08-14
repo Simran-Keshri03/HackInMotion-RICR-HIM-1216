@@ -62,9 +62,7 @@ export default function StudyGroups() {
             const result = await api.get<{ group: GroupDetail }>(`/groups/${groupId}`);
             setDetail(result.group);
         } catch (cause) {
-            setError(
-                cause instanceof Error ? cause.message : 'Could not open that group.'
-            );
+            setError(cause instanceof Error ? cause.message : 'Could not open that group.');
         } finally {
             setLoadingDetail(false);
         }
@@ -86,9 +84,7 @@ export default function StudyGroups() {
             groups.reload();
             void open(result.group.id);
         } catch (cause) {
-            setError(
-                cause instanceof Error ? cause.message : 'Could not create the group.'
-            );
+            setError(cause instanceof Error ? cause.message : 'Could not create the group.');
         } finally {
             setBusy(false);
         }
@@ -153,8 +149,8 @@ export default function StudyGroups() {
                         <span className="label">Study groups</span>
                         <h1 style={{ marginBottom: 6 }}>Study with your classmates</h1>
                         <p className="muted" style={{ margin: 0, maxWidth: '52ch' }}>
-                            Compare how much everybody has got through. Groups are joined by
-                            code — they cannot be searched for or browsed.
+                            Compare how much everybody has got through. Groups are joined by code —
+                            they cannot be searched for or browsed.
                         </p>
                     </div>
 
@@ -176,15 +172,15 @@ export default function StudyGroups() {
                         <div style={{ minWidth: 0 }}>
                             <span className="label">What your group can see</span>
                             <p style={{ margin: '6px 0 0' }}>
-                                Your name, how many questions you have answered, your
-                                streak, and how many topics you have mastered.
+                                Your name, how many questions you have answered, your streak, and
+                                how many topics you have mastered.
                             </p>
                         </div>
                     </div>
 
                     <p className="faint" style={{ margin: 0, paddingLeft: 48 }}>
-                        Not your accuracy, not your weak topics, not your answers, and
-                        nothing you asked the tutor.
+                        Not your accuracy, not your weak topics, not your answers, and nothing you
+                        asked the tutor.
                     </p>
                 </div>
 
@@ -199,9 +195,7 @@ export default function StudyGroups() {
                         </>
                     )}
 
-                    {groups.error ? (
-                        <Failed error={groups.error} onRetry={groups.reload} />
-                    ) : null}
+                    {groups.error ? <Failed error={groups.error} onRetry={groups.reload} /> : null}
 
                     {!groups.loading && !groups.error && mine.length === 0 && (
                         <div className="stack" style={{ gap: 4, padding: '10px 2px' }}>
@@ -288,17 +282,10 @@ export default function StudyGroups() {
                                 </div>
                             </div>
                             {detail.comparison.topStreak && (
-                                <p
-                                    className="faint"
-                                    style={{ marginTop: 12, marginBottom: 0 }}
-                                >
-                                    Longest streak going:{' '}
-                                    {detail.comparison.topStreak.displayName} on{' '}
-                                    {detail.comparison.topStreak.days}{' '}
-                                    {detail.comparison.topStreak.days === 1
-                                        ? 'day'
-                                        : 'days'}
-                                    .
+                                <p className="faint" style={{ marginTop: 12, marginBottom: 0 }}>
+                                    Longest streak going: {detail.comparison.topStreak.displayName}{' '}
+                                    on {detail.comparison.topStreak.days}{' '}
+                                    {detail.comparison.topStreak.days === 1 ? 'day' : 'days'}.
                                 </p>
                             )}
                         </div>
@@ -317,9 +304,7 @@ export default function StudyGroups() {
                                     </span>
                                     <span className="row-item__body">
                                         <strong>{member.displayName}</strong>
-                                        {member.isYou && (
-                                            <span className="faint"> (you)</span>
-                                        )}
+                                        {member.isYou && <span className="faint"> (you)</span>}
                                         <div className="faint">
                                             {member.questionsAnswered} answered ·{' '}
                                             {member.currentStreakDays} day streak ·{' '}
@@ -330,11 +315,7 @@ export default function StudyGroups() {
                             ))}
                         </div>
 
-                        <button
-                            type="button"
-                            disabled={busy}
-                            onClick={() => void leave(detail.id)}
-                        >
+                        <button type="button" disabled={busy} onClick={() => void leave(detail.id)}>
                             Leave this group
                         </button>
                     </div>
@@ -446,9 +427,7 @@ export default function StudyGroups() {
                                 <Icon name={benefit.icon as 'chart'} />
                             </span>
                             <div style={{ minWidth: 0 }}>
-                                <strong style={{ fontSize: '0.92rem' }}>
-                                    {benefit.title}
-                                </strong>
+                                <strong style={{ fontSize: '0.92rem' }}>{benefit.title}</strong>
                                 <div className="faint">{benefit.body}</div>
                             </div>
                         </div>
@@ -471,17 +450,11 @@ export default function StudyGroups() {
                     <div className="card stack" style={{ gap: 8 }}>
                         <div className="spread">
                             <strong>{detail.name}</strong>
-                            <span className="faint">
-                                {detail.comparison.memberCount} members
-                            </span>
+                            <span className="faint">{detail.comparison.memberCount} members</span>
                         </div>
 
                         {detail.comparison.members.slice(0, 5).map((member) => (
-                            <div
-                                key={member.userId}
-                                className="row"
-                                style={{ gap: 10 }}
-                            >
+                            <div key={member.userId} className="row" style={{ gap: 10 }}>
                                 <span className="rank">{member.rank}</span>
                                 <span className="avatar avatar--sm" aria-hidden="true">
                                     {initials(member.displayName)}
@@ -489,13 +462,9 @@ export default function StudyGroups() {
                                 <span style={{ flex: '1 1 auto', minWidth: 0 }}>
                                     <div style={{ fontSize: '0.9rem' }}>
                                         {member.displayName}
-                                        {member.isYou && (
-                                            <span className="faint"> (you)</span>
-                                        )}
+                                        {member.isYou && <span className="faint"> (you)</span>}
                                     </div>
-                                    <div className="faint">
-                                        {member.questionsAnswered} answered
-                                    </div>
+                                    <div className="faint">{member.questionsAnswered} answered</div>
                                 </span>
                             </div>
                         ))}
@@ -530,9 +499,7 @@ export default function StudyGroups() {
 /** "1st", "2nd", "3rd" — a rank reads better than a bare number next to a name. */
 function ordinal(n: number): string {
     const suffix =
-        n % 100 >= 11 && n % 100 <= 13
-            ? 'th'
-            : (['th', 'st', 'nd', 'rd'][n % 10] ?? 'th');
+        n % 100 >= 11 && n % 100 <= 13 ? 'th' : (['th', 'st', 'nd', 'rd'][n % 10] ?? 'th');
 
     return `${n}${suffix}`;
 }
