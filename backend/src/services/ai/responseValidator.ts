@@ -59,8 +59,7 @@ const DANGLING_REFERENCES = [
  * reason it is not.
  */
 export function businessCheck(question: GeneratedQuestion): string | null {
-    const { questionType, body, options, correctOptionIndexes, explanation } =
-        question;
+    const { questionType, body, options, correctOptionIndexes, explanation } = question;
 
     // A single-answer question with two answers is a broken question, not a hard one.
     if (questionType === 'mcq' && correctOptionIndexes.length !== 1) {

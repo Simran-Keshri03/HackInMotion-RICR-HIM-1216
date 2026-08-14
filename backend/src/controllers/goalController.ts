@@ -17,9 +17,7 @@ import { AppError, sendOk } from '@/utils/http.js';
 export const createGoalSchema = z.object({
     title: z.string().trim().min(1).max(120),
     curriculumId: z.string().uuid(),
-    examDate: z
-        .string()
-        .regex(/^\d{4}-\d{2}-\d{2}$/, 'must be a date in YYYY-MM-DD form'),
+    examDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'must be a date in YYYY-MM-DD form'),
     dailyMinutes: z.number().int().min(10).max(960),
     subjectIds: z.array(z.string().uuid()).min(1).max(20),
 });
@@ -33,16 +31,10 @@ export const createGoalSchema = z.object({
 export async function listSubjects(req: Request, res: Response) {
     const { accessToken } = authOf(req);
 
-    const query = z
-        .object({ curriculumId: z.string().uuid() })
-        .safeParse(req.query);
+    const query = z.object({ curriculumId: z.string().uuid() }).safeParse(req.query);
 
     if (!query.success) {
-        throw new AppError(
-            400,
-            'INVALID_INPUT',
-            'curriculumId is required and must be a uuid.'
-        );
+        throw new AppError(400, 'INVALID_INPUT', 'curriculumId is required and must be a uuid.');
     }
 
     const service = new GoalService(new GoalRepository(userDb(accessToken)));

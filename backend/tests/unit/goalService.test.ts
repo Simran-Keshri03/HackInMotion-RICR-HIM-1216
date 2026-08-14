@@ -15,21 +15,26 @@ function isoDaysFromNow(days: number): string {
 }
 
 function serviceWithStub() {
-    const replaceActive = vi.fn(async (_userId: string, goal: {
-        title: string;
-        examDate: string;
-        dailyMinutes: number;
-        subjectIds: string[];
-        curriculumId: string;
-    }) => ({
-        id: 'goal-1',
-        title: goal.title,
-        exam_date: goal.examDate,
-        daily_minutes: goal.dailyMinutes,
-        status: 'active' as const,
-        created_at: new Date().toISOString(),
-        curriculum_id: goal.curriculumId,
-    }));
+    const replaceActive = vi.fn(
+        async (
+            _userId: string,
+            goal: {
+                title: string;
+                examDate: string;
+                dailyMinutes: number;
+                subjectIds: string[];
+                curriculumId: string;
+            }
+        ) => ({
+            id: 'goal-1',
+            title: goal.title,
+            exam_date: goal.examDate,
+            daily_minutes: goal.dailyMinutes,
+            status: 'active' as const,
+            created_at: new Date().toISOString(),
+            curriculum_id: goal.curriculumId,
+        })
+    );
 
     const repo = {
         findSubjects: vi.fn(async (_curriculumId: string) => []),
@@ -114,17 +119,17 @@ describe('GoalService.create', () => {
     it('refuses a date that is not a date', async () => {
         const { service } = serviceWithStub();
 
-        await expect(
-            service.create({ ...validGoal, examDate: '2026-99-99' })
-        ).rejects.toThrowError(/not a real date/i);
+        await expect(service.create({ ...validGoal, examDate: '2026-99-99' })).rejects.toThrowError(
+            /not a real date/i
+        );
     });
 
     it('refuses a goal with no subjects', async () => {
         const { service } = serviceWithStub();
 
-        await expect(
-            service.create({ ...validGoal, subjectIds: [] })
-        ).rejects.toThrowError(/at least one subject/i);
+        await expect(service.create({ ...validGoal, subjectIds: [] })).rejects.toThrowError(
+            /at least one subject/i
+        );
     });
 
     it('drops a duplicated subject before it reaches the database', async () => {

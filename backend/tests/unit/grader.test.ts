@@ -39,9 +39,7 @@ describe('gradeAnswer - multiple choice', () => {
     });
 
     it('cannot be fooled by repeating one option', () => {
-        expect(
-            gradeAnswer(question, { selectedOptions: [0, 0, 0] }).isCorrect
-        ).toBe(false);
+        expect(gradeAnswer(question, { selectedOptions: [0, 0, 0] }).isCorrect).toBe(false);
     });
 });
 
@@ -101,10 +99,7 @@ describe('gradeAnswer - refuses to guess', () => {
 
     it('refuses a single-choice question that stores two answers', () => {
         expect(() =>
-            gradeAnswer(
-                { questionType: 'mcq', correctAnswer: [0, 1] },
-                { selectedOptions: [0] }
-            )
+            gradeAnswer({ questionType: 'mcq', correctAnswer: [0, 1] }, { selectedOptions: [0] })
         ).toThrowError(/cannot be graded/i);
     });
 });

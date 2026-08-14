@@ -49,9 +49,7 @@ export class TopicRepository {
     ): Promise<TopicCandidate[]> {
         const goalScope = await this.findActiveGoalScope(userId);
 
-        const scopeIds = subjectId
-            ? goalScope.filter((id) => id === subjectId)
-            : goalScope;
+        const scopeIds = subjectId ? goalScope.filter((id) => id === subjectId) : goalScope;
 
         // A subject that is not in the goal narrows the scope to nothing, which the caller reports as
         // an empty state rather than silently falling back to the whole syllabus.
@@ -129,9 +127,7 @@ export class TopicRepository {
 
         if (error) throw error;
 
-        return new Map(
-            ((data ?? []) as MasteryRow[]).map((row) => [row.topic_id, row])
-        );
+        return new Map(((data ?? []) as MasteryRow[]).map((row) => [row.topic_id, row]));
     }
 }
 
@@ -139,8 +135,5 @@ function daysSince(timestamp: string | null, now: Date): number | null {
     if (!timestamp) return null;
 
     const millisecondsPerDay = 86_400_000;
-    return Math.max(
-        0,
-        (now.getTime() - new Date(timestamp).getTime()) / millisecondsPerDay
-    );
+    return Math.max(0, (now.getTime() - new Date(timestamp).getTime()) / millisecondsPerDay);
 }

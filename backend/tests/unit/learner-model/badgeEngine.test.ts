@@ -140,7 +140,13 @@ describe('streakReachedOn', () => {
 
     it('does not care what order the dates arrive in', () => {
         const dates = run('2026-08-14', 10);
-        const shuffled = [dates[5]!, dates[0]!, dates[9]!, ...dates.slice(1, 5), ...dates.slice(6, 9)];
+        const shuffled = [
+            dates[5]!,
+            dates[0]!,
+            dates[9]!,
+            ...dates.slice(1, 5),
+            ...dates.slice(6, 9),
+        ];
 
         expect(streakReachedOn(shuffled, 7)).toBe(streakReachedOn(dates, 7));
     });
@@ -166,17 +172,13 @@ describe('nextBadges — the part that motivates', () => {
 
     it('puts the closest target first', () => {
         // The top of the list should be the one actually within reach, or the list is just a menu.
-        const next = nextBadges(
-            inputs({ maxStreak: 29, totalAnswered: 30, topicsMastered: 0 })
-        );
+        const next = nextBadges(inputs({ maxStreak: 29, totalAnswered: 30, topicsMastered: 0 }));
 
         expect(next[0]?.family).toBe('streak');
     });
 
     it('drops a family that has nothing left to reach', () => {
-        const next = nextBadges(
-            inputs({ maxStreak: 500, activeDates: run('2026-08-14', 200) })
-        );
+        const next = nextBadges(inputs({ maxStreak: 500, activeDates: run('2026-08-14', 200) }));
 
         expect(next.find((b) => b.family === 'streak')).toBeUndefined();
     });

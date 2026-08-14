@@ -66,8 +66,8 @@ export default function Practice() {
 
                 <Empty title="Set a goal first">
                     <p className="muted" style={{ margin: 0 }}>
-                        Practice is drawn from the subjects in your goal. Tell us what you
-                        are preparing for and they will appear here.
+                        Practice is drawn from the subjects in your goal. Tell us what you are
+                        preparing for and they will appear here.
                     </p>
                     <p className="faint" style={{ marginTop: 10, marginBottom: 0 }}>
                         <Link to="/goals">Set your goal</Link>
@@ -127,17 +127,9 @@ export default function Practice() {
     );
 }
 
-function SubjectCard({
-    subject,
-    onStart,
-}: {
-    subject: GoalSubject;
-    onStart: () => void;
-}) {
+function SubjectCard({ subject, onStart }: { subject: GoalSubject; onStart: () => void }) {
     const coverage =
-        subject.topicCount > 0
-            ? Math.round((subject.topicsStarted / subject.topicCount) * 100)
-            : 0;
+        subject.topicCount > 0 ? Math.round((subject.topicsStarted / subject.topicCount) * 100) : 0;
 
     return (
         <div className="card stack" style={{ gap: 10 }}>
@@ -158,9 +150,7 @@ function SubjectCard({
                     {subject.averageMastery !== null && (
                         <> · mastery {Math.round(subject.averageMastery)}</>
                     )}
-                    {subject.topicsMastered > 0 && (
-                        <> · {subject.topicsMastered} mastered</>
-                    )}
+                    {subject.topicsMastered > 0 && <> · {subject.topicsMastered} mastered</>}
                 </div>
             </div>
 

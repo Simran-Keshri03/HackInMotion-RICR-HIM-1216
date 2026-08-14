@@ -1,8 +1,5 @@
 import { Router } from 'express';
-import {
-    generateQuestions,
-    generateQuestionsSchema,
-} from '@/controllers/questionController.js';
+import { generateQuestions, generateQuestionsSchema } from '@/controllers/questionController.js';
 import { requireAuth } from '@/middleware/authMiddleware.js';
 import { rateLimit } from '@/middleware/rateLimitMiddleware.js';
 import { validateBody } from '@/middleware/validationMiddleware.js';

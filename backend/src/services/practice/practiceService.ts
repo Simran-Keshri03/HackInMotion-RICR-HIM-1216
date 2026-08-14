@@ -78,10 +78,7 @@ export class PracticeService {
             input.answer
         );
 
-        const scoreBefore = await this.mastery.findScore(
-            input.userId,
-            question.topic_id
-        );
+        const scoreBefore = await this.mastery.findScore(input.userId, question.topic_id);
 
         const attempt = await this.attempts.insert({
             userId: input.userId,
@@ -198,17 +195,9 @@ export class PracticeService {
         const mastery = computeMastery(evidence);
 
         const lastAttemptAt = rows[0]?.attempted_at ?? new Date().toISOString();
-        const lastCorrectAt =
-            rows.find((row) => row.is_correct)?.attempted_at ?? null;
+        const lastCorrectAt = rows.find((row) => row.is_correct)?.attempted_at ?? null;
 
-        await this.mastery.save(
-            userId,
-            topicId,
-            evidence,
-            mastery,
-            lastAttemptAt,
-            lastCorrectAt
-        );
+        await this.mastery.save(userId, topicId, evidence, mastery, lastAttemptAt, lastCorrectAt);
 
         return {
             score: mastery.score,
@@ -251,8 +240,7 @@ export class PracticeService {
         try {
             const state = await this.revision.findState(userId, topicId);
 
-            const accuracyPercent =
-                answeredToday > 0 ? (correctToday / answeredToday) * 100 : 0;
+            const accuracyPercent = answeredToday > 0 ? (correctToday / answeredToday) * 100 : 0;
 
             const settledToday = state?.lastReviewedOn === today;
 
@@ -284,11 +272,7 @@ export class PracticeService {
             // reviewed: there is no interval to grow and no ease to adjust, so it gets its first
             // short gap.
             if (state === null && answeredToday <= 1) {
-                await this.revision.save(
-                    userId,
-                    topicId,
-                    firstSchedule(today, daysUntilExam)
-                );
+                await this.revision.save(userId, topicId, firstSchedule(today, daysUntilExam));
                 return;
             }
 

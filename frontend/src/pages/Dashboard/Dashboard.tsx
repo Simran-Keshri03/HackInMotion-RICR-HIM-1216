@@ -33,23 +33,15 @@ export default function Dashboard() {
 
     // Two independent requests. If the summary fails the recommendation can still render, and
     // vice versa — one slow endpoint should not blank the whole screen.
-    const summary = useApi<LearnerSummary>(() =>
-        api.get<LearnerSummary>('/learner/summary')
-    );
-    const session = useApi<NextSession>(() =>
-        api.get<NextSession>('/recommendations/next')
-    );
+    const summary = useApi<LearnerSummary>(() => api.get<LearnerSummary>('/learner/summary'));
+    const session = useApi<NextSession>(() => api.get<NextSession>('/recommendations/next'));
     // Whether a goal exists changes what the empty state should say. Without one the engine
     // ranks the whole syllabus, so "nothing to practise" is the wrong message — the learner
     // needs to be sent to set a goal, not told there is no work.
-    const goal = useApi<{ goal: Goal | null }>(() =>
-        api.get<{ goal: Goal | null }>('/goals')
-    );
+    const goal = useApi<{ goal: Goal | null }>(() => api.get<{ goal: Goal | null }>('/goals'));
     // The year grid and the badges. Its own request, so a slow year of squares never delays the one
     // thing this screen exists for — telling the learner what to do next.
-    const activity = useApi<ActivityResponse>(() =>
-        api.get<ActivityResponse>('/learner/activity')
-    );
+    const activity = useApi<ActivityResponse>(() => api.get<ActivityResponse>('/learner/activity'));
     // Just for the greeting, so it renders as soon as it arrives rather than waiting on the rest.
     const profile = useApi<{ profile: LearnerProfile }>(() =>
         api.get<{ profile: LearnerProfile }>('/learner/profile')
@@ -69,16 +61,16 @@ export default function Dashboard() {
             {!profile.loading && (
                 <div className="spread" style={{ alignItems: 'flex-start', gap: 16 }}>
                     <div style={{ minWidth: 0 }}>
-                    <span className="label">{greetingFor(new Date())}</span>
-                    <h1 style={{ marginBottom: 0 }}>
-                        {name ? `Welcome back, ${name}` : 'Welcome back'}
-                    </h1>
-                    {!name && (
-                        <p className="faint" style={{ margin: '6px 0 0' }}>
-                            <Link to="/settings">Add your name</Link> so this says hello
-                            properly.
-                        </p>
-                    )}
+                        <span className="label">{greetingFor(new Date())}</span>
+                        <h1 style={{ marginBottom: 0 }}>
+                            {name ? `Welcome back, ${name}` : 'Welcome back'}
+                        </h1>
+                        {!name && (
+                            <p className="faint" style={{ margin: '6px 0 0' }}>
+                                <Link to="/settings">Add your name</Link> so this says hello
+                                properly.
+                            </p>
+                        )}
                     </div>
 
                     {/* The page's mark, matching every other screen. */}
@@ -91,23 +83,17 @@ export default function Dashboard() {
             {/* ---------------------------------------------- next action */}
             {session.loading && <Loading label="Working out what you should do next…" />}
 
-            {session.error ? (
-                <Failed error={session.error} onRetry={session.reload} />
-            ) : null}
+            {session.error ? <Failed error={session.error} onRetry={session.reload} /> : null}
 
             {goal.data && !goal.data.goal && (
                 <div className="card stack">
                     <span className="label">Start here</span>
                     <p style={{ margin: 0 }}>
-                        You have not set a goal yet, so practice is being drawn from the
-                        whole syllabus. Tell us your exam and how much time you have and
-                        it will focus on what matters.
+                        You have not set a goal yet, so practice is being drawn from the whole
+                        syllabus. Tell us your exam and how much time you have and it will focus on
+                        what matters.
                     </p>
-                    <button
-                        type="button"
-                        className="primary"
-                        onClick={() => navigate('/goals')}
-                    >
+                    <button type="button" className="primary" onClick={() => navigate('/goals')}>
                         Set your goal
                     </button>
                 </div>
@@ -133,9 +119,7 @@ export default function Dashboard() {
                 <div className="card card--accent stack">
                     <div className="spread">
                         <span className="label">Do this next</span>
-                        <span
-                            className={`pill pill--${session.data.recommendation.difficulty}`}
-                        >
+                        <span className={`pill pill--${session.data.recommendation.difficulty}`}>
                             {session.data.recommendation.difficulty}
                         </span>
                     </div>
@@ -182,17 +166,12 @@ export default function Dashboard() {
                     <div className="spread">
                         <div>
                             <span className="label">{goal.data.goal.title}</span>
-                            <div className="faint">
-                                {goal.data.goal.dailyMinutes} min a day
-                            </div>
+                            <div className="faint">{goal.data.goal.dailyMinutes} min a day</div>
                         </div>
                         <div style={{ textAlign: 'right' }}>
-                            <div className="big">
-                                {Math.max(0, goal.data.goal.daysRemaining)}
-                            </div>
+                            <div className="big">{Math.max(0, goal.data.goal.daysRemaining)}</div>
                             <div className="faint">
-                                {goal.data.goal.daysRemaining === 1 ? 'day' : 'days'}{' '}
-                                left
+                                {goal.data.goal.daysRemaining === 1 ? 'day' : 'days'} left
                             </div>
                         </div>
                     </div>
@@ -220,26 +199,21 @@ export default function Dashboard() {
             {activity.data && (
                 <>
                     <ActivityHeatmap calendar={activity.data.calendar} />
-                    <Badges
-                        badges={activity.data.badges}
-                        upcoming={activity.data.upcoming}
-                    />
+                    <Badges badges={activity.data.badges} upcoming={activity.data.upcoming} />
                 </>
             )}
 
             {/* ---------------------------------------------- your numbers */}
             {summary.loading && <Loading label="Loading your progress…" />}
 
-            {summary.error ? (
-                <Failed error={summary.error} onRetry={summary.reload} />
-            ) : null}
+            {summary.error ? <Failed error={summary.error} onRetry={summary.reload} /> : null}
 
             {summary.data && !summary.data.hasActivity && (
                 <div className="card">
                     <span className="label">Your progress</span>
                     <p className="muted" style={{ marginTop: 10, marginBottom: 0 }}>
-                        Answer your first question and your mastery scores will
-                        start appearing here.
+                        Answer your first question and your mastery scores will start appearing
+                        here.
                     </p>
                 </div>
             )}
@@ -248,10 +222,7 @@ export default function Dashboard() {
                 <>
                     <div className="card">
                         <span className="label">Your numbers</span>
-                        <div
-                            className="row"
-                            style={{ marginTop: 14, gap: 32 }}
-                        >
+                        <div className="row" style={{ marginTop: 14, gap: 32 }}>
                             <Stat
                                 value={String(summary.data.attempts.total)}
                                 label="questions answered"
@@ -265,9 +236,7 @@ export default function Dashboard() {
                                 label="accuracy"
                             />
                             <Stat
-                                value={String(
-                                    summary.data.habits.currentStreakDays
-                                )}
+                                value={String(summary.data.habits.currentStreakDays)}
                                 label="day streak"
                             />
                             {/* Regularity, next to volume and accuracy on purpose: it is the one
@@ -285,8 +254,7 @@ export default function Dashboard() {
                         {summary.data.habits.longestStreakDays >
                             summary.data.habits.currentStreakDays && (
                             <p className="faint" style={{ marginTop: 12, marginBottom: 0 }}>
-                                Your best run was{' '}
-                                {summary.data.habits.longestStreakDays} days.
+                                Your best run was {summary.data.habits.longestStreakDays} days.
                             </p>
                         )}
                     </div>
@@ -308,9 +276,7 @@ export default function Dashboard() {
                                         style={{ marginTop: 6 }}
                                         role="progressbar"
                                         aria-label={`${topic.name} mastery`}
-                                        aria-valuenow={Math.round(
-                                            topic.masteryScore
-                                        )}
+                                        aria-valuenow={Math.round(topic.masteryScore)}
                                         aria-valuemin={0}
                                         aria-valuemax={100}
                                     >
@@ -322,9 +288,7 @@ export default function Dashboard() {
                                     </div>
                                     <span className="faint">
                                         based on {topic.attempts}{' '}
-                                        {topic.attempts === 1
-                                            ? 'attempt'
-                                            : 'attempts'}
+                                        {topic.attempts === 1 ? 'attempt' : 'attempts'}
                                     </span>
                                 </div>
                             ))}
@@ -333,8 +297,7 @@ export default function Dashboard() {
                                 answers is an estimate, and the interface should not pretend
                                 otherwise. */}
                             <p className="faint" style={{ margin: 0 }}>
-                                Mastery is an estimate from your answers so far, not
-                                a measurement.
+                                Mastery is an estimate from your answers so far, not a measurement.
                             </p>
                         </div>
                     )}
@@ -353,13 +316,7 @@ function Stat({ value, label }: { value: string; label: string }) {
     );
 }
 
-function MasterySignal({
-    score,
-    attempts,
-}: {
-    score: number | null;
-    attempts: number;
-}) {
+function MasterySignal({ score, attempts }: { score: number | null; attempts: number }) {
     if (score === null) {
         return (
             <p className="faint" style={{ margin: 0 }}>
@@ -373,8 +330,7 @@ function MasterySignal({
             <div className="spread">
                 <span className="faint">Current mastery</span>
                 <span className="mono">
-                    {Math.round(score)} · {attempts}{' '}
-                    {attempts === 1 ? 'attempt' : 'attempts'}
+                    {Math.round(score)} · {attempts} {attempts === 1 ? 'attempt' : 'attempts'}
                 </span>
             </div>
             <div className="meter" style={{ marginTop: 6 }}>

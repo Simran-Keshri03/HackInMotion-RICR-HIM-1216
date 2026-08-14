@@ -14,9 +14,7 @@ import { sendOk } from '@/utils/http.js';
 export async function getLearnerSummary(req: Request, res: Response) {
     const { userId, accessToken } = authOf(req);
 
-    const service = new LearnerModelService(
-        new LearnerRepository(userDb(accessToken))
-    );
+    const service = new LearnerModelService(new LearnerRepository(userDb(accessToken)));
 
     sendOk(res, await service.getSummary(userId));
 }

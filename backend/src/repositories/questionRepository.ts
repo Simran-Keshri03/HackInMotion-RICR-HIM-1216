@@ -17,8 +17,7 @@ export interface PracticeQuestion {
     marks: number;
 }
 
-const LEARNER_VISIBLE_COLUMNS =
-    'id, topic_id, question_type, body, options, difficulty, marks';
+const LEARNER_VISIBLE_COLUMNS = 'id, topic_id, question_type, body, options, difficulty, marks';
 
 export class QuestionRepository {
     private readonly db: SupabaseClient;

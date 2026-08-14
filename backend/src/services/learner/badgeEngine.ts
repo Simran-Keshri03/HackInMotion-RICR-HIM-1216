@@ -81,30 +81,126 @@ const TIERS: {
     describe: (target: number) => string;
 }[] = [
     // ---- streak ----
-    { family: 'streak', target: 3, id: 'streak-3', name: 'Getting Started', describe: (n) => `Studied ${n} days in a row.` },
-    { family: 'streak', target: 7, id: 'streak-7', name: 'One Week', describe: (n) => `Studied ${n} days in a row.` },
-    { family: 'streak', target: 30, id: 'streak-30', name: 'One Month', describe: (n) => `Studied ${n} days in a row.` },
-    { family: 'streak', target: 50, id: 'streak-50', name: '50 Days', describe: (n) => `Studied ${n} days in a row.` },
-    { family: 'streak', target: 100, id: 'streak-100', name: 'Century', describe: (n) => `Studied ${n} days in a row.` },
+    {
+        family: 'streak',
+        target: 3,
+        id: 'streak-3',
+        name: 'Getting Started',
+        describe: (n) => `Studied ${n} days in a row.`,
+    },
+    {
+        family: 'streak',
+        target: 7,
+        id: 'streak-7',
+        name: 'One Week',
+        describe: (n) => `Studied ${n} days in a row.`,
+    },
+    {
+        family: 'streak',
+        target: 30,
+        id: 'streak-30',
+        name: 'One Month',
+        describe: (n) => `Studied ${n} days in a row.`,
+    },
+    {
+        family: 'streak',
+        target: 50,
+        id: 'streak-50',
+        name: '50 Days',
+        describe: (n) => `Studied ${n} days in a row.`,
+    },
+    {
+        family: 'streak',
+        target: 100,
+        id: 'streak-100',
+        name: 'Century',
+        describe: (n) => `Studied ${n} days in a row.`,
+    },
 
     // ---- volume ----
-    { family: 'volume', target: 25, id: 'volume-25', name: 'First 25', describe: (n) => `Answered ${n} questions.` },
-    { family: 'volume', target: 100, id: 'volume-100', name: 'Hundred Up', describe: (n) => `Answered ${n} questions.` },
-    { family: 'volume', target: 500, id: 'volume-500', name: 'Five Hundred', describe: (n) => `Answered ${n} questions.` },
-    { family: 'volume', target: 1000, id: 'volume-1000', name: 'Thousand Club', describe: (n) => `Answered ${n} questions.` },
+    {
+        family: 'volume',
+        target: 25,
+        id: 'volume-25',
+        name: 'First 25',
+        describe: (n) => `Answered ${n} questions.`,
+    },
+    {
+        family: 'volume',
+        target: 100,
+        id: 'volume-100',
+        name: 'Hundred Up',
+        describe: (n) => `Answered ${n} questions.`,
+    },
+    {
+        family: 'volume',
+        target: 500,
+        id: 'volume-500',
+        name: 'Five Hundred',
+        describe: (n) => `Answered ${n} questions.`,
+    },
+    {
+        family: 'volume',
+        target: 1000,
+        id: 'volume-1000',
+        name: 'Thousand Club',
+        describe: (n) => `Answered ${n} questions.`,
+    },
 
     // ---- mastery ----
-    { family: 'mastery', target: 1, id: 'mastery-1', name: 'First Topic Mastered', describe: () => `Took a topic past ${MASTERY_BAR} mastery.` },
-    { family: 'mastery', target: 5, id: 'mastery-5', name: 'Five Mastered', describe: (n) => `Took ${n} topics past ${MASTERY_BAR} mastery.` },
-    { family: 'mastery', target: 15, id: 'mastery-15', name: 'Fifteen Mastered', describe: (n) => `Took ${n} topics past ${MASTERY_BAR} mastery.` },
+    {
+        family: 'mastery',
+        target: 1,
+        id: 'mastery-1',
+        name: 'First Topic Mastered',
+        describe: () => `Took a topic past ${MASTERY_BAR} mastery.`,
+    },
+    {
+        family: 'mastery',
+        target: 5,
+        id: 'mastery-5',
+        name: 'Five Mastered',
+        describe: (n) => `Took ${n} topics past ${MASTERY_BAR} mastery.`,
+    },
+    {
+        family: 'mastery',
+        target: 15,
+        id: 'mastery-15',
+        name: 'Fifteen Mastered',
+        describe: (n) => `Took ${n} topics past ${MASTERY_BAR} mastery.`,
+    },
 
     // ---- accuracy ----
-    { family: 'accuracy', target: 70, id: 'accuracy-70', name: 'Steady Hand', describe: (n) => `${n}% accuracy over ${MIN_ANSWERS_FOR_ACCURACY}+ questions.` },
-    { family: 'accuracy', target: 85, id: 'accuracy-85', name: 'Sharp', describe: (n) => `${n}% accuracy over ${MIN_ANSWERS_FOR_ACCURACY}+ questions.` },
+    {
+        family: 'accuracy',
+        target: 70,
+        id: 'accuracy-70',
+        name: 'Steady Hand',
+        describe: (n) => `${n}% accuracy over ${MIN_ANSWERS_FOR_ACCURACY}+ questions.`,
+    },
+    {
+        family: 'accuracy',
+        target: 85,
+        id: 'accuracy-85',
+        name: 'Sharp',
+        describe: (n) => `${n}% accuracy over ${MIN_ANSWERS_FOR_ACCURACY}+ questions.`,
+    },
 
     // ---- revision ----
-    { family: 'revision', target: 10, id: 'revision-10', name: 'Comes Back', describe: (n) => `Completed ${n} scheduled revisions.` },
-    { family: 'revision', target: 50, id: 'revision-50', name: 'Never Forgets', describe: (n) => `Completed ${n} scheduled revisions.` },
+    {
+        family: 'revision',
+        target: 10,
+        id: 'revision-10',
+        name: 'Comes Back',
+        describe: (n) => `Completed ${n} scheduled revisions.`,
+    },
+    {
+        family: 'revision',
+        target: 50,
+        id: 'revision-50',
+        name: 'Never Forgets',
+        describe: (n) => `Completed ${n} scheduled revisions.`,
+    },
 ];
 
 function valueFor(family: BadgeFamily, inputs: BadgeInputs): number {
@@ -142,8 +238,7 @@ export function streakReachedOn(activeDates: string[], length: number): string |
         const previous = i > 0 ? sorted[i - 1]! : null;
         const consecutive =
             previous !== null &&
-            Date.parse(`${sorted[i]!}T00:00:00Z`) -
-                Date.parse(`${previous}T00:00:00Z`) ===
+            Date.parse(`${sorted[i]!}T00:00:00Z`) - Date.parse(`${previous}T00:00:00Z`) ===
                 86_400_000;
 
         run = consecutive ? run + 1 : 1;
@@ -168,9 +263,7 @@ export function earnedBadges(inputs: BadgeInputs): Badge[] {
             description: tier.describe(tier.target),
             // Only streaks can say when. Claiming a date for the others would mean inventing one.
             earnedOn:
-                tier.family === 'streak'
-                    ? streakReachedOn(inputs.activeDates, tier.target)
-                    : null,
+                tier.family === 'streak' ? streakReachedOn(inputs.activeDates, tier.target) : null,
         });
     }
 
@@ -192,9 +285,7 @@ export function nextBadges(inputs: BadgeInputs): BadgeProgress[] {
 
     for (const family of families) {
         const current = valueFor(family, inputs);
-        const next = TIERS.find(
-            (tier) => tier.family === family && current < tier.target
-        );
+        const next = TIERS.find((tier) => tier.family === family && current < tier.target);
 
         if (!next) continue;
 
@@ -209,7 +300,5 @@ export function nextBadges(inputs: BadgeInputs): BadgeProgress[] {
     }
 
     // Closest to completion first, so the top of the list is the one actually within reach.
-    return upcoming.sort(
-        (a, b) => b.current / b.target - a.current / a.target
-    );
+    return upcoming.sort((a, b) => b.current / b.target - a.current / a.target);
 }

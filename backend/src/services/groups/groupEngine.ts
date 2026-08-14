@@ -74,9 +74,7 @@ export function rankMembers(members: SharedProgress[]): GroupComparison {
 
     for (const [index, member] of sorted.entries()) {
         const rank =
-            lastScore !== null && member.questionsAnswered === lastScore
-                ? lastRank
-                : index + 1;
+            lastScore !== null && member.questionsAnswered === lastScore ? lastRank : index + 1;
 
         ranked.push({ ...member, rank });
         lastScore = member.questionsAnswered;
@@ -94,14 +92,8 @@ export function rankMembers(members: SharedProgress[]): GroupComparison {
         yourRank: you?.rank ?? null,
         memberCount: ranked.length,
         totals: {
-            questionsAnswered: ranked.reduce(
-                (sum, member) => sum + member.questionsAnswered,
-                0
-            ),
-            topicsMastered: ranked.reduce(
-                (sum, member) => sum + member.topicsMastered,
-                0
-            ),
+            questionsAnswered: ranked.reduce((sum, member) => sum + member.questionsAnswered, 0),
+            topicsMastered: ranked.reduce((sum, member) => sum + member.topicsMastered, 0),
         },
         topStreak: withStreak[0]
             ? {

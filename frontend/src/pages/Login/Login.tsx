@@ -83,11 +83,7 @@ export default function Login() {
 
         try {
             if (mode === 'signup') {
-                const { needsEmailConfirm } = await signUp(
-                    email.trim(),
-                    password,
-                    name
-                );
+                const { needsEmailConfirm } = await signUp(email.trim(), password, name);
 
                 if (needsEmailConfirm) {
                     setNotice(
@@ -101,14 +97,11 @@ export default function Login() {
                 await signIn(email.trim(), password);
             }
         } catch (cause) {
-            setError(
-                cause instanceof Error ? cause.message : 'Something went wrong. Try again.'
-            );
+            setError(cause instanceof Error ? cause.message : 'Something went wrong. Try again.');
         } finally {
             setBusy(false);
         }
     }
-
 
     const canSubmit =
         email.trim() !== '' &&
@@ -136,8 +129,8 @@ export default function Login() {
                             <span className="authpitch__accent">Stronger you.</span>
                         </h1>
                         <p className="muted" style={{ maxWidth: '46ch' }}>
-                            Adaptive learning and a study planner that works out what to give
-                            you next — and tells you why it chose it.
+                            Adaptive learning and a study planner that works out what to give you
+                            next — and tells you why it chose it.
                         </p>
                     </div>
 
@@ -152,9 +145,7 @@ export default function Login() {
                                     <Icon name={feature.icon} />
                                 </span>
                                 <div style={{ minWidth: 0 }}>
-                                    <strong style={{ fontSize: '0.95rem' }}>
-                                        {feature.title}
-                                    </strong>
+                                    <strong style={{ fontSize: '0.95rem' }}>{feature.title}</strong>
                                     <div className="faint">{feature.body}</div>
                                 </div>
                             </div>
@@ -205,8 +196,7 @@ export default function Login() {
                                     />
                                 </div>
                                 <span className="faint">
-                                    This is what the app calls you, and what your study group
-                                    sees.
+                                    This is what the app calls you, and what your study group sees.
                                 </span>
                             </div>
                         )}
@@ -255,9 +245,7 @@ export default function Login() {
                                 <button
                                     type="button"
                                     className="inputwrap__action"
-                                    aria-label={
-                                        showPassword ? 'Hide password' : 'Show password'
-                                    }
+                                    aria-label={showPassword ? 'Hide password' : 'Show password'}
                                     onClick={() => setShowPassword((v) => !v)}
                                 >
                                     <Icon name={showPassword ? 'eyeOff' : 'eye'} size={16} />
@@ -273,14 +261,9 @@ export default function Login() {
                             className="primary wide"
                             disabled={busy || !canSubmit}
                         >
-                            {busy
-                                ? 'Working…'
-                                : mode === 'signin'
-                                  ? 'Sign in'
-                                  : 'Create account'}
+                            {busy ? 'Working…' : mode === 'signin' ? 'Sign in' : 'Create account'}
                         </button>
                     </form>
-
 
                     <p className="faint" style={{ margin: 0, textAlign: 'center' }}>
                         {mode === 'signin' ? (
@@ -312,11 +295,10 @@ export default function Login() {
 
             <footer className="authfoot">
                 <span className="faint">
-                    © {new Date().getFullYear()} Adigam AI. Adaptive Learning &amp;
-                    Personalized Study Planner.
+                    © {new Date().getFullYear()} Adigam AI. Adaptive Learning &amp; Personalized
+                    Study Planner.
                 </span>
             </footer>
         </div>
     );
 }
-

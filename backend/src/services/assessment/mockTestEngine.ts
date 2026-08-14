@@ -104,13 +104,8 @@ export function planMockTest(
     requestedQuestions: number,
     secondsPerQuestion: number | null
 ): MockTestPlan {
-    const {
-        minQuestions,
-        maxQuestions,
-        maxTopics,
-        minPerTopic,
-        fallbackSecondsPerQuestion,
-    } = MOCK_TEST_CONFIG;
+    const { minQuestions, maxQuestions, maxTopics, minPerTopic, fallbackSecondsPerQuestion } =
+        MOCK_TEST_CONFIG;
 
     const empty: MockTestPlan = {
         allocations: [],
@@ -119,10 +114,7 @@ export function planMockTest(
         omitted: [],
     };
 
-    const target = Math.min(
-        maxQuestions,
-        Math.max(minQuestions, Math.round(requestedQuestions))
-    );
+    const target = Math.min(maxQuestions, Math.max(minQuestions, Math.round(requestedQuestions)));
 
     const omitted: { name: string; reason: string }[] = [];
 
@@ -169,10 +161,7 @@ export function planMockTest(
 
         return {
             topic,
-            count: Math.max(
-                minPerTopic,
-                Math.min(topic.availableQuestions, ideal || minPerTopic)
-            ),
+            count: Math.max(minPerTopic, Math.min(topic.availableQuestions, ideal || minPerTopic)),
         };
     });
 
@@ -194,9 +183,7 @@ export function planMockTest(
     while (total < target) {
         const taker = allocations
             .filter((entry) => entry.count < entry.topic.availableQuestions)
-            .sort(
-                (a, b) => topicShare(b.topic) - topicShare(a.topic)
-            )[0];
+            .sort((a, b) => topicShare(b.topic) - topicShare(a.topic))[0];
 
         // The bank simply does not hold `target` questions across these topics. A shorter test is the
         // honest outcome, not a failure.

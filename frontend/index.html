@@ -1,12 +1,12 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Adigam AI — Adaptive Learning</title>
-      <meta name="theme-color" content="#0e1117" />
-    <!--
+    <head>
+        <meta charset="UTF-8" />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Adigam AI — Adaptive Learning</title>
+        <meta name="theme-color" content="#0e1117" />
+        <!--
       Applies the saved theme before the first paint.
 
       Inline and blocking on purpose. Doing this from React means the dark palette renders and then
@@ -16,28 +16,27 @@
       Wrapped in try/catch because localStorage throws outright in a private window on some
       browsers, and a themed page is not worth a blank one.
     -->
-    <script>
-      try {
-        // Dark unless the learner explicitly asked for light.
-        //
-        // This used to follow the operating system when no preference was stored, which meant anybody
-        // whose machine is in light mode — most machines, by default — opened a study app in a bright
-        // palette they never chose. Dark is the brand and the better default for the hours this gets
-        // used in, so it is the default rather than a coin flip on somebody's system settings.
-        //
-        // "Match device" is still available in Settings; choosing it stores 'system' and this reads it.
-        var saved = localStorage.getItem('adigam-theme');
-        var wantsLight =
-          saved === 'light' ||
-          (saved === 'system' &&
-            window.matchMedia('(prefers-color-scheme: light)').matches);
-        if (wantsLight) document.documentElement.setAttribute('data-theme', 'light');
-      } catch (e) {}
-    </script>
-
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+        <script>
+            try {
+                // Dark unless the learner explicitly asked for light.
+                //
+                // This used to follow the operating system when no preference was stored, which meant anybody
+                // whose machine is in light mode — most machines, by default — opened a study app in a bright
+                // palette they never chose. Dark is the brand and the better default for the hours this gets
+                // used in, so it is the default rather than a coin flip on somebody's system settings.
+                //
+                // "Match device" is still available in Settings; choosing it stores 'system' and this reads it.
+                var saved = localStorage.getItem('adigam-theme');
+                var wantsLight =
+                    saved === 'light' ||
+                    (saved === 'system' &&
+                        window.matchMedia('(prefers-color-scheme: light)').matches);
+                if (wantsLight) document.documentElement.setAttribute('data-theme', 'light');
+            } catch (e) {}
+        </script>
+    </head>
+    <body>
+        <div id="root"></div>
+        <script type="module" src="/src/main.tsx"></script>
+    </body>
 </html>

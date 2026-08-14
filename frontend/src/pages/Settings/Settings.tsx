@@ -73,17 +73,15 @@ export default function Settings() {
         setSaving(true);
 
         try {
-            const result = await api.patch<{ profile: LearnerProfile }>(
-                '/learner/profile',
-                { displayName: name.trim(), timezone }
-            );
+            const result = await api.patch<{ profile: LearnerProfile }>('/learner/profile', {
+                displayName: name.trim(),
+                timezone,
+            });
 
             profile.setData({ profile: result.profile });
             setSaved(true);
         } catch (cause) {
-            setError(
-                cause instanceof Error ? cause.message : 'Could not save your settings.'
-            );
+            setError(cause instanceof Error ? cause.message : 'Could not save your settings.');
         } finally {
             setSaving(false);
         }
@@ -109,9 +107,7 @@ export default function Settings() {
                 </span>
             </div>
 
-            {profile.error ? (
-                <Failed error={profile.error} onRetry={profile.reload} />
-            ) : null}
+            {profile.error ? <Failed error={profile.error} onRetry={profile.reload} /> : null}
 
             {error && <div className="banner banner--error">{error}</div>}
             {saved && <div className="banner">Saved.</div>}
@@ -133,12 +129,13 @@ export default function Settings() {
                         aria-pressed={theme === option.value}
                         onClick={() => setTheme(option.value)}
                     >
-                        <span className="option__mark">
-                            {theme === option.value ? '✓' : ''}
-                        </span>
+                        <span className="option__mark">{theme === option.value ? '✓' : ''}</span>
                         <span>
                             {option.label}
-                            <span className="faint">{' — '}{option.hint}</span>
+                            <span className="faint">
+                                {' — '}
+                                {option.hint}
+                            </span>
                         </span>
                     </button>
                 ))}
@@ -188,8 +185,8 @@ export default function Settings() {
                         ))}
                     </select>
                     <span className="faint">
-                        This decides when your day starts and ends — your streak, whether a
-                        session counts as missed, and when a revision falls due.
+                        This decides when your day starts and ends — your streak, whether a session
+                        counts as missed, and when a revision falls due.
                     </span>
                 </div>
 

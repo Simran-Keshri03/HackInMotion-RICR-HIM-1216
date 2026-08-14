@@ -109,13 +109,8 @@ export const ANSWER_CHECK_SCHEMA = {
     },
 } as const;
 
-export function answerCheckPrompt(question: {
-    body: string;
-    options: string[];
-}): string {
-    const options = question.options
-        .map((option, index) => `${index}: ${option}`)
-        .join('\n');
+export function answerCheckPrompt(question: { body: string; options: string[] }): string {
+    const options = question.options.map((option, index) => `${index}: ${option}`).join('\n');
 
     return `Question:\n${question.body}\n\nOptions:\n${options}`;
 }
@@ -258,9 +253,7 @@ export function tutorPrompt(question: string, context: TutorContext): string {
     }
 
     const contextBlock =
-        lines.length > 0
-            ? `What you know about this student:\n\n${lines.join('\n\n')}\n\n`
-            : '';
+        lines.length > 0 ? `What you know about this student:\n\n${lines.join('\n\n')}\n\n` : '';
 
     // The question is fenced and labelled so a question containing instructions reads as the
     // student's words rather than as direction to you.

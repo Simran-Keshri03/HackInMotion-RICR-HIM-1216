@@ -72,17 +72,10 @@ export function Empty({
  * drop or a server error, not a 400. An always-visible retry button on a permanent failure
  * teaches learners the button does nothing.
  */
-export function Failed({
-    error,
-    onRetry,
-}: {
-    error: unknown;
-    onRetry?: () => void;
-}): ReactElement {
+export function Failed({ error, onRetry }: { error: unknown; onRetry?: () => void }): ReactElement {
     const apiError = error instanceof ApiError ? error : null;
     const message =
-        apiError?.message ??
-        (error instanceof Error ? error.message : 'Something went wrong.');
+        apiError?.message ?? (error instanceof Error ? error.message : 'Something went wrong.');
 
     // Unknown errors get a retry too: we cannot rule out that they are transient.
     const canRetry = onRetry && (apiError === null || apiError.retryable);
@@ -94,11 +87,7 @@ export function Failed({
             </div>
 
             {canRetry && (
-                <button
-                    type="button"
-                    onClick={onRetry}
-                    style={{ marginTop: 14 }}
-                >
+                <button type="button" onClick={onRetry} style={{ marginTop: 14 }}>
                     Try again
                 </button>
             )}

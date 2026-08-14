@@ -26,14 +26,11 @@ export function PracticeSession({
     subjectId: string | null;
     onExit: () => void;
 }) {
-
     // Re-fetches when the subject changes, which is what `deps` on useApi is for.
     const session = useApi<NextSession>(
         () =>
             api.get<NextSession>(
-                subjectId
-                    ? `/recommendations/next?subject=${subjectId}`
-                    : '/recommendations/next'
+                subjectId ? `/recommendations/next?subject=${subjectId}` : '/recommendations/next'
             ),
         [subjectId]
     );
@@ -75,8 +72,7 @@ export function PracticeSession({
                 }
             >
                 <p className="muted">
-                    {session.data?.reason ??
-                        'There is nothing to practise on this topic yet.'}
+                    {session.data?.reason ?? 'There is nothing to practise on this topic yet.'}
                 </p>
             </Empty>
         );
@@ -91,11 +87,7 @@ export function PracticeSession({
             <Empty
                 title="Session finished"
                 action={
-                    <button
-                        type="button"
-                        className="primary"
-                        onClick={onExit}
-                    >
+                    <button type="button" className="primary" onClick={onExit}>
                         Pick another subject
                     </button>
                 }
@@ -130,23 +122,14 @@ export function PracticeSession({
             const payload = {
                 questionId: question.id,
                 // Exactly one of these, matching what the backend's schema requires.
-                ...(isChoice
-                    ? { selectedOptions: selected }
-                    : { value: Number(numericValue) }),
-                timeTakenSeconds: Math.min(
-                    3600,
-                    Math.round((Date.now() - startedAt) / 1000)
-                ),
+                ...(isChoice ? { selectedOptions: selected } : { value: Number(numericValue) }),
+                timeTakenSeconds: Math.min(3600, Math.round((Date.now() - startedAt) / 1000)),
                 source: 'practice' as const,
             };
 
             setResult(await api.post<AttemptResult>('/attempts', payload));
         } catch (cause) {
-            setSubmitError(
-                cause instanceof Error
-                    ? cause.message
-                    : 'Could not save your answer.'
-            );
+            setSubmitError(cause instanceof Error ? cause.message : 'Could not save your answer.');
         } finally {
             setSubmitting(false);
         }
@@ -164,9 +147,7 @@ export function PracticeSession({
     // Which options to mark once the answer is known. The correct answer arrives only in the
     // attempt response, so this is empty until then.
     const correctIndexes =
-        result && Array.isArray(result.correctAnswer)
-            ? (result.correctAnswer as number[])
-            : [];
+        result && Array.isArray(result.correctAnswer) ? (result.correctAnswer as number[]) : [];
 
     return (
         <div className="stack">
@@ -177,9 +158,7 @@ export function PracticeSession({
                         Question {index + 1} of {questions.length}
                     </div>
                 </div>
-                <span className={`pill pill--${question.difficulty}`}>
-                    {question.difficulty}
-                </span>
+                <span className={`pill pill--${question.difficulty}`}>{question.difficulty}</span>
             </div>
 
             <div className="card stack">
@@ -241,9 +220,7 @@ export function PracticeSession({
                     </div>
                 )}
 
-                {submitError && (
-                    <div className="banner banner--error">{submitError}</div>
-                )}
+                {submitError && <div className="banner banner--error">{submitError}</div>}
 
                 {!result && (
                     <button
@@ -259,20 +236,14 @@ export function PracticeSession({
 
             {result && (
                 <div className="card stack">
-                    <div
-                        className={`banner banner--${result.isCorrect ? 'good' : 'error'}`}
-                    >
-                        <strong>
-                            {result.isCorrect ? 'Correct' : 'Not quite'}
-                        </strong>
+                    <div className={`banner banner--${result.isCorrect ? 'good' : 'error'}`}>
+                        <strong>{result.isCorrect ? 'Correct' : 'Not quite'}</strong>
                     </div>
 
                     {result.explanation && (
                         <div>
                             <span className="label">Why</span>
-                            <p style={{ marginTop: 8, marginBottom: 0 }}>
-                                {result.explanation}
-                            </p>
+                            <p style={{ marginTop: 8, marginBottom: 0 }}>{result.explanation}</p>
                         </div>
                     )}
 
@@ -291,11 +262,7 @@ export function PracticeSession({
 
                     {isLast ? (
                         <div className="stack" style={{ gap: 8 }}>
-                            <button
-                                type="button"
-                                className="primary wide"
-                                onClick={onExit}
-                            >
+                            <button type="button" className="primary wide" onClick={onExit}>
                                 Finish
                             </button>
                             <p className="faint" style={{ margin: 0, textAlign: 'center' }}>
@@ -303,11 +270,7 @@ export function PracticeSession({
                             </p>
                         </div>
                     ) : (
-                        <button
-                            type="button"
-                            className="primary wide"
-                            onClick={next}
-                        >
+                        <button type="button" className="primary wide" onClick={next}>
                             Next question
                         </button>
                     )}
@@ -340,10 +303,7 @@ function MasteryChange({ mastery }: { mastery: AttemptResult['mastery'] }) {
                 <span className="big mono">{Math.round(after)}</span>
 
                 {change !== null && change !== 0 && (
-                    <span
-                        className="mono"
-                        style={{ color: rose ? 'var(--good)' : 'var(--bad)' }}
-                    >
+                    <span className="mono" style={{ color: rose ? 'var(--good)' : 'var(--bad)' }}>
                         {rose ? '+' : ''}
                         {change.toFixed(1)}
                     </span>
@@ -357,9 +317,8 @@ function MasteryChange({ mastery }: { mastery: AttemptResult['mastery'] }) {
             {/* Honest framing: early scores move a lot because there is little evidence, and a
                 learner should understand that rather than reading a low number as a verdict. */}
             <p className="faint" style={{ marginTop: 8, marginBottom: 0 }}>
-                Based on {attemptsOnTopic}{' '}
-                {attemptsOnTopic === 1 ? 'attempt' : 'attempts'}. Scores move
-                more while there is less evidence.
+                Based on {attemptsOnTopic} {attemptsOnTopic === 1 ? 'attempt' : 'attempts'}. Scores
+                move more while there is less evidence.
             </p>
         </div>
     );

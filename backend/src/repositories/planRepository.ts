@@ -229,11 +229,13 @@ export class PlanRepository {
         if (masteryError) throw masteryError;
 
         const byTopic = new Map(
-            ((mastery ?? []) as {
-                topic_id: string;
-                mastery_score: number;
-                total_attempts: number;
-            }[]).map((row) => [row.topic_id, row])
+            (
+                (mastery ?? []) as {
+                    topic_id: string;
+                    mastery_score: number;
+                    total_attempts: number;
+                }[]
+            ).map((row) => [row.topic_id, row])
         );
 
         return leaves.map((leaf) => {
@@ -242,9 +244,7 @@ export class PlanRepository {
             return {
                 topicId: leaf.id,
                 name: leaf.name,
-                subjectName: leaf.parent_id
-                    ? (subjectNames.get(leaf.parent_id) ?? null)
-                    : null,
+                subjectName: leaf.parent_id ? (subjectNames.get(leaf.parent_id) ?? null) : null,
                 weight: Number(leaf.weight),
                 masteryScore: row ? Number(row.mastery_score) : null,
                 attempts: row ? Number(row.total_attempts) : 0,
@@ -363,8 +363,7 @@ export class PlanRepository {
                     questions_correct: Number(correct),
                     // The CHECK constraint requires a timestamp when the status is 'completed', and
                     // refuses one that claims completion without it.
-                    completed_at:
-                        status === 'completed' ? new Date().toISOString() : null,
+                    completed_at: status === 'completed' ? new Date().toISOString() : null,
                 })
                 .in('id', ids);
 
@@ -449,10 +448,7 @@ export class PlanRepository {
         if (nameError) throw nameError;
 
         const byId = new Map(
-            ((names ?? []) as { id: string; name: string }[]).map((row) => [
-                row.id,
-                row.name,
-            ])
+            ((names ?? []) as { id: string; name: string }[]).map((row) => [row.id, row.name])
         );
 
         return rows.map((row) => ({

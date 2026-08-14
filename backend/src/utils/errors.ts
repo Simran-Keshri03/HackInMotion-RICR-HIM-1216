@@ -7,11 +7,7 @@
  */
 
 export type AIErrorCode =
-    | 'AI_TIMEOUT'
-    | 'AI_RATE_LIMITED'
-    | 'AI_REFUSED'
-    | 'AI_MALFORMED'
-    | 'AI_UNAVAILABLE';
+    'AI_TIMEOUT' | 'AI_RATE_LIMITED' | 'AI_REFUSED' | 'AI_MALFORMED' | 'AI_UNAVAILABLE';
 
 /**
  * Thrown when the AI provider fails: timeout, network, rate limit, a declined request, or

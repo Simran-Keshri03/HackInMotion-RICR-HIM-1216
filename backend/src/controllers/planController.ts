@@ -22,9 +22,7 @@ export async function getCurrentPlan(req: Request, res: Response) {
 
     // Read as the learner; the goal is their own row and RLS applying is one less thing to reason
     // about.
-    const goal = await new GoalService(
-        new GoalRepository(userDb(accessToken))
-    ).getActive(userId);
+    const goal = await new GoalService(new GoalRepository(userDb(accessToken))).getActive(userId);
 
     // Elevated, because reading the plan may also settle past sessions and rebuild it — both writes
     // learners hold no privilege for. That is deliberate: a learner who could mark their own
@@ -62,9 +60,7 @@ export async function generatePlan(req: Request, res: Response) {
 
     // The goal is read as the learner: it is their own row, and RLS applying is one less thing to
     // reason about.
-    const goal = await new GoalService(
-        new GoalRepository(userDb(accessToken))
-    ).getActive(userId);
+    const goal = await new GoalService(new GoalRepository(userDb(accessToken))).getActive(userId);
 
     if (!goal) {
         throw new AppError(

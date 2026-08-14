@@ -24,10 +24,7 @@ export async function askTutor(req: Request, res: Response) {
     // Elevated client: writing a conversation, and reading the mastery and mistakes the reply is
     // grounded in, are both closed to learners. Every query is filtered by the user id from the
     // token.
-    const service = new TutorService(
-        claudeProvider(),
-        new AiRepository(adminDb)
-    );
+    const service = new TutorService(claudeProvider(), new AiRepository(adminDb));
 
     sendOk(
         res,
@@ -47,10 +44,7 @@ export async function listConversations(req: Request, res: Response) {
     const { userId, accessToken } = authOf(req);
 
     // Reads only, so the learner-scoped client is right: RLS is a second lock behind the user id.
-    const service = new TutorService(
-        unusedProvider(),
-        new AiRepository(userDb(accessToken))
-    );
+    const service = new TutorService(unusedProvider(), new AiRepository(userDb(accessToken)));
 
     sendOk(res, { conversations: await service.listConversations(userId) });
 }
@@ -65,10 +59,7 @@ export async function getConversation(req: Request, res: Response) {
         throw new AppError(400, 'INVALID_INPUT', 'That is not a conversation id.');
     }
 
-    const service = new TutorService(
-        unusedProvider(),
-        new AiRepository(userDb(accessToken))
-    );
+    const service = new TutorService(unusedProvider(), new AiRepository(userDb(accessToken)));
 
     sendOk(res, await service.getConversation(id.data, userId));
 }

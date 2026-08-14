@@ -147,9 +147,7 @@ export class QuestionBankService {
         try {
             const result = await this.generateForTopic(input);
 
-            return result.outcomes.some(
-                (outcome) => outcome.verified && outcome.stored
-            );
+            return result.outcomes.some((outcome) => outcome.verified && outcome.stored);
         } catch (error) {
             // A generation failure is not a practice failure. The caller falls back to saying the
             // topic has nothing yet, which is true, and the learner can try again.
@@ -162,9 +160,7 @@ export class QuestionBankService {
         }
     }
 
-    async generateForTopic(
-        input: GenerateQuestionsInput
-    ): Promise<GenerateQuestionsResult> {
+    async generateForTopic(input: GenerateQuestionsInput): Promise<GenerateQuestionsResult> {
         const topic = await this.questions.findTopicWithSubject(input.topicId);
 
         if (!topic) {
@@ -283,10 +279,7 @@ export class QuestionBankService {
                 };
             }
 
-            const verdict = agreesWithProposedAnswer(
-                question.correctOptionIndexes,
-                parsed.data
-            );
+            const verdict = agreesWithProposedAnswer(question.correctOptionIndexes, parsed.data);
 
             return { ...verdict, usage: response.usage };
         } catch {

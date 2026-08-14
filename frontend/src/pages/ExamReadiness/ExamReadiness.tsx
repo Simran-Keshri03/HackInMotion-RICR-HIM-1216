@@ -70,9 +70,7 @@ function GapList({
                     <div key={gap.topicId} className="spread">
                         <span>
                             {gap.name}
-                            {gap.subjectName && (
-                                <span className="faint"> · {gap.subjectName}</span>
-                            )}
+                            {gap.subjectName && <span className="faint"> · {gap.subjectName}</span>}
                         </span>
                         <span className="muted" style={{ whiteSpace: 'nowrap' }}>
                             {gap.masteryScore === null
@@ -87,13 +85,10 @@ function GapList({
 }
 
 export default function ExamReadiness() {
-    const readiness = useApi<ReadinessResponse>(() =>
-        api.get<ReadinessResponse>('/readiness')
-    );
+    const readiness = useApi<ReadinessResponse>(() => api.get<ReadinessResponse>('/readiness'));
 
     if (readiness.loading) return <Loading label="Working out where you stand…" />;
-    if (readiness.error)
-        return <Failed error={readiness.error} onRetry={readiness.reload} />;
+    if (readiness.error) return <Failed error={readiness.error} onRetry={readiness.reload} />;
 
     const goal = readiness.data?.goal ?? null;
     const result = readiness.data?.readiness ?? null;

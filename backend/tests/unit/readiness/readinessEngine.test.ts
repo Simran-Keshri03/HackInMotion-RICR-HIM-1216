@@ -235,9 +235,24 @@ describe('scoreReadiness — gaps name what to do', () => {
         const result = scoreReadiness(
             input({
                 topics: [
-                    topic({ topicId: 'a', name: 'Alpha, untouched', masteryScore: null, attempts: 0 }),
-                    topic({ topicId: 'b', name: 'Bravo, untouched', masteryScore: null, attempts: 0 }),
-                    topic({ topicId: 'z', name: 'Zulu, measured badly', masteryScore: 20, attempts: 14 }),
+                    topic({
+                        topicId: 'a',
+                        name: 'Alpha, untouched',
+                        masteryScore: null,
+                        attempts: 0,
+                    }),
+                    topic({
+                        topicId: 'b',
+                        name: 'Bravo, untouched',
+                        masteryScore: null,
+                        attempts: 0,
+                    }),
+                    topic({
+                        topicId: 'z',
+                        name: 'Zulu, measured badly',
+                        masteryScore: 20,
+                        attempts: 14,
+                    }),
                 ],
             })
         );
@@ -266,8 +281,20 @@ describe('scoreReadiness — gaps name what to do', () => {
         const result = scoreReadiness(
             input({
                 topics: [
-                    topic({ topicId: 'l', name: 'Light', weight: 0.5, masteryScore: null, attempts: 0 }),
-                    topic({ topicId: 'h', name: 'Heavy', weight: 4, masteryScore: null, attempts: 0 }),
+                    topic({
+                        topicId: 'l',
+                        name: 'Light',
+                        weight: 0.5,
+                        masteryScore: null,
+                        attempts: 0,
+                    }),
+                    topic({
+                        topicId: 'h',
+                        name: 'Heavy',
+                        weight: 4,
+                        masteryScore: null,
+                        attempts: 0,
+                    }),
                 ],
             })
         );

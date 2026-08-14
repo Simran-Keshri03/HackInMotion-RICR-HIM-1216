@@ -150,9 +150,9 @@ describe('QuestionBankService.fillIfEmpty', () => {
 
         const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
 
-        await expect(
-            new QuestionBankService(provider, repo).fillIfEmpty(input)
-        ).resolves.toBe(false);
+        await expect(new QuestionBankService(provider, repo).fillIfEmpty(input)).resolves.toBe(
+            false
+        );
 
         warn.mockRestore();
     });

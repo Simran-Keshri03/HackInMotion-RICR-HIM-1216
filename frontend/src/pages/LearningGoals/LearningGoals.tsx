@@ -43,11 +43,7 @@ function daysUntil(isoDate: string): number {
     if (Number.isNaN(target)) return Number.NaN;
 
     const now = new Date();
-    const today = Date.UTC(
-        now.getUTCFullYear(),
-        now.getUTCMonth(),
-        now.getUTCDate()
-    );
+    const today = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
 
     return Math.round((target - today) / 86_400_000);
 }
@@ -68,9 +64,7 @@ interface Resolved {
 export default function LearningGoals() {
     const navigate = useNavigate();
 
-    const existing = useApi<{ goal: Goal | null }>(() =>
-        api.get<{ goal: Goal | null }>('/goals')
-    );
+    const existing = useApi<{ goal: Goal | null }>(() => api.get<{ goal: Goal | null }>('/goals'));
 
     // Step one.
     const [goalText, setGoalText] = useState('');
@@ -137,11 +131,7 @@ export default function LearningGoals() {
                     subjects,
                 });
             } catch (cause) {
-                setError(
-                    cause instanceof Error
-                        ? cause.message
-                        : 'Could not load your syllabus.'
-                );
+                setError(cause instanceof Error ? cause.message : 'Could not load your syllabus.');
             }
         })();
     }, [current, prefilled]);
@@ -152,9 +142,7 @@ export default function LearningGoals() {
     const canSave = title.trim() !== '' && dateIsSane && chosen.length > 0;
 
     function toggleSubject(id: string) {
-        setChosen((ids) =>
-            ids.includes(id) ? ids.filter((x) => x !== id) : [...ids, id]
-        );
+        setChosen((ids) => (ids.includes(id) ? ids.filter((x) => x !== id) : [...ids, id]));
     }
 
     /** Step one: hand what they typed to the model and see whether it names something studiable. */
@@ -207,11 +195,7 @@ export default function LearningGoals() {
                 setAutoTitle(outcome.curriculum.name);
             }
         } catch (cause) {
-            setError(
-                cause instanceof Error
-                    ? cause.message
-                    : 'Could not look that up. Try again.'
-            );
+            setError(cause instanceof Error ? cause.message : 'Could not look that up. Try again.');
         } finally {
             setResolving(false);
         }
@@ -236,9 +220,7 @@ export default function LearningGoals() {
 
             navigate('/dashboard', { replace: true });
         } catch (cause) {
-            setError(
-                cause instanceof Error ? cause.message : 'Could not save your goal.'
-            );
+            setError(cause instanceof Error ? cause.message : 'Could not save your goal.');
         } finally {
             setSaving(false);
         }
@@ -256,18 +238,16 @@ export default function LearningGoals() {
             <form className="stack" onSubmit={handleResolve}>
                 <div className="spread" style={{ alignItems: 'flex-start', gap: 16 }}>
                     <div style={{ minWidth: 0 }}>
-                    <span className="label">
-                        {current ? 'Your goal' : 'Set your goal'}
-                    </span>
-                    <h1 style={{ marginBottom: 6 }}>What are you preparing for?</h1>
-                    <p className="muted" style={{ margin: 0 }}>
-                        Type it however you say it — <em>class 10</em>,{' '}
-                        <em>12th boards</em>, <em>GATE CSE</em>. The syllabus is worked
-                        out from that, and everything you practise comes from it.
-                    </p>
+                        <span className="label">{current ? 'Your goal' : 'Set your goal'}</span>
+                        <h1 style={{ marginBottom: 6 }}>What are you preparing for?</h1>
+                        <p className="muted" style={{ margin: 0 }}>
+                            Type it however you say it — <em>class 10</em>, <em>12th boards</em>,{' '}
+                            <em>GATE CSE</em>. The syllabus is worked out from that, and everything
+                            you practise comes from it.
+                        </p>
                     </div>
 
-                {/* The page's mark. Every screen has one so a page is recognisable at a glance
+                    {/* The page's mark. Every screen has one so a page is recognisable at a glance
                     rather than being a heading above a stack of dark rectangles. Hidden on narrow
                     screens, where it would push the heading onto two awkward lines. */}
                     <span className="hero-mark" aria-hidden="true">
@@ -292,8 +272,8 @@ export default function LearningGoals() {
                             onChange={(e) => setGoalText(e.target.value)}
                         />
                         <span className="faint">
-                            A syllabus somebody has already looked up is instant. A new one
-                            takes a few seconds to work out.
+                            A syllabus somebody has already looked up is instant. A new one takes a
+                            few seconds to work out.
                         </span>
                     </div>
 
@@ -332,8 +312,7 @@ export default function LearningGoals() {
 
             {current && (
                 <div className="banner">
-                    Saving replaces your current goal. Your answers and mastery scores
-                    are kept.
+                    Saving replaces your current goal. Your answers and mastery scores are kept.
                 </div>
             )}
 
@@ -364,8 +343,7 @@ export default function LearningGoals() {
                     />
                     {dateIsSane ? (
                         <span className="faint">
-                            {daysRemaining}{' '}
-                            {daysRemaining === 1 ? 'day' : 'days'} from today
+                            {daysRemaining} {daysRemaining === 1 ? 'day' : 'days'} from today
                         </span>
                     ) : (
                         <span className="faint" style={{ color: 'var(--bad)' }}>
@@ -384,13 +362,11 @@ export default function LearningGoals() {
                         step={5}
                         value={dailyMinutes}
                         required
-                        onChange={(e) =>
-                            setDailyMinutes(Number(e.target.value) || 0)
-                        }
+                        onChange={(e) => setDailyMinutes(Number(e.target.value) || 0)}
                     />
                     <span className="faint">
-                        Be honest — the plan is only useful if this is a number you will
-                        actually hit.
+                        Be honest — the plan is only useful if this is a number you will actually
+                        hit.
                     </span>
                 </div>
             </div>
@@ -399,8 +375,8 @@ export default function LearningGoals() {
                 <div>
                     <span className="label">What do you want to study?</span>
                     <p className="faint" style={{ margin: '6px 0 0' }}>
-                        Pick the subjects you are sitting. Only these will be practised —
-                        questions never come from a subject you did not choose.
+                        Pick the subjects you are sitting. Only these will be practised — questions
+                        never come from a subject you did not choose.
                     </p>
                 </div>
 
@@ -459,8 +435,7 @@ export default function LearningGoals() {
                     </div>
                     {topicsChosen > 0 && (
                         <p className="faint" style={{ marginTop: 12, marginBottom: 0 }}>
-                            About{' '}
-                            {describeBudget(Math.round(totalMinutes / topicsChosen))} per
+                            About {describeBudget(Math.round(totalMinutes / topicsChosen))} per
                             topic, if you keep to it.
                         </p>
                     )}
@@ -480,16 +455,8 @@ export default function LearningGoals() {
                     Change goal
                 </button>
 
-                <button
-                    type="submit"
-                    className="primary wide"
-                    disabled={!canSave || saving}
-                >
-                    {saving
-                        ? 'Saving…'
-                        : current
-                          ? 'Update goal'
-                          : 'Save goal and start'}
+                <button type="submit" className="primary wide" disabled={!canSave || saving}>
+                    {saving ? 'Saving…' : current ? 'Update goal' : 'Save goal and start'}
                 </button>
             </div>
         </form>

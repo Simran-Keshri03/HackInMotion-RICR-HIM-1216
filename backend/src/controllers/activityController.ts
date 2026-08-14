@@ -2,16 +2,8 @@ import type { Request, Response } from 'express';
 import { userDb } from '@/config/database.js';
 import { authOf } from '@/middleware/authMiddleware.js';
 import { LearnerRepository } from '@/repositories/learnerRepository.js';
-import {
-    CALENDAR_DAYS,
-    addDays,
-    buildCalendar,
-} from '@/services/learner/activityEngine.js';
-import {
-    MASTERY_BAR,
-    earnedBadges,
-    nextBadges,
-} from '@/services/learner/badgeEngine.js';
+import { CALENDAR_DAYS, addDays, buildCalendar } from '@/services/learner/activityEngine.js';
+import { MASTERY_BAR, earnedBadges, nextBadges } from '@/services/learner/badgeEngine.js';
 import { todayIn } from '@/utils/dates.js';
 import { sendOk } from '@/utils/http.js';
 
@@ -39,9 +31,7 @@ export async function getActivity(req: Request, res: Response) {
     const from = addDays(today, -(CALENDAR_DAYS - 1));
 
     const [activity, achievements, profile] = await Promise.all([
-        learners.findDailyActivity(userId, from, today, (at) =>
-            todayIn(timezone, new Date(at))
-        ),
+        learners.findDailyActivity(userId, from, today, (at) => todayIn(timezone, new Date(at))),
         learners.findAchievementCounts(userId, MASTERY_BAR),
         learners.findProfile(userId),
     ]);
@@ -85,9 +75,7 @@ export async function getActivity(req: Request, res: Response) {
 export async function getGoalSubjects(req: Request, res: Response) {
     const { userId, accessToken } = authOf(req);
 
-    const subjects = await new LearnerRepository(userDb(accessToken)).findGoalSubjects(
-        userId
-    );
+    const subjects = await new LearnerRepository(userDb(accessToken)).findGoalSubjects(userId);
 
     sendOk(res, { subjects });
 }

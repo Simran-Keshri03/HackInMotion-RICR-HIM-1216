@@ -18,9 +18,7 @@ export interface GradableQuestion {
 }
 
 /** What the learner sent. Options for choice questions, a number for numeric ones. */
-export type GivenAnswer =
-    | { selectedOptions: number[] }
-    | { value: number };
+export type GivenAnswer = { selectedOptions: number[] } | { value: number };
 
 // The stored shapes, as documented in 003_questions.sql. AI-generated rows could carry
 // something else, so every read is validated rather than cast.
@@ -31,11 +29,7 @@ const numericAnswerSchema = z.object({
 });
 
 function malformed(detail: string): AppError {
-    return new AppError(
-        500,
-        'QUESTION_MALFORMED',
-        `This question cannot be graded: ${detail}`
-    );
+    return new AppError(500, 'QUESTION_MALFORMED', `This question cannot be graded: ${detail}`);
 }
 
 export function gradeAnswer(
@@ -46,11 +40,7 @@ export function gradeAnswer(
         case 'mcq':
         case 'msq': {
             if (!('selectedOptions' in given)) {
-                throw new AppError(
-                    400,
-                    'INVALID_ANSWER',
-                    'This question needs selected options.'
-                );
+                throw new AppError(400, 'INVALID_ANSWER', 'This question needs selected options.');
             }
 
             const parsed = choiceAnswerSchema.safeParse(question.correctAnswer);
@@ -79,11 +69,7 @@ export function gradeAnswer(
 
         case 'numeric': {
             if (!('value' in given)) {
-                throw new AppError(
-                    400,
-                    'INVALID_ANSWER',
-                    'This question needs a numeric value.'
-                );
+                throw new AppError(400, 'INVALID_ANSWER', 'This question needs a numeric value.');
             }
 
             const parsed = numericAnswerSchema.safeParse(question.correctAnswer);

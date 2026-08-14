@@ -58,10 +58,7 @@ export class AiRepository {
      * client, which bypasses RLS, so nothing below would stop one learner reading another's
      * questions if it were left off.
      */
-    async findConversation(
-        conversationId: string,
-        userId: string
-    ): Promise<ConversationRow> {
+    async findConversation(conversationId: string, userId: string): Promise<ConversationRow> {
         const { data, error } = await this.db
             .from('ai_conversations')
             .select('id, topic_id, title, created_at, last_message_at')
@@ -74,11 +71,7 @@ export class AiRepository {
         if (!data) {
             // 404 rather than 403: telling somebody a conversation exists but is not theirs is
             // itself a leak.
-            throw new AppError(
-                404,
-                'CONVERSATION_NOT_FOUND',
-                'That conversation does not exist.'
-            );
+            throw new AppError(404, 'CONVERSATION_NOT_FOUND', 'That conversation does not exist.');
         }
 
         return data as ConversationRow;
@@ -105,9 +98,7 @@ export class AiRepository {
         if (error) throw error;
 
         return new Set(
-            ((data ?? []) as { conversation_id: string }[]).map(
-                (row) => row.conversation_id
-            )
+            ((data ?? []) as { conversation_id: string }[]).map((row) => row.conversation_id)
         );
     }
 
@@ -230,9 +221,7 @@ export class AiRepository {
 
         const wrongIds = [
             ...new Set(
-                ((wrongAttempts ?? []) as { question_id: string }[]).map(
-                    (row) => row.question_id
-                )
+                ((wrongAttempts ?? []) as { question_id: string }[]).map((row) => row.question_id)
             ),
         ];
 

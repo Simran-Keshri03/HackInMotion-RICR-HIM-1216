@@ -109,14 +109,10 @@ export default function AITutor() {
         setMessages([]);
 
         try {
-            const thread = await api.get<{ messages: TutorMessage[] }>(
-                `/ai/conversations/${id}`
-            );
+            const thread = await api.get<{ messages: TutorMessage[] }>(`/ai/conversations/${id}`);
             setMessages(thread.messages);
         } catch (cause) {
-            setError(
-                cause instanceof Error ? cause.message : 'Could not open that conversation.'
-            );
+            setError(cause instanceof Error ? cause.message : 'Could not open that conversation.');
         }
     }
 
@@ -130,7 +126,7 @@ export default function AITutor() {
         <div className="stack">
             <div className="spread">
                 <div className="row" style={{ gap: 14, alignItems: 'flex-start' }}>
-                {/* The page's mark. Every screen has one so a page is recognisable at a glance
+                    {/* The page's mark. Every screen has one so a page is recognisable at a glance
                     rather than being a heading above a stack of dark rectangles. Hidden on narrow
                     screens, where it would push the heading onto two awkward lines. */}
                     <span className="hero-mark" aria-hidden="true">
@@ -157,8 +153,8 @@ export default function AITutor() {
 
             {messages.length === 0 && (
                 <p className="muted" style={{ margin: 0 }}>
-                    Ask anything about what you are studying. Answers use what you have
-                    already practised, so they start where you actually are.
+                    Ask anything about what you are studying. Answers use what you have already
+                    practised, so they start where you actually are.
                 </p>
             )}
 
@@ -168,11 +164,7 @@ export default function AITutor() {
                     {messages.map((message, index) => (
                         <div
                             key={`${message.createdAt}-${index}`}
-                            className={
-                                message.role === 'learner'
-                                    ? 'card card--accent'
-                                    : 'card'
-                            }
+                            className={message.role === 'learner' ? 'card card--accent' : 'card'}
                         >
                             <div className="spread">
                                 <span className="label">
@@ -235,9 +227,7 @@ export default function AITutor() {
                         id="question"
                         value={voice.listening ? voice.heard : question}
                         maxLength={2000}
-                        placeholder={
-                            voice.listening ? 'Listening…' : 'Why does this formula work?'
-                        }
+                        placeholder={voice.listening ? 'Listening…' : 'Why does this formula work?'}
                         disabled={asking || voice.listening}
                         onChange={(e) => setQuestion(e.target.value)}
                     />
@@ -285,14 +275,11 @@ export default function AITutor() {
                         {asking ? 'Asking…' : 'Ask'}
                     </button>
                 </div>
-
             </form>
 
             {/* ------------------------------------------------ history */}
             {history.loading && <Loading label="Loading your questions…" />}
-            {history.error ? (
-                <Failed error={history.error} onRetry={history.reload} />
-            ) : null}
+            {history.error ? <Failed error={history.error} onRetry={history.reload} /> : null}
 
             {(history.data?.conversations.length ?? 0) > 0 && (
                 <div className="card stack" style={{ gap: 8 }}>
@@ -306,9 +293,7 @@ export default function AITutor() {
                             aria-pressed={thread.id === conversationId}
                             onClick={() => void openThread(thread.id)}
                         >
-                            <span className="option__mark">
-                                {thread.answered ? '' : '·'}
-                            </span>
+                            <span className="option__mark">{thread.answered ? '' : '·'}</span>
                             <span>
                                 {thread.title}
                                 {!thread.answered && (

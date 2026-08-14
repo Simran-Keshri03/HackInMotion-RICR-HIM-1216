@@ -136,14 +136,10 @@ function round2(value: number): number {
  * Separate from `nextReview` because a first sighting is not a review: there is no interval to grow
  * and no ease to adjust, and pretending otherwise would apply a multiplier to nothing.
  */
-export function firstSchedule(
-    studiedOn: string,
-    daysUntilExam: number | null
-): ScheduleUpdate {
+export function firstSchedule(studiedOn: string, daysUntilExam: number | null): ScheduleUpdate {
     const { firstIntervalDays, examBufferDays } = SRS_CONFIG;
 
-    const room =
-        daysUntilExam === null ? Number.POSITIVE_INFINITY : daysUntilExam - examBufferDays;
+    const room = daysUntilExam === null ? Number.POSITIVE_INFINITY : daysUntilExam - examBufferDays;
 
     if (room < firstIntervalDays) {
         return {
@@ -178,10 +174,7 @@ export function firstSchedule(
  * `state` is null for a topic being reviewed without a schedule yet — which happens for every topic
  * practised before this feature existed, so it is a normal path rather than an edge case.
  */
-export function nextReview(
-    state: ReviewState | null,
-    outcome: ReviewOutcome
-): ScheduleUpdate {
+export function nextReview(state: ReviewState | null, outcome: ReviewOutcome): ScheduleUpdate {
     const {
         passAccuracyPercent,
         lapseAccuracyPercent,

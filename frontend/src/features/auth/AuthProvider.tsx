@@ -1,12 +1,5 @@
 import type { Session } from '@supabase/auth-js';
-import {
-    type ReactNode,
-    createContext,
-    useContext,
-    useEffect,
-    useMemo,
-    useState,
-} from 'react';
+import { type ReactNode, createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 
 /**

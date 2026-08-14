@@ -96,10 +96,7 @@ export function planDiagnostic(
 ): DiagnosticPlan {
     const { minQuestions, maxQuestions, maxPerSubject } = DIAGNOSTIC_CONFIG;
 
-    const target = Math.min(
-        maxQuestions,
-        Math.max(minQuestions, Math.round(requestedQuestions))
-    );
+    const target = Math.min(maxQuestions, Math.max(minQuestions, Math.round(requestedQuestions)));
 
     const uncovered: { subjectName: string; reason: string }[] = [];
 
@@ -178,8 +175,7 @@ export function planDiagnostic(
     const coverage = [...takenPerSubject.entries()].map(([subjectId, questionCount]) => ({
         subjectId,
         subjectName:
-            subjects.find((subject) => subject.subjectId === subjectId)?.subjectName ??
-            'Subject',
+            subjects.find((subject) => subject.subjectId === subjectId)?.subjectName ?? 'Subject',
         questionCount,
     }));
 
@@ -255,9 +251,11 @@ export function summariseDiagnostic(answers: DiagnosticAnswer[]): DiagnosticResu
     const grouped = new Map<string, { name: string; correct: number; total: number }>();
 
     for (const answer of answers) {
-        const entry =
-            grouped.get(answer.subjectId) ??
-            { name: answer.subjectName, correct: 0, total: 0 };
+        const entry = grouped.get(answer.subjectId) ?? {
+            name: answer.subjectName,
+            correct: 0,
+            total: 0,
+        };
 
         entry.total += 1;
         if (answer.isCorrect) entry.correct += 1;
@@ -268,9 +266,7 @@ export function summariseDiagnostic(answers: DiagnosticAnswer[]): DiagnosticResu
     const subjects = [...grouped.entries()]
         .map(([subjectId, entry]) => {
             const percent =
-                entry.total > 0
-                    ? Math.round((entry.correct / entry.total) * 1000) / 10
-                    : 0;
+                entry.total > 0 ? Math.round((entry.correct / entry.total) * 1000) / 10 : 0;
 
             return {
                 subjectId,
@@ -289,18 +285,13 @@ export function summariseDiagnostic(answers: DiagnosticAnswer[]): DiagnosticResu
         correctCount: correct,
         answeredCount: answered,
         totalQuestions: total,
-        accuracyPercent:
-            total > 0 ? Math.round((correct / total) * 1000) / 10 : 0,
+        accuracyPercent: total > 0 ? Math.round((correct / total) * 1000) / 10 : 0,
         subjects,
         verdict: verdictFor(subjects, answered, total),
     };
 }
 
-function verdictFor(
-    subjects: SubjectLevel[],
-    answered: number,
-    total: number
-): string {
+function verdictFor(subjects: SubjectLevel[], answered: number, total: number): string {
     if (total === 0) return 'There was nothing to assess.';
 
     if (answered === 0) {

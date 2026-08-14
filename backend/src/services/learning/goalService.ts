@@ -55,11 +55,7 @@ export class GoalService {
         const daysRemaining = daysUntil(input.examDate);
 
         if (Number.isNaN(daysRemaining)) {
-            throw new AppError(
-                400,
-                'INVALID_INPUT',
-                'The exam date is not a real date.'
-            );
+            throw new AppError(400, 'INVALID_INPUT', 'The exam date is not a real date.');
         }
 
         if (daysRemaining < 1) {
@@ -81,11 +77,7 @@ export class GoalService {
         }
 
         if (input.subjectIds.length === 0) {
-            throw new AppError(
-                400,
-                'INVALID_INPUT',
-                'Choose at least one subject to study.'
-            );
+            throw new AppError(400, 'INVALID_INPUT', 'Choose at least one subject to study.');
         }
 
         // Guard against a client sending the same subject twice, which would violate the
@@ -140,11 +132,7 @@ export function daysUntil(isoDate: string): number {
     if (Number.isNaN(target)) return Number.NaN;
 
     const now = new Date();
-    const today = Date.UTC(
-        now.getUTCFullYear(),
-        now.getUTCMonth(),
-        now.getUTCDate()
-    );
+    const today = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
 
     return Math.round((target - today) / 86_400_000);
 }

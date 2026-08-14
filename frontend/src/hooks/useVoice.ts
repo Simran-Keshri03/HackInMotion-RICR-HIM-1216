@@ -133,8 +133,7 @@ export function useVoice(): Voice {
     const recognition = useRef<SpeechRecognitionLike | null>(null);
 
     const canListen = recognitionConstructor() !== null;
-    const canSpeak =
-        typeof window !== 'undefined' && typeof window.speechSynthesis !== 'undefined';
+    const canSpeak = typeof window !== 'undefined' && typeof window.speechSynthesis !== 'undefined';
 
     const stopListening = useCallback(() => {
         recognition.current?.stop();

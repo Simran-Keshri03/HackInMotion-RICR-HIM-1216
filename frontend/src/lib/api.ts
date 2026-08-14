@@ -110,28 +110,16 @@ async function request<T>(
         // "try again", the other says "check your connection", and telling somebody to check a
         // working connection is how an app loses trust.
         if (cause instanceof DOMException && cause.name === 'TimeoutError') {
-            throw new ApiError(
-                0,
-                'TIMEOUT',
-                'The server took too long to answer. Try again.'
-            );
+            throw new ApiError(0, 'TIMEOUT', 'The server took too long to answer. Try again.');
         }
 
         // Being offline is worth naming separately, because there is nothing the server can do about
         // it and retrying immediately will not help.
         if (typeof navigator !== 'undefined' && navigator.onLine === false) {
-            throw new ApiError(
-                0,
-                'OFFLINE',
-                'You appear to be offline. Reconnect and try again.'
-            );
+            throw new ApiError(0, 'OFFLINE', 'You appear to be offline. Reconnect and try again.');
         }
 
-        throw new ApiError(
-            0,
-            'NETWORK',
-            'Could not reach the server. Check your connection.'
-        );
+        throw new ApiError(0, 'NETWORK', 'Could not reach the server. Check your connection.');
     }
 
     let body: ApiResponse<T>;
@@ -200,13 +188,9 @@ export const api = {
                      * and only applies to that one code, so nothing else is made slower.
                      */
                     const gap =
-                        error.code === 'TOKEN_NOT_YET_VALID'
-                            ? SKEW_RETRY_DELAY_MS
-                            : RETRY_DELAY_MS;
+                        error.code === 'TOKEN_NOT_YET_VALID' ? SKEW_RETRY_DELAY_MS : RETRY_DELAY_MS;
 
-                    await new Promise((resolve) =>
-                        setTimeout(resolve, gap * (attempt + 1))
-                    );
+                    await new Promise((resolve) => setTimeout(resolve, gap * (attempt + 1)));
                 }
             }
         }

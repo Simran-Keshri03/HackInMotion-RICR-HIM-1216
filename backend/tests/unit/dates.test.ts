@@ -17,7 +17,7 @@ import { todayIn } from '@/utils/dates.js';
 const EARLY_MORNING_IST = new Date('2026-08-13T19:30:00.000Z');
 
 describe('todayIn', () => {
-    it('gives the learner their own date, not the server\'s', () => {
+    it("gives the learner their own date, not the server's", () => {
         expect(todayIn('Asia/Kolkata', EARLY_MORNING_IST)).toBe('2026-08-14');
 
         // The bug, stated as a fact: UTC disagrees, and following UTC is what was wrong.
@@ -33,14 +33,10 @@ describe('todayIn', () => {
         expect(oneAm).toBe(tenAm);
     });
 
-    it('rolls over at the learner\'s midnight, not at UTC midnight', () => {
+    it("rolls over at the learner's midnight, not at UTC midnight", () => {
         // 23:59 IST on the 14th, and one minute later.
-        expect(todayIn('Asia/Kolkata', new Date('2026-08-14T18:29:00.000Z'))).toBe(
-            '2026-08-14'
-        );
-        expect(todayIn('Asia/Kolkata', new Date('2026-08-14T18:31:00.000Z'))).toBe(
-            '2026-08-15'
-        );
+        expect(todayIn('Asia/Kolkata', new Date('2026-08-14T18:29:00.000Z'))).toBe('2026-08-14');
+        expect(todayIn('Asia/Kolkata', new Date('2026-08-14T18:31:00.000Z'))).toBe('2026-08-15');
     });
 
     it('always returns a date the database will accept', () => {

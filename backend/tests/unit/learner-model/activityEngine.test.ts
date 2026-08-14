@@ -64,9 +64,7 @@ describe('buildCalendar — the grid', () => {
         // is fixed-size anyway.
         const calendar = buildCalendar(counts([TODAY]), TODAY);
 
-        expect(calendar.days.filter((day) => day.count === 0)).toHaveLength(
-            CALENDAR_DAYS - 1
-        );
+        expect(calendar.days.filter((day) => day.count === 0)).toHaveLength(CALENDAR_DAYS - 1);
     });
 
     it('produces days in ascending date order', () => {
@@ -77,10 +75,7 @@ describe('buildCalendar — the grid', () => {
     });
 
     it('ignores activity older than the window', () => {
-        const calendar = buildCalendar(
-            counts(['2020-01-01', '2019-06-06', TODAY]),
-            TODAY
-        );
+        const calendar = buildCalendar(counts(['2020-01-01', '2019-06-06', TODAY]), TODAY);
 
         expect(calendar.activeDays).toBe(1);
         expect(calendar.totalAnswered).toBe(3);
@@ -97,11 +92,7 @@ describe('buildCalendar — the grid', () => {
 
 describe('buildCalendar — max streak', () => {
     it('finds the longest run anywhere in the year', () => {
-        const dates = [
-            ...run('2026-03-20', 14),
-            ...run('2026-05-10', 5),
-            ...run(TODAY, 2),
-        ];
+        const dates = [...run('2026-03-20', 14), ...run('2026-05-10', 5), ...run(TODAY, 2)];
 
         expect(buildCalendar(counts(dates), TODAY).maxStreak).toBe(14);
     });

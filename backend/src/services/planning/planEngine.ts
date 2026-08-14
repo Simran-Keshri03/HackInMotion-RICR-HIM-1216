@@ -230,10 +230,7 @@ export function buildPlan(inputs: PlanInputs): StudyPlan {
             : PLAN_CONFIG.fallbackSecondsPerQuestion;
 
     // ---- 1. the budget, and the ceiling on how much of it a day can hold ----
-    const perDayCapacity = Math.min(
-        inputs.dailyMinutes,
-        maxTopicsPerDay * maxSessionMinutes
-    );
+    const perDayCapacity = Math.min(inputs.dailyMinutes, maxTopicsPerDay * maxSessionMinutes);
     const totalBudget = inputs.daysRemaining * perDayCapacity;
 
     /**
@@ -268,9 +265,7 @@ export function buildPlan(inputs: PlanInputs): StudyPlan {
 
         // Rounded down to whole sessions so the layout never has to split a remainder of four
         // minutes across a day boundary.
-        const sessions = Math.floor(
-            Math.min(share, remainingBudget) / sessionFloor
-        );
+        const sessions = Math.floor(Math.min(share, remainingBudget) / sessionFloor);
 
         if (sessions < 1) {
             omittedTopics.push({
@@ -305,10 +300,7 @@ export function buildPlan(inputs: PlanInputs): StudyPlan {
     // day divided by how many topics it should hold — which is what actually makes the plan spread.
     const sessionCap = Math.min(
         maxSessionMinutes,
-        Math.max(
-            sessionFloor,
-            Math.floor(perDayCapacity / PLAN_CONFIG.topicsPerDayTarget)
-        )
+        Math.max(sessionFloor, Math.floor(perDayCapacity / PLAN_CONFIG.topicsPerDayTarget))
     );
 
     const sessions: PlannedSession[] = [];
@@ -340,9 +332,7 @@ export function buildPlan(inputs: PlanInputs): StudyPlan {
 
         // Spread across days rather than stacked on day one: a backlog of ten topics is not a
         // ten-topic day, and clearing it over a few days is how the schedule intends it.
-        const perDayBudget = Math.floor(
-            perDayCapacity * PLAN_CONFIG.maxRevisionShareOfDay
-        );
+        const perDayBudget = Math.floor(perDayCapacity * PLAN_CONFIG.maxRevisionShareOfDay);
 
         if (perDayBudget < minutes) break;
 
@@ -360,10 +350,7 @@ export function buildPlan(inputs: PlanInputs): StudyPlan {
             topicName: due.name,
             sortOrder: index % slotsPerDay,
             plannedMinutes: minutes,
-            plannedQuestions: Math.max(
-                1,
-                Math.round((minutes * 60) / secondsPerQuestion)
-            ),
+            plannedQuestions: Math.max(1, Math.round((minutes * 60) / secondsPerQuestion)),
             kind: 'revise',
             reason: revisionReason(due),
         });
@@ -427,10 +414,7 @@ export function buildPlan(inputs: PlanInputs): StudyPlan {
                 topicName: queue.topic.name,
                 sortOrder: placedToday,
                 plannedMinutes: folded,
-                plannedQuestions: Math.max(
-                    1,
-                    Math.round((folded * 60) / secondsPerQuestion)
-                ),
+                plannedQuestions: Math.max(1, Math.round((folded * 60) / secondsPerQuestion)),
                 kind: 'learn',
                 reason: sessionReason(queue.topic),
             });
@@ -456,10 +440,7 @@ export function buildPlan(inputs: PlanInputs): StudyPlan {
 
     return {
         sessions,
-        totalMinutesPlanned: sessions.reduce(
-            (sum, session) => sum + session.plannedMinutes,
-            0
-        ),
+        totalMinutesPlanned: sessions.reduce((sum, session) => sum + session.plannedMinutes, 0),
         topicsCovered: new Set(sessions.map((session) => session.topicId)).size,
         omittedTopics,
     };

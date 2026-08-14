@@ -109,10 +109,7 @@ export class AttemptRepository {
      * question. Mastery is recomputed from this rather than nudged, so the cache can never
      * drift from the history it summarises.
      */
-    async findTopicAttempts(
-        userId: string,
-        topicId: string
-    ): Promise<AttemptRow[]> {
+    async findTopicAttempts(userId: string, topicId: string): Promise<AttemptRow[]> {
         const { data, error } = await this.db
             .from('question_attempts')
             .select('is_correct, attempted_at, questions(difficulty)')

@@ -31,14 +31,10 @@ export const submitAttemptSchema = z
             .enum(['practice', 'assessment', 'topic_test', 'mock_test', 'revision'])
             .default('practice'),
     })
-    .refine(
-        (body) =>
-            (body.selectedOptions === undefined) !== (body.value === undefined),
-        {
-            message:
-                'Send either selectedOptions (choice questions) or value (numeric questions), not both.',
-        }
-    );
+    .refine((body) => (body.selectedOptions === undefined) !== (body.value === undefined), {
+        message:
+            'Send either selectedOptions (choice questions) or value (numeric questions), not both.',
+    });
 
 export async function submitAttempt(req: Request, res: Response) {
     const { userId, accessToken } = authOf(req);
@@ -57,9 +53,7 @@ export async function submitAttempt(req: Request, res: Response) {
     // The exam date caps how far out a review can be scheduled. Read as the learner: it is their own
     // row, and a missing goal is a normal state rather than an error — the schedule then falls back
     // to its ordinary interval ceiling.
-    const goal = await new GoalService(
-        new GoalRepository(userDb(accessToken))
-    ).getActive(userId);
+    const goal = await new GoalService(new GoalRepository(userDb(accessToken))).getActive(userId);
 
     const result = await service.submit({
         userId,

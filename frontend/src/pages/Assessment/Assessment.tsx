@@ -54,11 +54,7 @@ export default function Assessment() {
             setIndex(0);
             setPhase('sitting');
         } catch (cause) {
-            setError(
-                cause instanceof Error
-                    ? cause.message
-                    : 'Could not start the assessment.'
-            );
+            setError(cause instanceof Error ? cause.message : 'Could not start the assessment.');
         } finally {
             setBusy(false);
         }
@@ -99,9 +95,7 @@ export default function Assessment() {
         setBusy(true);
 
         try {
-            const result = await api.get<{ assessment: AssessmentType }>(
-                `/assessments/${id}`
-            );
+            const result = await api.get<{ assessment: AssessmentType }>(`/assessments/${id}`);
             setAssessment(result.assessment);
             setPhase(result.assessment.status === 'completed' ? 'done' : 'sitting');
         } catch (cause) {
@@ -143,8 +137,7 @@ export default function Assessment() {
                     <div>
                         <span className="label">Knowledge check</span>
                         <div className="faint">
-                            Question {index + 1} of {questions.length} ·{' '}
-                            {answeredCount} answered
+                            Question {index + 1} of {questions.length} · {answeredCount} answered
                         </div>
                     </div>
                     <span className={`pill pill--${question.difficulty}`}>
@@ -185,9 +178,7 @@ export default function Assessment() {
                                     type="button"
                                     className="option"
                                     aria-pressed={selected.includes(optionIndex)}
-                                    onClick={() =>
-                                        choose(question.id, optionIndex, isMulti)
-                                    }
+                                    onClick={() => choose(question.id, optionIndex, isMulti)}
                                 >
                                     <span className="option__mark">
                                         {String.fromCharCode(65 + optionIndex)}
@@ -210,8 +201,7 @@ export default function Assessment() {
                                 onChange={(e) =>
                                     setAnswers((current) => {
                                         const next = { ...current };
-                                        if (e.target.value === '')
-                                            delete next[question.id];
+                                        if (e.target.value === '') delete next[question.id];
                                         else next[question.id] = Number(e.target.value);
                                         return next;
                                     })
@@ -251,9 +241,9 @@ export default function Assessment() {
                 </div>
 
                 <p className="faint" style={{ margin: 0 }}>
-                    Nothing is marked until you finish. A blank answer is treated as unknown,
-                    which means more plan time on that topic than you may need — a guess is
-                    better information than a gap.
+                    Nothing is marked until you finish. A blank answer is treated as unknown, which
+                    means more plan time on that topic than you may need — a guess is better
+                    information than a gap.
                 </p>
             </div>
         );
@@ -313,11 +303,7 @@ export default function Assessment() {
                 </div>
 
                 <div className="row" style={{ gap: 10, flexWrap: 'wrap' }}>
-                    <button
-                        type="button"
-                        className="primary"
-                        onClick={() => navigate('/plan')}
-                    >
+                    <button type="button" className="primary" onClick={() => navigate('/plan')}>
                         Build my plan from this
                     </button>
                     <button
@@ -352,8 +338,8 @@ export default function Assessment() {
                         <h1 style={{ marginBottom: 6 }}>Where are you starting from?</h1>
                         <p className="muted" style={{ margin: 0, maxWidth: '54ch' }}>
                             One question per topic, across every subject in your goal. It takes
-                            about fifteen minutes and it is what lets your study plan spend time
-                            on your weak areas rather than spreading it evenly.
+                            about fifteen minutes and it is what lets your study plan spend time on
+                            your weak areas rather than spreading it evenly.
                         </p>
                     </div>
                     <span className="hero-mark" aria-hidden="true">
@@ -394,9 +380,7 @@ export default function Assessment() {
 
                 <div className="card stack">
                     <div>
-                        <span className="label">
-                            {done ? 'Sit it again' : 'Start the check'}
-                        </span>
+                        <span className="label">{done ? 'Sit it again' : 'Start the check'}</span>
                         <p className="faint" style={{ margin: '6px 0 0' }}>
                             {done
                                 ? 'Useful after a few weeks of study — it will show what has moved, and the plan rebuilds around the new picture.'
@@ -453,9 +437,7 @@ export default function Assessment() {
                                 <Icon name={item.icon as 'chart'} />
                             </span>
                             <div style={{ minWidth: 0 }}>
-                                <strong style={{ fontSize: '0.92rem' }}>
-                                    {item.title}
-                                </strong>
+                                <strong style={{ fontSize: '0.92rem' }}>{item.title}</strong>
                                 <div className="faint">{item.body}</div>
                             </div>
                         </div>

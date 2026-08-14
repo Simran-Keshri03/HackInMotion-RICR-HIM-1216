@@ -31,9 +31,7 @@ function storedTheme(): Theme {
     try {
         const saved = localStorage.getItem(STORAGE_KEY);
 
-        return saved === 'dark' || saved === 'light' || saved === 'system'
-            ? saved
-            : 'dark';
+        return saved === 'dark' || saved === 'light' || saved === 'system' ? saved : 'dark';
     } catch {
         // Private windows throw on localStorage in some browsers.
         return 'dark';
@@ -42,8 +40,7 @@ function storedTheme(): Theme {
 
 function prefersLight(): boolean {
     return (
-        typeof window !== 'undefined' &&
-        window.matchMedia('(prefers-color-scheme: light)').matches
+        typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: light)').matches
     );
 }
 

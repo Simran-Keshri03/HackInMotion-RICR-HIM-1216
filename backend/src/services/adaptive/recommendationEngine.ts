@@ -1,7 +1,4 @@
-import {
-    type Difficulty,
-    chooseDifficulty,
-} from '@/services/adaptive/difficultyEngine.js';
+import { type Difficulty, chooseDifficulty } from '@/services/adaptive/difficultyEngine.js';
 
 /**
  * Decides the single next best thing for a learner to do.
@@ -127,10 +124,7 @@ function clamp01(value: number): number {
 export function priorityScore(candidate: TopicCandidate): number {
     const { weights, stalenessSaturatesAtDays } = ADAPTIVE_CONFIG;
 
-    const gap =
-        candidate.masteryScore === null
-            ? 1
-            : clamp01((100 - candidate.masteryScore) / 100);
+    const gap = candidate.masteryScore === null ? 1 : clamp01((100 - candidate.masteryScore) / 100);
 
     // Never attempted counts as maximally stale: it has been waiting since day one.
     const staleness =
@@ -138,10 +132,7 @@ export function priorityScore(candidate: TopicCandidate): number {
             ? 1
             : clamp01(candidate.daysSinceLastAttempt / stalenessSaturatesAtDays);
 
-    return (
-        (weights.masteryGap * gap + weights.staleness * staleness) *
-        candidate.weight
-    );
+    return (weights.masteryGap * gap + weights.staleness * staleness) * candidate.weight;
 }
 
 /** Which kind of session this topic calls for. */
@@ -169,8 +160,7 @@ function chooseAction(candidate: TopicCandidate): LearningAction {
  * recommendation, so the count here is always the count they will actually get.
  */
 function sentenceFor(plan: SessionPlan, questionCount: number): string {
-    const { candidate, action, difficulty, difficultyAdjustment, recentAccuracyPercent } =
-        plan;
+    const { candidate, action, difficulty, difficultyAdjustment, recentAccuracyPercent } = plan;
     const name = candidate.name;
     const mastery = Math.round(candidate.masteryScore ?? 0);
     const questions = questionCount === 1 ? '1 question' : `${questionCount} questions`;
@@ -221,9 +211,7 @@ export interface SessionPlan {
  * untouched topics are held back. Once everything in progress is reasonable, the whole
  * scope competes again and the syllabus opens up.
  */
-export function eligibleCandidates(
-    candidates: TopicCandidate[]
-): TopicCandidate[] {
+export function eligibleCandidates(candidates: TopicCandidate[]): TopicCandidate[] {
     const started = candidates.filter((c) => c.totalAttempts > 0);
 
     const unfinished = started.filter(
@@ -240,11 +228,7 @@ export function planSession(input: RecommendationInput): SessionPlan | null {
     const ranked = eligibleCandidates(input.candidates)
         .map((candidate) => ({ candidate, score: priorityScore(candidate) }))
         // Tie-break on name so the same inputs always produce the same order.
-        .sort(
-            (a, b) =>
-                b.score - a.score ||
-                a.candidate.name.localeCompare(b.candidate.name)
-        );
+        .sort((a, b) => b.score - a.score || a.candidate.name.localeCompare(b.candidate.name));
 
     const winner = ranked[0]!.candidate;
     const action = chooseAction(winner);
@@ -304,14 +288,8 @@ export function planSession(input: RecommendationInput): SessionPlan | null {
  * Phase two: fix the plan to the number of questions the bank could actually supply, and
  * write the sentence from those final numbers.
  */
-export function finaliseAction(
-    plan: SessionPlan,
-    availableQuestionCount: number
-): NextBestAction {
-    const questionCount = Math.min(
-        plan.requestedQuestionCount,
-        availableQuestionCount
-    );
+export function finaliseAction(plan: SessionPlan, availableQuestionCount: number): NextBestAction {
+    const questionCount = Math.min(plan.requestedQuestionCount, availableQuestionCount);
 
     const estimatedMinutes = Math.max(
         ADAPTIVE_CONFIG.minEstimatedMinutes,
@@ -344,9 +322,7 @@ export function finaliseAction(
 }
 
 /** Both phases, for callers that already know the bank can fill the request. */
-export function recommendNextAction(
-    input: RecommendationInput
-): NextBestAction | null {
+export function recommendNextAction(input: RecommendationInput): NextBestAction | null {
     const plan = planSession(input);
     return plan ? finaliseAction(plan, plan.requestedQuestionCount) : null;
 }

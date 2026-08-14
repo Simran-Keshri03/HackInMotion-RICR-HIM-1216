@@ -171,9 +171,7 @@ describe('shouldReplan — restraint', () => {
     it('does not rebuild for a single missed day', () => {
         // One missed session is a life, not a pattern. Rebuilding would move the remaining work
         // earlier and make the plan harder precisely when somebody is already behind.
-        const verdict = shouldReplan(
-            inputs({ pastSessions: [session('2026-08-13', 'missed')] })
-        );
+        const verdict = shouldReplan(inputs({ pastSessions: [session('2026-08-13', 'missed')] }));
 
         expect(verdict.replan).toBe(false);
     });

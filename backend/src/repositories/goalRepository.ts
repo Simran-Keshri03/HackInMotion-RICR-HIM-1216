@@ -135,14 +135,12 @@ export class GoalRepository {
 
         const created = data as GoalRow;
 
-        const { error: scopeError } = await this.db
-            .from('learning_goal_topics')
-            .insert(
-                goal.subjectIds.map((topicId) => ({
-                    goal_id: created.id,
-                    topic_id: topicId,
-                }))
-            );
+        const { error: scopeError } = await this.db.from('learning_goal_topics').insert(
+            goal.subjectIds.map((topicId) => ({
+                goal_id: created.id,
+                topic_id: topicId,
+            }))
+        );
 
         if (scopeError) throw scopeError;
 

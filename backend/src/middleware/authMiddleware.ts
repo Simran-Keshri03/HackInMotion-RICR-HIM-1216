@@ -24,28 +24,17 @@ declare global {
 const MIN_TOKEN_LENGTH = 20;
 const MAX_TOKEN_LENGTH = 4096;
 
-export async function requireAuth(
-    req: Request,
-    _res: Response,
-    next: NextFunction
-) {
+export async function requireAuth(req: Request, _res: Response, next: NextFunction) {
     try {
         const header = req.headers.authorization ?? '';
 
         if (!header.startsWith('Bearer ')) {
-            throw new AppError(
-                401,
-                'UNAUTHENTICATED',
-                'Missing bearer token.'
-            );
+            throw new AppError(401, 'UNAUTHENTICATED', 'Missing bearer token.');
         }
 
         const token = header.slice('Bearer '.length).trim();
 
-        if (
-            token.length < MIN_TOKEN_LENGTH ||
-            token.length > MAX_TOKEN_LENGTH
-        ) {
+        if (token.length < MIN_TOKEN_LENGTH || token.length > MAX_TOKEN_LENGTH) {
             throw new AppError(401, 'UNAUTHENTICATED', 'Malformed token.');
         }
 
@@ -55,11 +44,7 @@ export async function requireAuth(
         const { data, error } = await adminDb.auth.getUser(token);
 
         if (error || !data.user) {
-            throw new AppError(
-                401,
-                'UNAUTHENTICATED',
-                'Invalid or expired token.'
-            );
+            throw new AppError(401, 'UNAUTHENTICATED', 'Invalid or expired token.');
         }
 
         req.auth = { userId: data.user.id, accessToken: token };
@@ -76,11 +61,7 @@ export async function requireAuth(
  */
 export function authOf(req: Request): { userId: string; accessToken: string } {
     if (!req.auth) {
-        throw new AppError(
-            500,
-            'INTERNAL_ERROR',
-            'Route is missing the auth middleware.'
-        );
+        throw new AppError(500, 'INTERNAL_ERROR', 'Route is missing the auth middleware.');
     }
     return req.auth;
 }

@@ -109,7 +109,7 @@ describe('buildPlan — the promises it must not break', () => {
         topic({ name: 'Graphs', masteryScore: null, attempts: 0, weight: 1.3 }),
     ];
 
-    it('never schedules a day beyond the learner\'s daily minutes', () => {
+    it("never schedules a day beyond the learner's daily minutes", () => {
         const plan = buildPlan({ ...base, topics });
 
         const perDay = new Map<string, number>();
@@ -129,9 +129,7 @@ describe('buildPlan — the promises it must not break', () => {
         const plan = buildPlan({ ...base, topics });
 
         for (const session of plan.sessions) {
-            expect(session.plannedMinutes).toBeGreaterThanOrEqual(
-                PLAN_CONFIG.minSessionMinutes
-            );
+            expect(session.plannedMinutes).toBeGreaterThanOrEqual(PLAN_CONFIG.minSessionMinutes);
         }
     });
 
@@ -150,10 +148,7 @@ describe('buildPlan — the promises it must not break', () => {
 
         const perDay = new Map<string, number>();
         for (const session of plan.sessions) {
-            perDay.set(
-                session.scheduledDate,
-                (perDay.get(session.scheduledDate) ?? 0) + 1
-            );
+            perDay.set(session.scheduledDate, (perDay.get(session.scheduledDate) ?? 0) + 1);
         }
 
         for (const count of perDay.values()) {
@@ -261,7 +256,7 @@ describe('buildPlan — revision slots', () => {
      * crowded out entirely — a backlog of overdue topics would never appear in a plan at all, which
      * is the failure spaced repetition exists to prevent.
      */
-    it('does not let revision push a day past the learner\'s daily minutes', () => {
+    it("does not let revision push a day past the learner's daily minutes", () => {
         const plan = buildPlan({ ...base, topics: learn, dueRevisions: due });
 
         const perDay = new Map<string, number>();
@@ -280,9 +275,7 @@ describe('buildPlan — revision slots', () => {
     it('still leaves room for new learning on a revision day', () => {
         const plan = buildPlan({ ...base, topics: learn, dueRevisions: due });
 
-        const firstDay = plan.sessions.filter(
-            (s) => s.scheduledDate === base.startDate
-        );
+        const firstDay = plan.sessions.filter((s) => s.scheduledDate === base.startDate);
 
         // A plan showing nothing but revision does not move the learner forward, and the exam is not
         // made only of things they have already seen.
@@ -487,9 +480,7 @@ describe('buildPlan — honesty when it does not fit', () => {
         const summed = plan.sessions.reduce((sum, s) => sum + s.plannedMinutes, 0);
 
         expect(plan.totalMinutesPlanned).toBe(summed);
-        expect(plan.topicsCovered).toBe(
-            new Set(plan.sessions.map((s) => s.topicId)).size
-        );
+        expect(plan.topicsCovered).toBe(new Set(plan.sessions.map((s) => s.topicId)).size);
         // The plan cannot promise more time than the learner said they had.
         expect(plan.totalMinutesPlanned).toBeLessThanOrEqual(
             base.daysRemaining * base.dailyMinutes
