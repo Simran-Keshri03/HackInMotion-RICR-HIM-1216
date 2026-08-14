@@ -1,0 +1,101 @@
+# Typecheck, lint, test and build on every push and pull request.
+#
+# The two halves run as separate jobs rather than one, for two reasons: they are independent so they
+# finish in the time of the slower one instead of the sum, and a red tick names which half broke without
+# anybody opening the log.
+#
+# What this deliberately does NOT run: the SQL tests under database/tests/. They need a live Postgres
+# with real credentials, and putting a database URL in a public repository's CI to prove the schema still
+# parses would be a poor trade. They are run by hand against the deployed database, where they roll back
+# in a transaction and are safe to repeat.
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# A second push while the first is still running makes the first run's answer irrelevant.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: Backend
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          # The project declares >=20; Vite needs 22.12 or newer, so 22 is the lowest version that
+          # actually works and the one worth testing against rather than whatever a laptop happens
+          # to have installed.
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      # `ci` rather than `install`: it fails when the lockfile and package.json disagree instead of
+      # quietly resolving something different from what anybody has tested.
+      - run: npm ci
+        working-directory: backend
+
+      - name: Typecheck
+        run: npm run typecheck
+        working-directory: backend
+
+      - name: Lint
+        run: npx oxlint
+        working-directory: backend
+
+      # No environment file, and that is the point: every one of these is a unit test over pure
+      # functions or stubs, so anything that needed a database or an API key to import would fail here
+      # and should.
+      - name: Test
+        run: npm test
+        working-directory: backend
+
+  frontend:
+    name: Frontend
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - run: npm ci
+        working-directory: frontend
+
+      - name: Lint
+        run: npm run lint
+        working-directory: frontend
+
+      - name: Test
+        run: npm test
+        working-directory: frontend
+
+      # `npm run build` is `tsc -b && vite build`, so this covers the typecheck as well.
+      #
+      # The VITE_ values are deliberate placeholders. vite.config.ts refuses to build without them —
+      # because a missing one is inlined as `undefined`, which turns a guard into an unconditional throw
+      # and lets Rollup tree-shake the auth client away, producing a build that succeeds and then
+      # white-screens. That check is worth having, and it means CI has to supply something. Nothing here
+      # is secret and the build is thrown away; what is being proved is that the bundle assembles.
+      - name: Build
+        run: npm run build
+        working-directory: frontend
+        env:
+          VITE_API_URL: http://localhost:4000/api/v1
+          VITE_SUPABASE_URL: https://placeholder.supabase.co
+          VITE_SUPABASE_PUBLISHABLE_KEY: placeholder-not-a-real-key

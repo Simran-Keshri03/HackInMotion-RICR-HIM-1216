@@ -1,6 +1,6 @@
 import type { Request, Response } from 'express';
 import { z } from 'zod';
-import { adminDb, userDb } from '@/config/database.js';
+import { adminDb } from '@/config/database.js';
 import { authOf } from '@/middleware/authMiddleware.js';
 import { AttemptRepository } from '@/repositories/attemptRepository.js';
 import { LearnerRepository } from '@/repositories/learnerRepository.js';
