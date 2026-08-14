@@ -760,6 +760,14 @@ read `correct_answer`.
 
 ![Sign in](docs/screenshots/landing.png)
 
+<img width="1470" height="835" alt="dashboard" src="https://github.com/user-attachments/assets/4ded0952-4792-4e27-87ee-94c2d9de6a92" />
+<img width="1464" height="823" alt="dashboard2" src="https://github.com/user-attachments/assets/8dcfefba-cb89-4d09-a44f-5db037aeadfd" />
+
+
+<img width="1470" height="832" alt="Aitututor2" src="https://github.com/user-attachments/assets/b2b0ac46-bd82-4a7b-8f2f-a958ba521a69" />
+<img width="1467" height="832" alt="Aitutor" src="https://github.com/user-attachments/assets/3e3d353b-caf8-4cb9-b922-3ef730aa6de7" />
+
+
 ### The rest
 
 The live app is the better tour, and the link is at the top. Behind sign-in there are nine screens:
