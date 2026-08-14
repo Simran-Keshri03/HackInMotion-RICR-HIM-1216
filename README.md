@@ -440,7 +440,7 @@ Check it: `curl http://localhost:4000/api/v1/health/deep` should report the data
 | `SUPABASE_PUBLISHABLE_KEY` | yes | safe to expose |
 | `SUPABASE_SECRET_KEY` | yes | **server only** — never in a browser |
 | `ANTHROPIC_API_KEY` | no | omit and AI features return a clear 503; everything else works |
-| `DATABASE_URL` | yes | session pooler connection string |
+| `DATABASE_URL` | for `psql` only | session pooler string, used to apply migrations and run the SQL tests. The server never reads it — it is not in the env schema — so production does not need it |
 
 An empty value is treated as absent rather than as an empty string. That is deliberate: a stray
 `ANTHROPIC_API_KEY=` once made the server refuse to boot with no useful message.
