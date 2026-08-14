@@ -17,6 +17,10 @@ const Dashboard = lazy(() => import('@/pages/Dashboard/Dashboard'));
 const Practice = lazy(() => import('@/pages/Practice/Practice'));
 const LearningGoals = lazy(() => import('@/pages/LearningGoals/LearningGoals'));
 const AITutor = lazy(() => import('@/pages/AITutor/AITutor'));
+const StudyPlan = lazy(() => import('@/pages/StudyPlan/StudyPlan'));
+const StudyGroups = lazy(() => import('@/pages/StudyGroups/StudyGroups'));
+const Settings = lazy(() => import('@/pages/Settings/Settings'));
+const MockTest = lazy(() => import('@/pages/MockTest/MockTest'));
 
 /**
  * Everything behind this needs a session.
@@ -65,7 +69,11 @@ export function AppRoutes() {
                     <Route path="/dashboard" element={<Dashboard />} />
                     <Route path="/practice" element={<Practice />} />
                     <Route path="/goals" element={<LearningGoals />} />
+                    <Route path="/plan" element={<StudyPlan />} />
+                    <Route path="/groups" element={<StudyGroups />} />
                     <Route path="/tutor" element={<AITutor />} />
+                    <Route path="/mock-tests" element={<MockTest />} />
+                    <Route path="/settings" element={<Settings />} />
                 </Route>
 
                 {/* Anything unknown goes to the dashboard, which itself redirects to login

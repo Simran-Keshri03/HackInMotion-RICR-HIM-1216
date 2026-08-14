@@ -6,24 +6,47 @@
  * transfer cost.
  *
  * Dark by default: this is a study app, often used at night, and a dark surface is easier on
- * the eyes than a bright one.
+ * the eyes than a bright one. Light is available and is a real palette rather than an inversion —
+ * flipping the dark one produces grey text on grey that nobody can read in daylight, which is the
+ * condition light mode exists for.
+ *
+ * The theme is a `data-theme` attribute on <html> overriding these same custom properties, so
+ * switching costs one attribute write and no re-render. Nothing below this block knows a theme
+ * exists.
  */
 
 :root {
-    --bg: #0e1117;
-    --surface: #161b24;
-    --surface-raised: #1e252f;
-    --border: #2a323d;
+    /* Very dark navy rather than neutral grey: it reads as a product rather than a terminal,
+       and blue-tinted darks make the blue accent look intentional instead of pasted on. */
+    --bg: #070b14;
+    --surface: #111827;
+    --surface-raised: #151c28;
+    --border: #1f2a3c;
+    --border-strong: #2b3a52;
 
-    --text: #e6edf3;
-    --text-dim: #9aa7b4;
-    --text-faint: #6b7787;
+    --text: #e8eef7;
+    --text-dim: #94a3b8;
+    --text-faint: #64748b;
 
-    --accent: #4c8dff;
-    --accent-dim: #2f5da8;
-    --good: #3fb950;
-    --bad: #f85149;
-    --warn: #d29922;
+    --accent: #3b82f6;
+    --accent-dim: #1e3a8a;
+    --violet: #8b5cf6;
+    --violet-dim: #4c1d95;
+    --good: #22c55e;
+    --bad: #ef4444;
+    --warn: #f59e0b;
+    --fire: #fb923c;
+
+    /* One gradient, reused. Two or three competing ones is what makes an interface look busy. */
+    --grad: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+    --grad-hover: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+
+    --shadow-card: 0 1px 2px rgb(0 0 0 / 0.3);
+    --shadow-lift: 0 8px 24px -6px rgb(0 0 0 / 0.5);
+    --glow: 0 0 0 1px rgb(59 130 246 / 0.25), 0 4px 20px -4px rgb(99 102 241 / 0.35);
+
+    /* Every transition in the app, so nothing is faster or slower than its neighbour. */
+    --ease: 180ms cubic-bezier(0.4, 0, 0.2, 1);
 
     --radius: 10px;
     --gap: 16px;
@@ -78,14 +101,79 @@ a {
     padding: 20px 16px 64px;
 }
 
+.sidebar__close {
+    padding: 4px 6px;
+}
+
 .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 30;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 12px;
+    /* Wraps rather than overflowing. Seven links, an email and a button do not fit across a 360 px
+       phone, and a bar that scrolls sideways hides exactly the items at the end of it. */
+    flex-wrap: wrap;
+    gap: 8px 12px;
     padding: 12px 16px;
     border-bottom: 1px solid var(--border);
     background: var(--surface);
+}
+
+.brand {
+    text-decoration: none;
+    color: inherit;
+}
+
+.topnav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
+    /* Takes the middle of the bar on a wide screen and a full row of its own once it wraps. */
+    flex: 1 1 auto;
+}
+
+.topnav__link {
+    padding: 5px 9px;
+    border-radius: 7px;
+    font-size: 0.9rem;
+    text-decoration: none;
+    color: var(--text-faint);
+}
+
+.topnav__link:hover {
+    color: var(--text);
+    background: var(--surface-raised);
+}
+
+/* Which page you are on, stated rather than inferred from the heading. Both a background and a
+   colour change: colour alone is not enough for anybody who cannot distinguish these two. */
+.topnav__link--active {
+    color: var(--text);
+    background: var(--surface-raised);
+    font-weight: 600;
+}
+
+.topbar__account {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.topbar__email {
+    max-width: 160px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* On a narrow screen the email is the first thing worth losing — the signed-in account matters
+   during a demo on a laptop, not to a learner on their own phone. */
+@media (max-width: 560px) {
+    .topbar__email {
+        display: none;
+    }
 }
 
 .brand {
@@ -210,7 +298,8 @@ button.wide {
 
 /* ---------------------------------------------------------------- form */
 
-input {
+input,
+select {
     font: inherit;
     width: 100%;
     padding: 10px 12px;
@@ -364,4 +453,806 @@ input:focus {
     border-color: #235c2c;
     background: #13251a;
     color: #7ee787;
+}
+
+/* ---------------------------------------------------------------- activity heatmap
+   A year of study as one grid, the shape GitHub and LeetCode use, because seeing the gaps
+   alongside the work motivates more than any single number does.
+
+   Plain CSS grid and 365 divs. A calendar-heatmap library would have cost more gzipped than
+   the whole of this app's own code, and this has to run on phones with 2-4 GB of RAM.
+
+   The columns are weeks and the rows are weekdays, filled top-to-bottom then left-to-right —
+   `grid-auto-flow: column` does that in one line, so the cells can be emitted in plain date
+   order with no week-bucketing in JS. */
+.heatmap {
+    display: grid;
+    grid-template-rows: repeat(7, 1fr);
+    grid-auto-flow: column;
+    grid-auto-columns: 1fr;
+    gap: 3px;
+    /* Scrolls rather than shrinks on a narrow phone: squares small enough to fit 53 weeks on a
+       360 px screen would be too small to read as anything. */
+    min-width: 620px;
+}
+
+.heatmap__scroll {
+    overflow-x: auto;
+    padding-bottom: 4px;
+}
+
+.heatmap__cell {
+    aspect-ratio: 1;
+    border-radius: 2px;
+    background: var(--surface-raised);
+}
+
+/* Four shades of the same green used for correctness elsewhere, so the colour keeps one meaning
+   across the app. Steps are perceptual rather than even — the darkest has to read as clearly more
+   than the one below it on a cheap screen in daylight. */
+.heatmap__cell[data-level='1'] { background: #0e4429; }
+.heatmap__cell[data-level='2'] { background: #196c34; }
+.heatmap__cell[data-level='3'] { background: #26a641; }
+.heatmap__cell[data-level='4'] { background: #3fb950; }
+
+.heatmap__months {
+    display: flex;
+    justify-content: space-between;
+    min-width: 620px;
+    margin-top: 6px;
+    font-size: 11px;
+    color: var(--text-faint);
+}
+
+.heatmap__legend {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    color: var(--text-faint);
+}
+
+.heatmap__legend .heatmap__cell {
+    width: 10px;
+    height: 10px;
+    aspect-ratio: auto;
+}
+
+/* ---------------------------------------------------------------- badges */
+.badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.badge {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface-raised);
+    min-width: 132px;
+}
+
+.badge__name {
+    font-weight: 600;
+    font-size: 13px;
+}
+
+.badge__meta {
+    font-size: 11px;
+    color: var(--text-faint);
+}
+
+/* An earned badge is coloured; a target is outlined. The difference has to be obvious at a glance
+   or the shelf reads as things already won and stops being a reason to come back. */
+.badge--earned {
+    border-color: var(--good);
+}
+
+.badge__bar {
+    height: 4px;
+    border-radius: 2px;
+    background: var(--border);
+    overflow: hidden;
+    margin-top: 4px;
+}
+
+.badge__bar span {
+    display: block;
+    height: 100%;
+    background: var(--accent);
+}
+
+
+/* ---------------------------------------------------------------- light theme
+   Chosen against white, not derived from the dark palette. The accent and status colours are
+   darkened because #4c8dff on white fails contrast at small sizes, and a study app puts a lot of
+   small text in front of people. */
+[data-theme='light'] {
+    --bg: #f6f8fa;
+    --surface: #ffffff;
+    --surface-raised: #f0f3f6;
+    --border: #d5dbe2;
+
+    --text: #1c2128;
+    --text-dim: #57606a;
+    --text-faint: #7d8590;
+
+    --accent: #0a58ca;
+    --accent-dim: #9ec5fe;
+    --good: #1a7f37;
+    --bad: #cf222e;
+    --warn: #9a6700;
+
+    color-scheme: light;
+}
+
+/* The heatmap's greens are set explicitly rather than through variables, so they need their own
+   light values — the dark shades disappear against a white card. */
+[data-theme='light'] .heatmap__cell { background: #e6eaef; }
+[data-theme='light'] .heatmap__cell[data-level='1'] { background: #aceebb; }
+[data-theme='light'] .heatmap__cell[data-level='2'] { background: #4ac26b; }
+[data-theme='light'] .heatmap__cell[data-level='3'] { background: #2da44e; }
+[data-theme='light'] .heatmap__cell[data-level='4'] { background: #116329; }
+
+
+/* ---------------------------------------------------------------- subject grid
+   Two or three across on a desktop, one on a phone. `auto-fill` with a minimum rather than fixed
+   breakpoints, so the number of columns follows the space available instead of a guess about
+   device widths. */
+.subjects {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 12px;
+}
+
+.subjects__bar {
+    height: 6px;
+    border-radius: 3px;
+    background: var(--surface-raised);
+    overflow: hidden;
+}
+
+.subjects__bar span {
+    display: block;
+    height: 100%;
+    background: var(--accent);
+}
+
+/* ============================================================================
+   App shell — topbar, sidebar, workspace
+
+   One grid: sidebar and content. The sidebar is a real column on a desktop and a slide-over
+   on a phone, which is the only layout that works at both ends without duplicating markup.
+   ============================================================================ */
+
+.shellgrid {
+    display: grid;
+    grid-template-columns: 248px minmax(0, 1fr);
+    align-items: start;
+    min-height: calc(100vh - 61px);
+}
+
+/* Single column below this, with the sidebar becoming a drawer. Chosen because 248 + a usable
+   content column stops fitting here, not because it is a common device width. */
+@media (max-width: 900px) {
+    .shellgrid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+.sidebar {
+    position: sticky;
+    top: 61px;
+    align-self: start;
+    max-height: calc(100vh - 61px);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    padding: 16px 12px;
+    border-right: 1px solid var(--border);
+    background: var(--surface);
+}
+
+@media (max-width: 900px) {
+    .sidebar {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 40;
+        width: 264px;
+        max-height: none;
+        transform: translateX(-100%);
+        transition: transform var(--ease);
+        box-shadow: var(--shadow-lift);
+    }
+
+    .sidebar[data-open='true'] {
+        transform: translateX(0);
+    }
+}
+
+.sidebar__group {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.sidebar__heading {
+    padding: 0 10px 6px;
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+}
+
+.sidebar__link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 10px;
+    border-radius: 9px;
+    font-size: 0.9rem;
+    text-decoration: none;
+    color: var(--text-dim);
+    transition: background var(--ease), color var(--ease);
+}
+
+.sidebar__link:hover {
+    background: var(--surface-raised);
+    color: var(--text);
+}
+
+/* The active item is the gradient plus a glow, because on a dark sidebar a background alone at
+   this size is easy to miss. */
+.sidebar__link--active {
+    background: var(--grad);
+    color: #fff;
+    font-weight: 600;
+    box-shadow: var(--glow);
+}
+
+.sidebar__link--active:hover {
+    background: var(--grad-hover);
+    color: #fff;
+}
+
+/* Items whose screens are not built. Rendered rather than hidden so the shape of the product is
+   visible, and unclickable rather than linked so nothing promises a page that does not exist. */
+
+
+
+.sidebar__icon {
+    flex: 0 0 18px;
+    width: 18px;
+    height: 18px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 1.7;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.sidebar__spacer {
+    flex: 1 1 auto;
+}
+
+/* Backdrop for the drawer. Only exists below the breakpoint. */
+.scrim {
+    position: fixed;
+    inset: 0;
+    z-index: 35;
+    background: rgb(2 6 15 / 0.6);
+    border: 0;
+    padding: 0;
+}
+
+@media (min-width: 901px) {
+    .scrim,
+    .sidebar__close,
+    .topbar__burger {
+        display: none;
+    }
+}
+
+.topbar__burger {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 9px;
+}
+
+/* ---------------------------------------------------------------- workspace */
+
+.workspace {
+    padding: 22px 20px 48px;
+    min-width: 0;
+}
+
+/* Main column plus an insights rail. The rail drops below the content when there is no room for
+   it to be a rail — a 280px column of cards squeezed to 180 is worse than the same cards stacked. */
+.worksplit {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 320px;
+    gap: 18px;
+    align-items: start;
+}
+
+@media (max-width: 1180px) {
+    .worksplit {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+/* ============================================================================
+   Cards, buttons, inputs — the upgraded shared primitives
+   ============================================================================ */
+
+.card {
+    box-shadow: var(--shadow-card);
+    transition: border-color var(--ease), box-shadow var(--ease), transform var(--ease);
+}
+
+/* Lift only where a card is actually interactive. A page where everything moves under the
+   cursor is noise; a card that lifts is a card promising something happens if you click it. */
+.card--hover:hover {
+    transform: translateY(-2px);
+    border-color: var(--border-strong);
+    box-shadow: var(--shadow-lift);
+}
+
+.card--glow {
+    border-color: rgb(59 130 246 / 0.35);
+    box-shadow: var(--glow);
+}
+
+button,
+.btn {
+    transition: background var(--ease), border-color var(--ease), color var(--ease),
+        transform var(--ease), box-shadow var(--ease);
+}
+
+button:active:not(:disabled) {
+    transform: translateY(1px);
+}
+
+/* The one gradient CTA. Used for the primary action on a screen and nowhere else, or it stops
+   meaning "this is the thing to press". */
+.primary {
+    background: var(--grad);
+    border: 0;
+    color: #fff;
+    font-weight: 600;
+}
+
+.primary:hover:not(:disabled) {
+    background: var(--grad-hover);
+    box-shadow: var(--glow);
+}
+
+/* A second-rank action: same shape, no gradient, so the hierarchy survives two buttons in a row. */
+.secondary {
+    background: var(--accent-dim);
+    border: 1px solid rgb(59 130 246 / 0.4);
+    color: var(--text);
+    font-weight: 600;
+}
+
+.secondary:hover:not(:disabled) {
+    background: #1e40af;
+    border-color: rgb(59 130 246 / 0.6);
+}
+
+button:disabled,
+.primary:disabled,
+.secondary:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+input,
+select,
+textarea {
+    transition: border-color var(--ease), box-shadow var(--ease);
+}
+
+/* A visible focus ring, on purpose. Keyboard users are the ones who need it and the ones most
+   often left without it. */
+input:focus,
+select:focus,
+textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgb(59 130 246 / 0.18);
+}
+
+button:focus-visible,
+a:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+/* An input with an icon in front of it. The icon sits in the box rather than beside it, so the
+   field still reads as one control. */
+.inputwrap {
+    display: flex;
+    align-items: stretch;
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    background: var(--bg);
+    overflow: hidden;
+    transition: border-color var(--ease), box-shadow var(--ease);
+}
+
+.inputwrap:focus-within {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgb(59 130 246 / 0.18);
+}
+
+.inputwrap__icon {
+    display: grid;
+    place-items: center;
+    width: 42px;
+    border-right: 1px solid var(--border);
+    color: var(--text-faint);
+    background: var(--surface-raised);
+}
+
+.inputwrap input {
+    flex: 1 1 auto;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    min-width: 0;
+}
+
+.inputwrap input:focus {
+    box-shadow: none;
+    border-color: transparent;
+}
+
+/* ---------------------------------------------------------------- avatars */
+
+.avatar {
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: #fff;
+    background: var(--grad);
+}
+
+.avatar--sm {
+    width: 30px;
+    height: 30px;
+    font-size: 0.68rem;
+}
+
+/* ---------------------------------------------------------------- rows */
+
+.row-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 11px 12px;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    background: none;
+    text-align: left;
+    color: inherit;
+    cursor: pointer;
+    transition: background var(--ease), border-color var(--ease);
+}
+
+.row-item:hover {
+    background: var(--surface-raised);
+    border-color: var(--border);
+}
+
+.row-item[aria-pressed='true'] {
+    background: var(--surface-raised);
+    border-color: rgb(59 130 246 / 0.4);
+}
+
+.row-item__body {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.row-item__chev {
+    flex: 0 0 auto;
+    color: var(--text-faint);
+    transition: transform var(--ease), color var(--ease);
+}
+
+.row-item:hover .row-item__chev {
+    color: var(--text);
+    transform: translateX(2px);
+}
+
+/* ---------------------------------------------------------------- icon tiles */
+
+.tile {
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+    width: 36px;
+    height: 36px;
+    border-radius: 9px;
+    border: 1px solid var(--border);
+}
+
+.tile--blue   { background: rgb(59 130 246 / 0.12); color: #60a5fa; border-color: rgb(59 130 246 / 0.25); }
+.tile--violet { background: rgb(139 92 246 / 0.12); color: #a78bfa; border-color: rgb(139 92 246 / 0.25); }
+.tile--green  { background: rgb(34 197 94 / 0.12);  color: #4ade80; border-color: rgb(34 197 94 / 0.25); }
+.tile--fire   { background: rgb(251 146 60 / 0.12); color: #fdba74; border-color: rgb(251 146 60 / 0.25); }
+
+/* ---------------------------------------------------------------- step list */
+
+.steps {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.step {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.step__n {
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--grad);
+    color: #fff;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+/* ---------------------------------------------------------------- skeletons */
+
+.skeleton {
+    border-radius: 8px;
+    background: linear-gradient(
+        90deg,
+        var(--surface-raised) 25%,
+        var(--border) 37%,
+        var(--surface-raised) 63%
+    );
+    background-size: 400% 100%;
+    animation: shimmer 1.3s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+    from { background-position: 100% 50%; }
+    to   { background-position: 0 50%; }
+}
+
+/* Anybody who has asked for less motion gets a static placeholder rather than none — the layout
+   still holds, it simply does not shimmer. */
+@media (prefers-reduced-motion: reduce) {
+    .skeleton { animation: none; }
+    .card--hover:hover { transform: none; }
+}
+
+/* ---------------------------------------------------------------- upgrade card */
+
+
+/* ---------------------------------------------------------------- page bits */
+
+/* The decorative mark beside a page heading. Dropped on narrow screens, where it would push the
+   heading into two awkward lines to earn nothing. */
+.hero-mark {
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+    width: 76px;
+    height: 76px;
+    border-radius: 18px;
+    color: #a78bfa;
+    background: linear-gradient(150deg, rgb(59 130 246 / 0.14), rgb(139 92 246 / 0.2));
+    border: 1px solid rgb(139 92 246 / 0.25);
+}
+
+@media (max-width: 720px) {
+    .hero-mark {
+        display: none;
+    }
+}
+
+/* A rank in a leaderboard row: fixed width so names start on the same line whether the rank is
+   1 or 12. */
+.rank {
+    flex: 0 0 22px;
+    text-align: center;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--text-faint);
+}
+
+.row-item[aria-current='true'] {
+    background: var(--surface-raised);
+    border-color: rgb(59 130 246 / 0.35);
+}
+
+/* ============================================================================
+   Sign-in page
+
+   Two columns on a desktop — pitch beside form — collapsing to the form alone on a phone. The
+   pitch is dropped rather than stacked below on small screens: somebody who opened the app to
+   sign in does not need to scroll past three feature blurbs to reach the password field.
+   ============================================================================ */
+
+.authpage {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background:
+        radial-gradient(900px 500px at 12% 0%, rgb(59 130 246 / 0.1), transparent 60%),
+        radial-gradient(800px 500px at 92% 12%, rgb(139 92 246 / 0.12), transparent 60%),
+        var(--bg);
+}
+
+.authpage__inner {
+    flex: 1 1 auto;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 440px;
+    gap: 56px;
+    align-items: center;
+    width: 100%;
+    max-width: 1140px;
+    margin: 0 auto;
+    padding: 48px 24px;
+}
+
+@media (max-width: 980px) {
+    .authpage__inner {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 28px;
+        padding: 32px 18px;
+        max-width: 460px;
+    }
+
+    .authpitch {
+        /* The features and the headline are a pitch for a product somebody has already chosen by
+           the time they are on this screen on a phone. */
+        display: none;
+    }
+}
+
+.authpitch {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.authpitch__title {
+    font-size: clamp(2.1rem, 4.2vw, 3.1rem);
+    line-height: 1.08;
+    letter-spacing: -0.02em;
+    margin: 0 0 12px;
+}
+
+.authpitch__accent {
+    background: var(--grad);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.authcard {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    padding: 28px;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    background: var(--surface);
+    box-shadow: var(--shadow-lift), var(--glow);
+}
+
+@media (max-width: 480px) {
+    .authcard {
+        padding: 20px;
+        border-radius: 14px;
+    }
+}
+
+/* "or continue with", with a rule either side. Two pseudo-element lines rather than a border and
+   a background-coloured span, which breaks the moment the card colour changes. */
+
+
+
+
+
+.authfoot {
+    padding: 18px 24px 28px;
+    text-align: center;
+}
+
+/* A button that has to read as a link, for the sign-in/sign-up toggle. A real anchor would need a
+   route; this changes a mode. */
+.linkish {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--accent);
+    font: inherit;
+    cursor: pointer;
+}
+
+.linkish:hover {
+    text-decoration: underline;
+}
+
+/* The show/hide-password control inside a field. */
+.inputwrap__action {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    border: 0;
+    border-left: 1px solid var(--border);
+    border-radius: 0;
+    background: transparent;
+    color: var(--text-faint);
+}
+
+.inputwrap__action:hover {
+    color: var(--text);
+    background: var(--surface-raised);
+}
+
+/* ---------------------------------------------------------------- question strip
+   Numbers for every question in a test, so moving around costs nothing. The only marking here says
+   "you gave an answer" — never whether it was right, which is the whole point of a test. */
+.qstrip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.qstrip__item {
+    width: 34px;
+    padding: 6px 0;
+    text-align: center;
+    font-size: 0.82rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.qstrip__item--answered {
+    border-color: rgb(59 130 246 / 0.45);
+    color: var(--text);
+}
+
+.qstrip__item[aria-current='true'] {
+    background: var(--grad);
+    border-color: transparent;
+    color: #fff;
+    font-weight: 700;
+}
+
+/* A Link that has to look like the primary button beside it. */
+.btn-link {
+    display: inline-block;
+    padding: 10px 16px;
+    border-radius: 9px;
+    text-align: center;
+    text-decoration: none;
 }
