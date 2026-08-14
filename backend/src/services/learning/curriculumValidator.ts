@@ -14,31 +14,44 @@ import { z } from 'zod';
  */
 
 /**
- * Strict about structure, deliberately loose about the contents of each subject.
+ * Strict about structure, deliberately loose about contents.
  *
- * The per-subject fields are checked by the business rules below, which drop what they cannot
- * use. If the schema enforced them instead, one sloppy subject — a one-letter name, a weight of
- * NaN — would fail the parse and throw away an otherwise good syllabus. Validate the shape here;
- * clean the contents there.
+ * Contents are checked by the business rules below, which trim and drop what they cannot use. If
+ * the schema enforced them instead, one sloppy field — a one-letter subject name, a weight of NaN,
+ * a reason two sentences longer than expected — would fail the parse and throw away an otherwise
+ * good reply. Validate the shape here; clean the contents there.
+ *
+ * That is not a stylistic preference. A tight cap on `reason` turned a correct rejection into a
+ * fault: asked about "apple" the model answered, at length, that an apple is not something you
+ * study; the reply overflowed the cap, the parse failed, and the learner was told "something went
+ * wrong" instead of being told their goal was not valid. The feature looked broken while working
+ * perfectly. The lengths below are generous bounds against a pathological reply, not judgements
+ * about what a good one looks like — the reply is already bounded by the request's token limit.
  */
 export const curriculumReplySchema = z.object({
     isStudyGoal: z.boolean(),
-    reason: z.string().max(400),
-    name: z.string().max(200),
-    slug: z.string().max(200),
-    description: z.string().max(2000),
+    reason: z.string().max(4000),
+    name: z.string().max(2000),
+    slug: z.string().max(2000),
+    description: z.string().max(20_000),
     subjects: z
         .array(
             z.object({
-                name: z.string().max(200),
+                name: z.string().max(2000),
                 // Not z.number(): that rejects NaN, and a model being loose about one number is
                 // not a reason to discard the syllabus. Clamped below instead.
                 weight: z.unknown(),
-                topics: z.array(z.string().max(300)).max(60),
+                topics: z.array(z.string().max(2000)).max(400),
             })
         )
-        .max(40),
+        .max(200),
 });
+
+/** Longest description worth storing. Past this it is prose, not a summary. */
+const MAX_DESCRIPTION = 2000;
+
+/** How much of the model's reason to show a learner. Long enough to be a reason, not a lecture. */
+const MAX_SHOWN_REASON = 240;
 
 export type CurriculumReply = z.infer<typeof curriculumReplySchema>;
 
@@ -94,6 +107,24 @@ function tidy(text: string): string {
 }
 
 /**
+ * Truncate at a word boundary, or at a sentence end if one falls close enough to the limit.
+ *
+ * Cutting mid-word reads as a bug to the person reading it, which matters most where this is used:
+ * the text explaining why their goal was refused.
+ */
+function shorten(text: string, limit: number): string {
+    if (text.length <= limit) return text;
+
+    const cut = text.slice(0, limit);
+    const sentenceEnd = Math.max(cut.lastIndexOf('. '), cut.lastIndexOf('! '));
+
+    if (sentenceEnd > limit * 0.5) return cut.slice(0, sentenceEnd + 1);
+
+    const lastSpace = cut.lastIndexOf(' ');
+    return `${lastSpace > limit * 0.5 ? cut.slice(0, lastSpace) : cut.trimEnd()}…`;
+}
+
+/**
  * A name that is really a sentence, an instruction, or the model talking to us rather than
  * labelling a subject. Cheap heuristics, applied only to short label fields.
  */
@@ -136,7 +167,7 @@ export function validateCurriculumReply(
 
     // The model's own verdict comes first: it saw the text and we did not.
     if (!reply.isStudyGoal) {
-        const detail = tidy(reply.reason);
+        const detail = shorten(tidy(reply.reason), MAX_SHOWN_REASON);
 
         return {
             ok: false,
@@ -148,7 +179,7 @@ export function validateCurriculumReply(
     }
 
     const name = tidy(reply.name);
-    const description = tidy(reply.description);
+    const description = shorten(tidy(reply.description), MAX_DESCRIPTION);
 
     if (name.length < 2 || looksLikeProse(name)) {
         return {

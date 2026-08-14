@@ -97,6 +97,60 @@ describe('validateCurriculumReply — rejects what is not a study goal', () => {
         }
     });
 
+    /**
+     * The bug this covers was seen live, on the goal text "apple".
+     *
+     * The model correctly refused it and explained itself at length. The reason overflowed a cap
+     * in the schema, so the parse failed and the learner was told "something went wrong working
+     * out that goal" — a fault message for a system that had just worked exactly as designed. A
+     * verbose model is not a broken one, and the length of an explanation must never decide
+     * whether the verdict inside it survives.
+     */
+    it('still rejects, with a reason, when the model explains itself at length', () => {
+        const longReason =
+            'An apple is a fruit rather than a field of study. ' +
+            'While there are subjects that touch on apples — botany covers the biology of fruiting plants, '.repeat(
+                8
+            ) +
+            'none of these is what the word on its own names.';
+
+        expect(longReason.length).toBeGreaterThan(400);
+
+        const result = validateCurriculumReply(
+            reply({
+                isStudyGoal: false,
+                reason: longReason,
+                name: '',
+                slug: '',
+                subjects: [],
+            }),
+            'apple'
+        );
+
+        expect(result.ok).toBe(false);
+        if (!result.ok) {
+            // The verdict survives, and it reads as a refusal rather than a malfunction.
+            expect(result.learnerMessage).toMatch(/not look like something to study/i);
+            expect(result.learnerMessage).not.toMatch(/something went wrong/i);
+            // Trimmed for display, and not cut mid-word.
+            expect(result.learnerMessage.length).toBeLessThan(340);
+            expect(result.learnerMessage).not.toMatch(/\w…$/);
+        }
+    });
+
+    it('stores a description the model padded out, rather than discarding the syllabus', () => {
+        const result = validateCurriculumReply(
+            reply({ description: 'The CBSE class 10 syllabus. '.repeat(200) }),
+            'class 10'
+        );
+
+        expect(result.ok).toBe(true);
+        if (result.ok) {
+            expect(result.curriculum.description.length).toBeLessThanOrEqual(2000);
+            expect(result.curriculum.subjects).toHaveLength(2);
+        }
+    });
+
     it('rejects a reply that is not the shape we asked for', () => {
         expect(validateCurriculumReply({ isStudyGoal: 'yes' }, 'x').ok).toBe(false);
         expect(validateCurriculumReply('sorry, I cannot', 'x').ok).toBe(false);
