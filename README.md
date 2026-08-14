@@ -766,6 +766,22 @@ read `correct_answer`.
 
 <img width="1470" height="832" alt="Aitututor2" src="https://github.com/user-attachments/assets/b2b0ac46-bd82-4a7b-8f2f-a958ba521a69" />
 <img width="1467" height="832" alt="Aitutor" src="https://github.com/user-attachments/assets/3e3d353b-caf8-4cb9-b922-3ef730aa6de7" />
+<img width="1470" height="839" alt="goalsetup" src="https://github.com/user-attachments/assets/11e67298-e612-4306-9a5f-23f918bdde4f" />
+<img width="1470" height="832" alt="Knowledgecheck" src="https://github.com/user-attachments/assets/f0d0d731-3681-42ec-9fa4-9533a9575dab" />
+
+<img width="1467" height="877" alt="landingpage" src="https://github.com/user-attachments/assets/83c4fa0b-ad0f-471e-a3b1-a50c5979fd1a" />
+<img width="1434" height="822" alt="loginpage" src="https://github.com/user-attachments/assets/42821830-3cb7-4b0f-a0fa-d1112ad57a19" />
+<img width="1470" height="832" alt="practiceknowledgecheck" src="https://github.com/user-attachments/assets/31266a39-74fd-4f2c-bf44-9425bdad98da" />
+<img width="1470" height="831" alt="Practice" src="https://github.com/user-attachments/assets/ce16850a-71d4-40ac-b7c2-e38123ae76c7" />
+<img width="1470" height="837" alt="studypaln" src="https://github.com/user-attachments/assets/847a9de0-b559-491c-8355-d2f6842bfbaf" />
+<img width="1469" height="833" alt="studygroup" src="https://github.com/user-attachments/assets/9a47d732-8508-4a86-be2b-81313781c7dd" />
+<img width="1470" height="835" alt="progress" src="https://github.com/user-attachments/assets/07d12c7b-cda6-4406-90c7-125042acaa6f" />
+
+
+<img width="1468" height="838" alt="Voicemodule" src="https://github.com/user-attachments/assets/23e356f2-7c60-4305-a90d-94020afc926a" />
+<img width="1470" height="834" alt="studyplan2" src="https://github.com/user-attachments/assets/962390b0-36dc-4736-8b66-4d5e0e8df9e9" />
+
+
 
 
 ### The rest
