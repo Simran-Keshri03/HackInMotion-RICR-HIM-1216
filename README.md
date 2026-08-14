@@ -1,763 +1,760 @@
-# AdhigamAI — Adapt. Learn. Master.
+# Adigam AI
 
-> **An adaptive AI-powered learning platform that continuously transforms learner performance into personalized, explainable next actions.**
+### ADAPT · LEARN · MASTER
 
-## 👥 Team
+**An adaptive learning assistant that turns a learner's own answers into a study plan it can explain.**
 
-**Team code — RICR-HIM-1216**
-
-| Name | Role |
-|---|---|
-| Harsh Kumar | Database |
-| Ayush Kumar | Backend |
-| Soumya Raghuwanshi | Frontend |
-| Simran Kumari Keshri | Frontend |
-
-
----
-
-## 🔗 Live
+[![CI](https://github.com/harsh-1-code/HackInMotion-RICR-HIM-1216/actions/workflows/ci.yml/badge.svg)](https://github.com/harsh-1-code/HackInMotion-RICR-HIM-1216/actions/workflows/ci.yml)
 
 | | |
 |---|---|
-| App | **https://adigamai.vercel.app** |
-| API | **https://adigam-api.onrender.com/api/v1** |
-
-**Reading the code:** [`docs/architecture.md`](docs/architecture.md) is the technical walkthrough —
-how the layers fit together and which decisions were deliberate.
-[`docs/security.md`](docs/security.md) covers what a learner's browser can and cannot reach, with the
-commands to verify it. [`docs/challenges.md`](docs/challenges.md) tracks the five problem-statement
-challenges. [`docs/deployment.md`](docs/deployment.md) covers both hosts and the free-tier limits.
-
-# ❗ Problem Statement
-
-Traditional learning systems generally provide the same sequence of content and practice to every learner. They often fail to continuously account for:
-
-- What a learner already knows
-- Which concepts are weak
-- Recent performance
-- Difficulty handling
-- Consistency over time
-- Available study time
-- Missed study sessions
-- Changing learning priorities
-
-As a result, learners may spend too much time on concepts they already understand while important weak areas remain unattended.
-
-The challenge is to build a learning system that can **assess the learner, understand their current learning state, recommend the next best action, and adapt that recommendation as new evidence becomes available**, while remaining secure, modular, scalable and usable on low-end devices.
+| **Live app** | https://adigamai.vercel.app |
+| **Live API** | https://adigam-api.onrender.com/api/v1 |
+| **Team code** | `RICR-HIM-1216` |
+| **Theme** | Education & EdTech |
 
 ---
 
-# 💡 Solution Overview
+## Table of contents
 
-## adhigamAI — Adapt. Learn. Master.
-
-adhigamAI is an adaptive learning platform built around a continuous learning loop:
-
-```text
-Student Answer
-      ↓
-     Grade
-      ↓
-Store Evidence
-      ↓
-Calculate Mastery
-      ↓
-Identify Learning Priority
-      ↓
-Recommend Next Action
-      ↓
-Student Practices
-      ↓
-New Evidence
-      ↓
-     Adapt
-      ↺
-```
-
-Instead of using an LLM to make every learning decision, adhigamAI separates **deterministic learning intelligence** from **generative AI**.
-
-### Deterministic engines handle:
-
-- Grading
-- Mastery calculation
-- Topic prioritization
-- Difficulty selection
-- Question selection
-- Adaptive recommendations
-
-### AI handles:
-
-- Question generation
-- Explanations
-- Personalized tutoring
-- Natural-language learning assistance
-
-This makes the learning system more **explainable, reproducible, testable and reliable**.
+1. [Project title](#1-project-title)
+2. [Team](#2-team)
+3. [Selected theme](#3-selected-theme)
+4. [Problem statement](#4-problem-statement)
+5. [Solution overview](#5-solution-overview)
+6. [Key features](#6-key-features)
+7. [Architecture](#7-architecture)
+8. [Technology stack](#8-technology-stack)
+9. [Project structure](#9-project-structure)
+10. [Installation guide](#10-installation-guide)
+11. [Environment variables](#11-environment-variables)
+12. [API documentation](#12-api-documentation)
+13. [Database details](#13-database-details)
+14. [Security](#14-security)
+15. [Testing](#15-testing)
+16. [Screenshots](#16-screenshots)
+17. [Deployment](#17-deployment)
+18. [Implementation status](#18-implementation-status)
+19. [Future scope](#19-future-scope)
+20. [Demo video](#20-demo-video)
+21. [Presentation](#21-presentation)
+22. [License](#22-license)
 
 ---
 
-# ✨ Key Features
+# 1. Project title
 
-### 🧠 Adaptive Learning
+## Adigam AI — AI-Powered Adaptive Learning Assistant & Personalized Study Planner
 
-The system continuously updates the learner's learning state based on actual performance.
+A learner tells Adigam what they are preparing for. It works out the syllabus, measures where they
+actually stand, builds a day-by-day plan weighted toward their weak areas, and adjusts that plan when
+they fall behind or when the studying is not working.
 
-### 📊 Evidence-Based Mastery
-
-Mastery is derived from multiple evidence signals rather than a single test score.
-
-Current mastery factors include:
-
-| Signal | Weight |
-|---|---:|
-| Recent accuracy | 40% |
-| Historical accuracy | 25% |
-| Difficulty handling | 25% |
-| Consistency | 10% |
-
-Evidence shrinkage and recency decay prevent insufficient or stale evidence from being treated as strong mastery.
-
-### 🎯 Explainable Recommendations
-
-The system identifies high-priority topics using:
-
-```text
-Priority =
-(0.7 × Knowledge Gap + 0.3 × Staleness)
-× Topic Importance
-```
-
-The learner receives an actionable recommendation rather than just analytics.
-
-### 🔄 Adaptive Difficulty
-
-Difficulty adapts according to the learner's mastery and recent performance.
-
-```text
-Mastery < 40      → Easy
-40–69             → Medium
-70+               → Hard
-```
-
-Recent performance can further adjust difficulty when sufficient evidence exists.
-
-### 🧩 Finish-What-You-Started Logic
-
-If a learner has already started a topic and its mastery remains below the defined threshold, the system prioritizes completing that learning path instead of continuously opening new topics.
-
-### 🤖 AI-Assisted Learning
-
-AI can generate questions and explanations through an abstract provider interface.
-
-AI-generated questions pass validation and independent answer verification before becoming available to learners.
-
-### 🔐 Security by Design
-
-The architecture includes:
-
-- JWT-based authentication
-- Server-derived user identity
-- Authorization checks
-- PostgreSQL Row Level Security
-- Database constraints and triggers
-- Protected question answer keys
-- Server-side grading
-- Rate limiting and validation
-
-### 📱 Low-End Device Friendly
-
-The frontend is intentionally lightweight. Computationally heavier learning operations are performed on the backend, reducing the amount of work required from the learner's device.
-
-### 🧱 Modular and Scalable
-
-The system separates:
-
-```text
-Routes
-  ↓
-Controllers
-  ↓
-Services
-  ↓
-Learning Engines / Repositories
-  ↓
-Database
-```
-
-AI providers are abstracted behind an interface so the provider can be replaced independently.
+Every number it shows comes with the evidence behind it, and every instruction comes with the reason it
+was chosen.
 
 ---
 
-# 🏗️ Architecture
-<img width="1600" height="900" alt="architecture-diagram" src="https://github.com/user-attachments/assets/7a9446e8-93d8-4e8c-ade3-7ccfdaa7d3db" />
+# 2. Team
 
+**Team name:** RICR-HIM-1216
+**HackInMotion team code:** `RICR-HIM-1216`
 
-## System Architecture
-
-```mermaid
-flowchart TB
-    U["👨‍🎓 Student<br/>Mobile / Desktop"]
-
-    FE["Frontend<br/>React + TypeScript + Vite"]
-
-    API["Backend API<br/>Node.js + Express + TypeScript"]
-
-    AUTH["Authentication<br/>Supabase Auth + JWT"]
-
-    SEC["Security Middleware<br/>Auth • Validation • Rate Limiting"]
-
-    LEARNING["Learning Intelligence"]
-
-    GRADER["Grading Engine"]
-    MASTERY["Mastery Engine"]
-    ADAPTIVE["Adaptive Recommendation Engine"]
-    SELECTOR["Question Selector"]
-
-    PLANNER["Study Planner / Re-planner"]
-
-    AI["AI Service<br/>IAIProvider"]
-    PROVIDER["AI Provider<br/>Claude / Future Providers"]
-
-    DB["Supabase PostgreSQL"]
-    RLS["Row Level Security"]
-    DATA["Learning Data<br/>Profiles • Goals • Topics<br/>Questions • Attempts • Assessments • Mastery"]
-
-    U -->|HTTPS / REST| FE
-    FE -->|API Requests| API
-
-    API --> AUTH
-    API --> SEC
-    SEC --> LEARNING
-
-    LEARNING --> GRADER
-    GRADER --> MASTERY
-    MASTERY --> ADAPTIVE
-    ADAPTIVE --> SELECTOR
-    ADAPTIVE --> PLANNER
-
-    API --> AI
-    AI --> PROVIDER
-
-    GRADER --> DB
-    MASTERY --> DB
-    ADAPTIVE --> DB
-    PLANNER --> DB
-    AI --> DB
-
-    FE -->|Authenticated Reads| DB
-    DB --> RLS
-    RLS --> DATA
-
-    MASTERY -.->|Learning State| ADAPTIVE
-    ADAPTIVE -.->|Next Action| FE
-```
-
-## Core Adaptive Learning Loop
-
-```mermaid
-flowchart LR
-    A["Student Answer"]
-    B["Grading"]
-    C["Append-Only Attempt"]
-    D["Mastery Engine"]
-    E["Adaptive Engine"]
-    F["Next Action"]
-    G["Practice"]
-
-    A --> B
-    B --> C
-    C --> D
-    D --> E
-    E --> F
-    F --> G
-    G --> A
-```
-
-## Security Architecture
-
-```mermaid
-flowchart LR
-    A["Client"]
-    B["JWT"]
-    C["Auth Middleware"]
-    D["Verified User ID"]
-    E["Authorization"]
-    F["PostgreSQL RLS"]
-    G["User Data"]
-
-    A --> B
-    B --> C
-    C --> D
-    D --> E
-    E --> F
-    F --> G
-```
-
-## AI Architecture
-
-```mermaid
-flowchart LR
-    S["Learning / Tutor Service"]
-    I["IAIProvider Interface"]
-    P["AI Provider"]
-    L["LLM API"]
-    V["Validation + Verification"]
-    Q["Verified Question Bank"]
-
-    S --> I
-    I --> P
-    P --> L
-    L --> V
-    V --> Q
-```
-
-### Architecture Principles
-
-- **Thin Client:** Keep the frontend lightweight for low-end devices.
-- **Backend-Driven Intelligence:** Learning computation happens primarily on the server.
-- **Deterministic Core:** Mastery and adaptive decisions are not delegated to an LLM.
-- **AI Abstraction:** AI providers are isolated behind an interface.
-- **Security by Design:** Authentication, authorization and database-level isolation are part of the architecture.
-- **Modularity:** Business logic is separated into services, engines and repositories.
-- **Scalability:** The initial system is a modular backend that can later be decomposed into independent services if required.
+| Member | Role |
+|---|---|
+| Harsh Kumar | Team Lead + Database |
+| Ayush Kumar | Backend |
+| Soumya Raghuwanshi | Frontend + Presenter |
+| Simran Kumari Keshri | Frontend |
 
 ---
 
-# 🛠️ Technology Stack
+# 3. Selected theme
 
-## Frontend
+## Education & EdTech
 
-- React
-- TypeScript
-- Vite
-- Responsive UI
-
-## Backend
-
-- Node.js
-- Express
-- TypeScript
-- REST APIs
-- Zod validation
-
-## Database & Authentication
-
-- Supabase
-- PostgreSQL
-- Supabase Auth
-- PostgreSQL Row Level Security (RLS)
-
-## AI
-
-- AI Provider Abstraction (`IAIProvider`)
-- Anthropic Claude / compatible future providers
-
-## Testing
-
-- Backend unit tests
-- Database/security assertions
-- API/integration testing
-
-## Engineering Practices
-
-- Modular architecture
-- Object-oriented design
-- Service / repository separation
-- Environment-based configuration
-- Input validation
-- Secure secret management
-- Error handling and logging
+Adaptive learning, personalised study planning, and assessment-driven prioritisation for students
+preparing for a dated exam.
 
 ---
 
-# 📂 Project Structure
+# 4. Problem statement
+
+Most learning platforms hand every student the same sequence of content, and they keep handing it over
+regardless of what the student has demonstrated. They rarely account for:
+
+- **What a learner already knows.** Time spent on a solved topic is time taken from an unsolved one.
+- **What they are actually weak at**, as opposed to what they say they are weak at.
+- **How much time is left.** A plan that ignores the exam date is a wish list.
+- **Forgetting.** A topic learned in week one is gone by week eight unless something brings it back.
+- **Why.** A recommendation a student cannot interrogate is one they stop following.
+
+The result is a student who works hard, cannot tell whether it is working, and finds out at the exam.
+
+---
+
+# 5. Solution overview
+
+Adigam closes a loop rather than serving a syllabus:
 
 ```text
-adhigamAI/
+answer  →  grade  →  record  →  recompute mastery  →  rank topics  →  next action
+   ↑                                                                      │
+   └──────────────────────────────────────────────────────────────────────┘
+```
+
+Every answer is evidence. Mastery is recomputed from the whole attempt log rather than nudged, so the
+score always matches the history behind it. The plan, the revision schedule, the recommendation and the
+readiness picture are all derived from that one source.
+
+### What is deterministic, and why
+
+The scoring and planning engines are pure functions with unit tests. **The planner does not call a
+language model**, and that is a deliberate decision rather than a limitation: dividing a fixed number of
+minutes between topics by how much each needs and how much each is worth is arithmetic. A plan produced
+by a model could not be reproduced, could not be unit tested, and could not be explained to a learner
+asking why Tuesday looks like that — and it would cost money and twenty seconds every time the plan
+changed. Building a 179-day plan takes about four seconds, all of it database.
+
+| Deterministic | Generative AI |
+|---|---|
+| Mastery scoring | Turning free text into a syllabus |
+| Topic ranking and difficulty | Writing new practice questions |
+| Study plan generation | Independently checking those answers |
+| Adaptive re-planning | Answering a learner's doubt in context |
+| Spaced repetition intervals | |
+| Grading and mock-test marking | |
+| Streaks, badges, consistency | |
+
+AI is used where judgement is genuinely required. Everything a learner is measured by is arithmetic they
+could check by hand.
+
+---
+
+# 6. Key features
+
+### Dynamic syllabus from free text
+A learner types `class 10`, `12th boards` or `GATE CSE`. The model returns a structured syllabus, which
+is then validated in four stages before anything is stored. Text that is not a study goal is refused
+with a reason — `dog` comes back rejected rather than producing an empty app.
+
+### Knowledge assessment
+One question per topic, spread across every subject in the goal. Broad rather than deep on purpose: the
+job is finding **where** a learner is weak, so covering twelve topics once beats covering three topics
+four times. Results are reported as bands, not percentages, because three questions cannot support
+"63%".
+
+### Personalised study plan
+Days remaining × minutes per day, divided by need. Need is how far a topic is from mastered × how much
+of the exam it is worth. Sessions are laid out day by day, interleaved so a learner meets their whole
+plan in the first week, and each one carries the sentence explaining why it is there.
+
+### Adaptive re-planning
+Runs when the plan is read, not from a button. Past sessions are settled from the answers actually
+recorded, and the plan is rebuilt when three sessions are missed in a week or two topics stop improving.
+Rate limited to once per twenty hours — a plan that changes every time you look at it is not adaptive.
+
+### Spaced repetition
+SM-2 intervals, the SuperMemo family Anki uses. A good review multiplies the gap; a bad one collapses it
+to a day. Two adaptations: the unit is a topic rather than a flashcard, and **the exam caps the
+interval** — scheduling a topic sixty days out when the exam is in thirty is not scheduling, it is
+dropping the topic.
+
+### Mock tests
+A paper built from the topics the plan has scheduled, marked in one pass at the end. Nothing is revealed
+mid-paper, and that is not client-side politeness — the server does not send the answers for an open
+test, so the screen could not show them.
+
+### AI tutor, by voice or text
+Grounded in the learner's mastery on the topic in view and the questions they recently got wrong. It is
+never given the answer key. Voice input and spoken answers use the browser's own speech APIs, so they
+add **nothing** to the bundle.
+
+### Gamification
+A year of activity as a grid, day streaks, consistency, and sixteen badges across five families. Badges
+are derived from the record on every read rather than stored, which means a badge cannot be wrong.
+
+### Study groups
+Classmates preparing for the same thing, compared on effort. Shared: name, questions answered, streak,
+topics mastered. **Not** shared: accuracy, weak topics, wrong answers, tutor conversations. Publishing
+somebody's weak spots to their classmates would make the honest answer to "should I practise my weakest
+topic" become "not while my friends can see".
+
+### Explainable mastery
+A 0–100 score from four weighted components — recent accuracy, historical accuracy, difficulty handled,
+consistency — shrunk toward a neutral prior when the evidence is thin, and decayed when a topic goes
+untouched. It is always shown next to the number of attempts behind it, because a score from three
+answers means little and the interface should say so.
+
+---
+
+# 7. Architecture
+
+![Adigam AI system architecture](assets/diagrams/architecture.gif)
+
+### Request flow
+
+```text
+Browser (React)
+    │  Supabase Auth — sign-in only, session in localStorage
+    │  Bearer token on every request
+    ▼
+Express API  ─── authMiddleware: token verified with Supabase, identity taken from it
+    │
+    ├── controllers   HTTP shape, zod validation, no SQL
+    ├── services      business rules, no SQL
+    │     └── engines pure functions: mastery, adaptive, planning, SRS, badges, groups
+    └── repositories  every query, no rules
+              │
+              ▼
+        Supabase PostgreSQL — RLS on all 20 tables, column-level grants
+```
+
+### Layer rules, enforced by review
+
+- **Controllers hold no SQL.** They validate, call a service, and shape a response.
+- **Repositories hold no business rules.** They read and write.
+- **Services hold no SQL.** They decide.
+- **Engines are pure.** No I/O, no clock, no randomness — every one is unit tested against hand-worked
+  examples.
+
+### The AI boundary
+
+Everything above the provider talks to an interface:
+
+```ts
+interface IAIProvider {
+  generateJson(request: AIJsonRequest): Promise<AIJsonResponse>;
+  generateText(request: AITextRequest): Promise<AITextResponse>;
+}
+```
+
+`claudeProvider.ts` is the **only** file in the repository that imports the Anthropic SDK. Callers state
+the quality they need — `'high'` for anything that becomes stored data, `'standard'` for text a person
+reads and judges — and the provider maps that to a model. Swapping models, or substituting a fake one in
+tests, is a change in one file.
+
+### Four gates on generated questions
+
+A wrong answer key is worse than no question: it marks a learner wrong for being right, and the mastery
+engine then records that as evidence.
+
+```text
+1. schema-constrained generation
+2. zod schema validation
+3. business rules (length, option count, no filler)
+4. independent answer check — a separate request that has never seen the proposed answer
+```
+
+A question becomes visible only when steps 1–4 all pass. Failures are kept but hidden, so what the model
+got wrong can be reviewed rather than lost.
+
+---
+
+# 8. Technology stack
+
+### Frontend
+
+| | |
+|---|---|
+| React | 19 |
+| TypeScript | 6 |
+| Vite | 8 |
+| Routing | react-router-dom 7 |
+| Auth client | `@supabase/auth-js` |
+| Styling | plain CSS with custom properties |
+| Tests | Vitest |
+| Lint | oxlint |
+
+**No UI framework, no component library, no icon package, no charting library.** The shared bundle is
+about **101 kB gzip**, and that is treated as a budget because this has to run on phones with 2–4 GB of
+RAM. The activity heatmap is 365 `div`s in a CSS grid; the icons are inline SVG paths; the voice feature
+uses the browser's own speech APIs and added zero bytes to the shared chunk.
+
+`@supabase/auth-js` rather than the full `supabase-js` for the same reason: the app needs sign-in and a
+session, and the full client additionally bundles PostgREST, realtime websockets, storage and edge
+functions, which together roughly doubled the gzipped bundle for code that never runs.
+
+### Backend
+
+| | |
+|---|---|
+| Node | 22+ |
+| Express | 5 |
+| TypeScript | 5.9, run through `tsx` — no build step |
+| Validation | zod 4 |
+| AI | `@anthropic-ai/sdk` — Claude |
+| Database client | `@supabase/supabase-js` |
+| Tests | Vitest |
+
+### Data & AI
+
+| | |
+|---|---|
+| Database | Supabase PostgreSQL 17 (Mumbai) |
+| Auth | Supabase Auth, JWT verified server-side |
+| Models | `claude-opus-5` for stored data, `claude-sonnet-5` for the tutor |
+
+---
+
+# 9. Project structure
+
+```text
+HackInMotion-RICR-HIM-1216/
+├── backend/
+│   └── src/
+│       ├── config/            env parsing, database clients
+│       ├── controllers/       HTTP shape and validation
+│       ├── middleware/        auth, rate limiting, body validation
+│       ├── repositories/      every SQL query
+│       ├── routes/            route tables
+│       ├── services/
+│       │   ├── adaptive/      recommendation, difficulty, question selection
+│       │   ├── ai/            IAIProvider, prompts, response validation
+│       │   ├── assessment/    diagnostic and mock-test engines
+│       │   ├── groups/        ranking and invite codes
+│       │   ├── learner/       mastery, habits, spaced repetition, badges, activity
+│       │   ├── learning/      curriculum resolution, goals
+│       │   ├── planning/      plan generation and re-planning
+│       │   ├── practice/      grading
+│       │   └── questions/     AI question generation pipeline
+│       ├── utils/             errors, dates, HTTP helpers
+│       └── server.ts
+│   └── tests/unit/            305 tests
 │
 ├── frontend/
-│   ├── src/
-│   ├── components/
-│   ├── pages/
-│   └── services/
+│   └── src/
+│       ├── components/        Activity, Icon, Loading, layout
+│       ├── features/auth/     AuthProvider
+│       ├── hooks/             useApi, useTheme, useVoice
+│       ├── lib/               api client, supabase auth client
+│       ├── pages/             10 screens, each its own lazy chunk
+│       └── router.tsx
+│   └── tests/                 7 tests
 │
-├── backend/
-│   ├── src/
-│   │   ├── routes/
-│   │   ├── controllers/
-│   │   ├── services/
-│   │   ├── engines/
-│   │   ├── repositories/
-│   │   ├── middleware/
-│   │   ├── ai/
-│   │   └── utils/
-│   │
-│   └── tests/
-│
-├── supabase/
-│   └── migrations/
+├── database/
+│   ├── migrations/            schema, in order
+│   ├── seed/                  seed topics and questions
+│   └── tests/                 58 checks, run in rolled-back transactions
 │
 ├── docs/
-│   ├── architecture/
-│   ├── screenshots/
-│   └── api/
+│   ├── architecture.md        technical walkthrough
+│   ├── security.md            what a browser can and cannot reach, with proofs
+│   ├── challenges.md          the five problem-statement challenges
+│   └── deployment.md          both hosts, and the free-tier limits
 │
-├── .env.example
-├── README.md
-└── package.json
+└── .github/workflows/         CI, and a keep-alive for the free tier
 ```
 
 ---
 
-# ⚙️ Installation Guide
+# 10. Installation guide
 
-## Prerequisites
+### Prerequisites
 
-Install:
+- Node.js 22 or newer
+- A Supabase project (free tier is enough)
+- An Anthropic API key — optional; everything except AI features works without one
+- `psql`, for applying migrations
 
-- Node.js 20+ recommended
-- npm
-- Git
-- A Supabase project
-- An AI provider API key if AI features are enabled
-
-## 1. Clone the repository
+### 1. Clone
 
 ```bash
-git clone <YOUR_REPOSITORY_URL>
-cd adhigamAI
+git clone https://github.com/harsh-1-code/HackInMotion-RICR-HIM-1216.git
+cd HackInMotion-RICR-HIM-1216
 ```
 
-## 2. Install frontend dependencies
+### 2. Install
 
 ```bash
-cd frontend
-npm install
+cd backend  && npm install
+cd ../frontend && npm install
 ```
 
-## 3. Install backend dependencies
+### 3. Configure
 
 ```bash
-cd ../backend
-npm install
+cp backend/.env.example  backend/.env
+cp frontend/.env.example frontend/.env
 ```
 
-## 4. Configure environment variables
+Fill both in — see [Environment variables](#11-environment-variables). If a Postgres password contains
+`@` or `#`, percent-encode it (`%40`, `%23`) or the connection URL will not parse.
 
-Create `.env` files from the provided `.env.example`.
-
-```bash
-cp .env.example .env
-```
-
-Configure the required Supabase and AI credentials.
-
-## 5. Apply database migrations
-
-Run the Supabase migrations using the project's configured Supabase workflow.
-
-## 6. Start the backend
+### 4. Apply migrations, in order
 
 ```bash
 cd backend
-npm run dev
+DB=$(grep '^DATABASE_URL' .env | cut -d= -f2- | tr -d '"')
+
+for f in ../database/migrations/*.sql; do
+  psql "$DB" -v ON_ERROR_STOP=1 -f "$f"
+done
 ```
 
-## 7. Start the frontend
+`000_roles.sql` must run first. It grants the service role what it needs — without it the backend cannot
+read its own question bank.
 
-In another terminal:
+### 5. Seed (optional)
 
 ```bash
-cd frontend
-npm run dev
+psql "$DB" -f ../database/seed/demo_questions.sql
 ```
 
-The local frontend and backend URLs will be displayed in the terminal.
+That one file carries both the default syllabus tree and the starter question bank. Every insert ends
+in `ON CONFLICT DO NOTHING` against fixed ids, so running it twice changes nothing.
+
+### 6. Run
+
+```bash
+cd backend  && npm run dev     # http://localhost:4000/api/v1
+cd frontend && npm run dev     # http://localhost:5173
+```
+
+Check it: `curl http://localhost:4000/api/v1/health/deep` should report the database as reachable.
 
 ---
 
-# 🔐 Environment Variables
+# 11. Environment variables
 
-Never commit real secrets to Git.
+### Backend — `backend/.env`
 
-Create environment variables using `.env.example`.
+| Variable | Required | Notes |
+|---|---|---|
+| `NODE_ENV` | no | `development` by default |
+| `PORT` | no | `4000` by default |
+| `CORS_ORIGINS` | yes | comma-separated. Include `http://localhost:4173` if you use `vite preview` — a request from an unlisted origin fails in the browser as a generic network error, not as a CORS one, which sends you looking in the wrong place |
+| `SUPABASE_URL` | yes | project URL |
+| `SUPABASE_PUBLISHABLE_KEY` | yes | safe to expose |
+| `SUPABASE_SECRET_KEY` | yes | **server only** — never in a browser |
+| `ANTHROPIC_API_KEY` | no | omit and AI features return a clear 503; everything else works |
+| `DATABASE_URL` | yes | session pooler connection string |
 
-## Backend
+An empty value is treated as absent rather than as an empty string. That is deliberate: a stray
+`ANTHROPIC_API_KEY=` once made the server refuse to boot with no useful message.
 
-```env
-PORT=5000
-NODE_ENV=development
+### Frontend — `frontend/.env`
 
-SUPABASE_URL=your_supabase_project_url
-SUPABASE_ANON_KEY=your_supabase_anon_key
-SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
+| Variable | Required | Notes |
+|---|---|---|
+| `VITE_API_URL` | yes | e.g. `http://localhost:4000/api/v1` |
+| `VITE_SUPABASE_URL` | yes | project URL |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | yes | compiled into the bundle and meant to be public — it grants nothing without a signed-in learner's token |
 
-AI_PROVIDER=claude
-ANTHROPIC_API_KEY=your_anthropic_api_key
-
-FRONTEND_URL=http://localhost:5173
-```
-
-## Frontend
-
-```env
-VITE_API_BASE_URL=http://localhost:5000/api
-VITE_SUPABASE_URL=your_supabase_project_url
-VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
-```
-
-> **Security:** `SUPABASE_SERVICE_ROLE_KEY` and `ANTHROPIC_API_KEY` must remain server-side and must never be exposed through frontend environment variables.
-
-> Adjust variable names to match the final implementation before submission.
+**The build fails if any of these are missing, on purpose.** Vite inlines a missing variable as
+`undefined`, which turns the guard in `lib/supabase.ts` into an unconditional throw and lets Rollup
+tree-shake the auth client away — producing a build that succeeds, weighs 25 kB less, and white-screens
+on load. Measured on this project: 98 kB with the variables, 73 kB without, both reported as clean
+builds. `vite.config.ts` now refuses and names what is missing.
 
 ---
 
-# 🔌 API Documentation
+# 12. API documentation
 
-The backend exposes REST APIs for authentication, goals, assessments, attempts, learner state and adaptive recommendations.
+Base URL: `/api/v1`. Every route except the health checks requires `Authorization: Bearer <token>`.
+Identity is taken from the verified token — **no endpoint accepts a user id**.
 
-## Health
-
-```http
-GET /api/health
-```
-
-Example:
+Every response has the same envelope:
 
 ```json
+{ "success": true,  "data": { }, "error": null }
+{ "success": false, "data": null, "error": { "code": "INVALID_INPUT", "message": "..." } }
+```
+
+### Endpoints
+
+| Method | Path | Purpose |
+|---|---|---|
+| `GET` | `/health` | process up |
+| `GET` | `/health/deep` | process up **and** database reachable |
+| `GET` | `/learner/summary` | attempts, accuracy, habits, weakest topics |
+| `GET` | `/learner/activity` | a year of activity, streaks, badges, next milestones |
+| `GET` | `/learner/subjects` | the goal's subjects with per-subject progress |
+| `GET` | `/learner/profile` | name, email, timezone |
+| `PATCH` | `/learner/profile` | display name and timezone only |
+| `GET` | `/goals` | active goal, or `null` |
+| `POST` | `/goals` | set a goal; archives the previous one |
+| `GET` | `/goals/subjects?curriculumId=` | subjects in a syllabus |
+| `GET` | `/curricula/default` | the syllabus shipped with the app |
+| `POST` | `/curricula/resolve` | free text → syllabus, or a reasoned rejection |
+| `GET` | `/recommendations/next` | **what to do now, and why** |
+| `POST` | `/attempts` | grade an answer, update mastery, habits and revision |
+| `POST` | `/questions/generate` | grow the bank for a topic |
+| `GET` | `/assessments/diagnostic` | the knowledge check for this goal, or `null` |
+| `POST` | `/assessments/diagnostic` | build and start one |
+| `GET` | `/assessments/:id` | questions while open, result once submitted |
+| `POST` | `/assessments/:id/submit` | mark it, and move mastery |
+| `GET` | `/study-plan/current` | the plan; also settles past sessions and may re-plan |
+| `POST` | `/study-plan/generate` | build a new version |
+| `GET` | `/revision/due` | topics the schedule says are due |
+| `GET` | `/mock-tests` | recent papers, plus any left open |
+| `POST` | `/mock-tests` | build one from the plan |
+| `GET` | `/mock-tests/:id` | questions while open, result once submitted |
+| `POST` | `/mock-tests/:id/submit` | mark the whole paper in one pass |
+| `GET` | `/ai/conversations` | tutor history |
+| `GET` | `/ai/conversations/:id` | one thread |
+| `POST` | `/ai/tutor` | ask a doubt, grounded in learner state |
+| `GET` | `/groups` | groups this learner is in |
+| `POST` | `/groups` | create one, with an invite code |
+| `POST` | `/groups/join` | join by code |
+| `GET` | `/groups/:id` | members and the ranked comparison |
+| `POST` | `/groups/:id/leave` | leave |
+
+### Rate limits
+
+Per learner, per hour. The reason differs by endpoint.
+
+| Endpoint | Limit | Why |
+|---|---|---|
+| `POST /questions/generate` | 10 | each call is real money at the model |
+| `POST /curricula/resolve` | 20 | free-text AI entry point |
+| `POST /ai/tutor` | 40 | AI cost, but a learner asks a lot in a session |
+| `POST /study-plan/generate` | 20 | writes ~100 rows and supersedes the previous plan |
+| `POST /mock-tests` | 20 | writes a paper and retires the open one |
+| `POST /groups/join` | 30 | **not a cost limit** — six characters from a 31-symbol alphabet is ~900 million codes, and unlimited attempts turn that into a guessing game whose prize is standing inside a stranger's group |
+
+### Example — set a goal
+
+```http
+POST /api/v1/goals
+Authorization: Bearer <token>
+
 {
-  "status": "ok",
-  "service": "adhigamAI"
+  "title": "GATE CSE",
+  "curriculumId": "03bd263b-db30-4ca6-8863-ea129038a9db",
+  "examDate": "2027-02-09",
+  "dailyMinutes": 60,
+  "subjectIds": ["d40d72d1-...", "9901df76-..."]
 }
 ```
 
-## Goals
-
-### Create Goal
-
-```http
-POST /api/goals
-Authorization: Bearer <JWT>
-Content-Type: application/json
-```
-
-Example:
-
 ```json
 {
-  "title": "GATE CSE Preparation",
-  "deadline": "2027-02-01",
-  "daily_minutes": 120
+  "success": true,
+  "data": { "goal": {
+    "id": "96259544-...", "title": "GATE CSE",
+    "examDate": "2027-02-09", "dailyMinutes": 60,
+    "daysRemaining": 179, "totalMinutesAvailable": 10740
+  }},
+  "error": null
 }
 ```
 
-### Get Current Goal
+### Example — what should I do now
 
 ```http
-GET /api/goals/current
-Authorization: Bearer <JWT>
+GET /api/v1/recommendations/next
 ```
-
-## Assessment
-
-### Create Assessment
-
-```http
-POST /api/assessments
-Authorization: Bearer <JWT>
-```
-
-### Submit Assessment
-
-```http
-POST /api/assessments/:id/submit
-Authorization: Bearer <JWT>
-Content-Type: application/json
-```
-
-## Attempts
-
-### Submit Answer
-
-```http
-POST /api/attempts
-Authorization: Bearer <JWT>
-Content-Type: application/json
-```
-
-Example:
 
 ```json
 {
-  "question_id": "question-id",
-  "answer": "B",
-  "time_taken_ms": 42000
+  "success": true,
+  "data": {
+    "recommendation": {
+      "action": "practice",
+      "topic": { "id": "b0000000-...", "name": "Normalisation" },
+      "difficulty": "easy",
+      "questionCount": 2,
+      "estimatedMinutes": 3,
+      "reason": "Normalisation is at mastery 16 but your recent accuracy is only 10%, so 2 questions at easy level will rebuild the basics.",
+      "signals": {
+        "masteryScore": 16.38, "recentAccuracyPercent": 10,
+        "totalAttempts": 17, "daysSinceLastAttempt": 0
+      }
+    },
+    "questions": [ { "id": "...", "body": "...", "options": ["..."], "difficulty": "easy" } ]
+  },
+  "error": null
 }
 ```
 
-The backend performs grading and stores the attempt as learning evidence.
+Note what the questions do **not** contain: `correct_answer` and `explanation`. They arrive only in the
+response to a submitted attempt.
 
-## Learner State
-
-```http
-GET /api/learner/profile
-Authorization: Bearer <JWT>
-```
-
-## Recommendation
+### Example — submit an answer
 
 ```http
-GET /api/recommendations/next
-Authorization: Bearer <JWT>
-```
+POST /api/v1/attempts
 
-Example response:
+{ "questionId": "ec1bbfb0-...", "selectedOptions": [0], "timeTakenSeconds": 25 }
+```
 
 ```json
 {
-  "topic": "Normalization",
-  "action": "practice",
-  "difficulty": "easy",
-  "estimated_minutes": 20,
-  "reason": "High learning gap and priority for the current goal."
+  "success": true,
+  "data": {
+    "attemptId": "07d20d07-...",
+    "isCorrect": false,
+    "correctAnswer": [1],
+    "explanation": "Array indexing starts at 0, so arr[4] is offset by 4 elements...",
+    "mastery": { "before": null, "after": 29.17, "change": null, "attemptsOnTopic": 1 }
+  },
+  "error": null
 }
 ```
 
-> **Note:** Update endpoint paths and request/response schemas to exactly match the final implementation before submission. The README should always reflect the deployed API contract.
+Full write-up: [`docs/architecture.md`](docs/architecture.md).
 
 ---
 
-# 🗄️ Database Details
+# 13. Database details
 
-adhigamAI uses **Supabase PostgreSQL** as the persistent relational data layer.
+**Supabase PostgreSQL 17 (Mumbai).** 20 tables, row-level security on all 20, 21 policies. Currently
+holding 5 curricula, 302 topics and 165 verified questions.
 
-## Core entities
+### Tables
+
+| Group | Tables |
+|---|---|
+| Identity | `profiles`, `learner_profiles` |
+| Content | `curricula`, `topics`, `questions` |
+| Goals | `learning_goals`, `learning_goal_topics` |
+| Evidence | `question_attempts`, `concept_mastery` |
+| Assessment | `assessments`, `assessment_questions` |
+| Planning | `study_plans`, `study_sessions`, `revision_schedule` |
+| Mock tests | `mock_tests`, `mock_test_questions` |
+| Tutor | `ai_conversations`, `ai_messages` |
+| Groups | `study_groups`, `group_members` |
+
+### Topic hierarchy
+
+Topics are self-referencing. A curriculum holds subjects; a subject holds the topics that are actually
+practised.
 
 ```text
-profiles
-   │
-   ├── learner_profiles
-   │
-   └── learning_goals
-          │
-          └── goal_topics
-                 │
-                 └── topics
-                        │
-                        └── questions
-                               │
-                               └── question_attempts
-                                      │
-                                      └── concept_mastery
-
-assessments
+curriculum  →  subject (parent_id null)  →  topic (leaf)
+GATE CSE    →  Databases                 →  Normalisation
+                                         →  Transactions
 ```
 
-The learning system stores evidence rather than only final scores.
+A goal selects **subjects**; the engines rank the leaves inside them.
 
-### Important database principles
-
-#### Append-only evidence
-
-Question attempts are treated as learning evidence and are not overwritten during normal learning flow.
-
-#### Row Level Security
-
-Users can access only the records permitted by their authenticated identity.
-
-#### Protected answer keys
-
-Question answer keys are protected from ordinary client access. Grading happens on the backend.
-
-#### Database constraints
-
-Foreign keys, unique constraints, checks and triggers protect data integrity.
-
----
-
-# 🧠 Learning Intelligence
-
-The intelligence layer is composed of independent engines.
+### From evidence to recommendation
 
 ```text
-                    Learning Intelligence
-                            │
-          ┌─────────────────┼─────────────────┐
-          ▼                 ▼                 ▼
-      Grading           Mastery          Adaptive
-       Engine            Engine           Engine
-          │                 │                 │
-          └─────────────────┼─────────────────┘
-                            ▼
-                     Next Best Action
+question_attempts   append-only, one row per answer, timestamped
+        ↓  masteryEngine
+concept_mastery     score + the evidence it came from, rebuildable
+        ↓  recommendationEngine
+next action         topic + difficulty + count + a sentence
 ```
 
-### Mastery Engine
+`concept_mastery` and `learner_profiles` are **caches over the attempt log**. If a formula changes, the
+version is bumped and they are recomputed — the attempts are the truth.
 
-Uses:
+### Principles
 
-- Recent accuracy
-- Historical accuracy
-- Difficulty handling
-- Consistency
-- Evidence shrinkage
-- Recency effects
-
-### Adaptive Engine
-
-Uses:
-
-- Mastery gap
-- Topic staleness
-- Topic importance
-- Current learning state
-- Recent performance
-- Available time
-
-### Question Selection
-
-Prioritizes:
-
-1. Unseen questions at target difficulty
-2. Unseen questions at other difficulties
-3. Previously seen questions when necessary
+- **Identity is never a column the caller supplies.** Triggers overwrite `topic_id` and `attempt_number`
+  on attempts, `user_id` on plan sessions, and `topic_id` on mock-test questions, precisely because a
+  denormalised field the caller controls is one the caller can lie about.
+- **Constraints encode the rules twice.** Difficulty buckets must sum to total attempts; a current
+  streak may not exceed the longest; lapses may not exceed reviews; a submitted test must carry a
+  complete result. The application maintains these too — the copy in the database is the one that
+  cannot be forgotten during a refactor.
+- **Generated columns rather than computed writes.** `accuracy` is `generated always as`, so it can
+  never disagree with the two counts it comes from.
+- **One active row where one is meant to exist.** A partial unique index enforces one active plan per
+  learner, in the database, because every screen asks for "the" current plan.
 
 ---
 
-# 🔐 Security
+# 14. Security
 
-Security is implemented across multiple layers:
+Full write-up with the commands to verify each claim: [`docs/security.md`](docs/security.md).
+
+Three risks, and they need different mechanisms:
+
+| Risk | Why it matters | Defence |
+|---|---|---|
+| Reading another learner's data | ordinary privacy | row-level security, all 20 tables |
+| Reading data about *yourself* that breaks the product | an answer key makes every score meaningless | **column-level** privileges |
+| Writing data about yourself | self-set mastery makes every plan and recommendation fiction | **no write privilege at all** |
+
+The third is the one most easily overlooked. A learner who could set their own mastery is not a privacy
+problem — they are a correctness problem, because the plan, the revision schedule and every readiness
+figure derive from it.
+
+### The answer key is unreachable from the browser
+
+`questions` grants `authenticated` SELECT on seven named columns. `correct_answer` and `explanation` are
+not among them. This is not a filtered API response — asked directly, with a valid signed-in token:
 
 ```text
-JWT Authentication
-       ↓
-Verified Identity
-       ↓
-Authorization
-       ↓
-RLS
-       ↓
-Database Constraints
-       ↓
-Protected Answer Keys
-       ↓
-Server-side Grading
+GET /rest/v1/questions?select=correct_answer   →  42501 permission denied
+GET /rest/v1/questions?select=*                →  42501 permission denied
+GET /rest/v1/questions?select=body             →  200  [{"body":"In C, what is 17 % 5?"}]
 ```
 
-Additional protections include:
+The middle line is the important one. `select=*` **fails** rather than quietly returning the allowed
+columns, so there is no shape of that request which leaks the key.
 
-- Input validation
-- Rate limiting
-- Secure environment variables
-- Error handling
-- Server-side AI API calls
-- No client-controlled ownership
-- Database-level isolation
+### Learners hold no write privilege
+
+Across all 20 tables, `authenticated` has **zero** table-level INSERT, UPDATE or DELETE grants. The only
+write privilege anywhere in the schema is column-level UPDATE on four columns of `profiles` —
+`display_name`, `avatar_url`, `timezone`, `settings`. Tested from the browser against the learner's own
+row:
+
+```text
+PATCH profiles        {"email": "hacked@evil.com"}   →  42501 permission denied
+PATCH concept_mastery {"mastery_score": 100}         →  42501 permission denied
+PATCH profiles        {"display_name": "Ayush"}      →  200  updated
+```
+
+### Also
+
+- **404, not 403**, for anything that is not yours — telling somebody a record exists but is not theirs
+  confirms the id. A malformed id returns the same 404, so the two cannot be told apart by probing.
+- **zod at both trust boundaries**: HTTP bodies *and* model output. A language model is an untrusted
+  input source.
+- **Secrets** — the service key, the Anthropic key and the connection string live only in the backend
+  environment. `.env` has been gitignored since the first commit, and the whole git history was scanned
+  for keys before the repository was made public.
+- **Honest limitations** are listed in `docs/security.md`: in-process rate limiting that resets on
+  deploy, question verification by a second model call rather than a human, invite codes that cannot be
+  rotated, no audit log, and a free-tier deployment with no WAF.
 
 ---
 
-# 🖥️ Screenshots
+# 15. Testing
+
+```bash
+cd backend  && npm test     # 305 tests, 18 files
+cd frontend && npm test     #   7 tests
+cd backend  && npm run typecheck
+```
+
+CI runs typecheck, lint, both suites and a full production build on every push and pull request.
+
+### What the tests are for
+
+They are not coverage theatre. The engines encode judgements, and each suite pins the promises that
+engine must not break. Several exist because they caught a real bug:
+
+- **Difficulty weighting did nothing.** 20 easy-correct and 20 hard-correct both scored 87. Caught by a
+  unit test before it shipped.
+- **The plan gave a topic measured as weak *less* time than one never measured**, because unknown
+  mastery was standing in for zero. Answering a diagnostic question wrong moved that topic from 105
+  planned minutes to 75. Two tests now pin the ordering.
+- **A generation race charged three times for one topic.** Three simultaneous requests each found
+  nothing and each generated. The test asserts the number of **AI calls**, not questions, because
+  duplicate generation is invisible in the response and shows up only on the bill.
+- **A clock-skew error was a 500 on the first screen after signing in.** Intermittent by nature, so it
+  is only demonstrable by test — seven of them.
+
+### Database tests
+
+```bash
+psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f database/tests/003_questions.test.sql
+```
+
+58 numbered checks across 8 files, each inside a transaction that rolls back, so they are safe to run
+repeatedly against a live database. They assert the properties above — including that a learner cannot
+read `correct_answer`.
+
+---
+
+# 16. Screenshots
 
 ### Sign in
 
@@ -765,21 +762,23 @@ Additional protections include:
 
 ### The rest
 
-The live app is the better tour, and it is two links up. Signed in, the screens are:
+The live app is the better tour, and the link is at the top. Behind sign-in there are nine screens:
 
 | Screen | What it shows |
 |---|---|
-| Dashboard | the next action with the engine's reason for choosing it, a year of activity, and the badge shelf |
+| Dashboard | the next action with the reason it was chosen, a year of activity, the badge shelf |
+| Your goal | free-text goal entry, the resolved syllabus, subject selection, exam date |
 | Knowledge check | the diagnostic that tells the plan where to start |
-| Study plan | today first, the rest of the term collapsed, every session explained |
+| Study plan | today first, the rest collapsed, every session explained |
 | Practice | subject picker, then one question at a time with the mastery change after each |
-| Mock tests | a paper marked at the end, broken down by topic |
+| Mock tests | a paper marked at the end, broken down by topic, weakest first |
+| Ask Adigam | the tutor, by typing or by voice, grounded in your own mastery |
 | Groups | a leaderboard, and a plain statement of what it does and does not reveal |
-
+| Settings | name, timezone, and dark / light / match-device |
 
 ---
 
-# 🚀 Deployment
+# 17. Deployment
 
 Both halves are live, and both are on free tiers.
 
@@ -787,174 +786,122 @@ Both halves are live, and both are on free tiers.
 |---|---|---|
 | Frontend | Vercel | https://adigamai.vercel.app |
 | Backend API | Render (Singapore) | https://adigam-api.onrender.com/api/v1 |
-| Database | Supabase | PostgreSQL 17, Mumbai region |
+| Database | Supabase | PostgreSQL 17, Mumbai |
 
-`GET /api/v1/health/deep` reports whether the process is up **and** whether the database answered, which
-is what a scheduled job pings every ten minutes — the free backend sleeps after fifteen minutes idle and
-the free database pauses after a week, so one request keeps both awake. Details and the limits that make
-that a judgement call are in [`docs/deployment.md`](docs/deployment.md).
+### Keeping a free tier awake
 
----
+Two deadlines, neither of them a billing problem: the backend spins down after about fifteen minutes
+idle, and the database pauses after about a week of inactivity. A paused database is not a slow app — it
+is a dead one.
 
-# 🔮 Future Scope
+A scheduled job pings `GET /api/v1/health/deep` every ten minutes. The deep check is the point: the
+shallow one touches only Express, so pinging it would keep the instance warm and quietly let the
+database pause anyway. One counted read satisfies both.
 
-adhigamAI is designed to evolve beyond the initial MVP.
-
-## Planned improvements
-
-### 📅 Intelligent Study Planner
-
-Generate complete schedules based on:
-
-- Goals
-- Deadlines
-- Available study time
-- Topic importance
-- Mastery
-- Learning pace
-
-### 🔄 Automatic Re-planning
-
-Automatically rebuild remaining schedules when learners:
-
-- Miss sessions
-- Fall behind
-- Improve faster than expected
-- Perform poorly in assessments
-
-### 🤖 Personalized AI Tutor
-
-Use the learner's current knowledge state and mistakes to provide more contextual explanations.
-
-### 🧩 Mistake & Misconception Engine
-
-Identify recurring conceptual mistakes and create targeted interventions.
-
-### 🧠 Spaced Repetition
-
-Predict when a concept should be reviewed based on mastery and retention evidence.
-
-### 📝 Mock Test Generator
-
-Generate adaptive mock tests based on the learner's current knowledge state and target examination.
-
-### 📈 Exam Readiness
-
-Estimate readiness using:
-
-- Topic mastery
-- Topic coverage
-- Mock performance
-- Recent performance
-- Remaining preparation time
-
-### 🔮 What-If Simulation
-
-Allow learners to ask:
-
-> "What happens if I study 30 minutes more every day?"
-
-The system can simulate changes to the learning plan and projected readiness.
-
-### 🌐 Scalable Architecture
-
-As adoption grows, independent modules can be extracted into separate services without redesigning the entire product.
-
-### 📱 Low-Bandwidth Optimization
-
-Future versions can further optimize:
-
-- Payload size
-- Offline caching
-- Progressive loading
-- Content caching
-- Low-bandwidth synchronization
+Details, and the free-plan instance-hour limit that makes this a judgement call:
+[`docs/deployment.md`](docs/deployment.md).
 
 ---
 
-# 🧪 Testing
+# 18. Implementation status
 
-The system follows a layered testing strategy.
+### Built and running
+
+| | |
+|---|---|
+| Database | 20 tables, RLS on all 20, 21 policies, 58 SQL checks |
+| Auth | Supabase Auth, JWT verified server-side, sign-up and sign-in |
+| Content | dynamic AI-resolved syllabi, 165 verified questions, on-demand generation |
+| Evidence | append-only attempts, server-side grading, mastery engine |
+| Adaptive | topic ranking, difficulty ladder, question selection with fallbacks |
+| Assessment | diagnostic knowledge check feeding the planner |
+| Planning | versioned day-by-day plans, automatic re-planning |
+| Retention | SM-2 spaced repetition, exam-capped intervals |
+| Mock tests | plan-derived papers, marked in one pass |
+| Tutor | context-grounded, voice in and out |
+| Gamification | activity heatmap, streaks, consistency, 16 badges |
+| Groups | invite-code only, deliberate privacy boundary |
+| Frontend | 10 screens, code-split per route, ~101 kB gzip shared, dark and light themes |
+| Ops | CI on every push, keep-alive, deep health check |
+
+### Not built
+
+- Mistake and misconception engine — recurring conceptual errors, and targeted interventions
+- Exam readiness score — a single number from mastery, coverage, mock performance and time left
+- What-if simulation — "what happens if I study 30 extra minutes a day"
+- AI insights screen — narrative progress summaries
+- Multilingual tutoring
+- Teacher and mentor dashboards
+
+---
+
+# 19. Future scope
+
+Everything below is genuinely not built. Features that once sat on this list — the study planner,
+adaptive re-planning, spaced repetition, mock tests, the AI tutor and voice interaction — have since
+shipped and moved to the section above.
+
+### Mistake and misconception engine
+Cluster wrong answers by the misconception behind them rather than by topic, and intervene on the
+misconception. Two learners can fail the same question for different reasons and need different help.
+
+### Exam readiness
+One number, from topic mastery weighted by exam importance, coverage, mock-test performance, recent form
+and time remaining — with the breakdown always visible, because a readiness score nobody can interrogate
+is a horoscope.
+
+### What-if simulation
+Re-run the planner against a changed budget and show the projected difference. The planner is already a
+pure function, so this is a second call rather than new machinery.
+
+### Multilingual learning
+Hindi and Indian regional languages for tutoring, explanations and plans. The tutor already prompts in
+English only; voice recognition is already tuned to `en-IN` rather than `en-US`, because US recognition
+mishears Indian-accented English often enough to make voice input worse than typing.
+
+### Beyond
+Teacher and mentor dashboards · institutional deployments · offline-first practice · advanced knowledge
+tracing (DKT/BKT) rather than a weighted formula · multi-exam parallel preparation.
+
+---
+
+# 20. Demo video
+
+**Not yet recorded.** It will be added here rather than linked to a placeholder.
+
+Planned flow:
 
 ```text
-Unit Tests
-    +
-Database Security Tests
-    +
-Integration Tests
-    +
-API Tests
-    +
-End-to-End Tests
+Sign up  →  Goal in plain words ("GATE CSE")  →  AI resolves the syllabus
+         →  Knowledge check  →  Plan built around the weak subjects
+         →  Practice, with mastery moving  →  Ask by voice
+         →  Mock test  →  Group comparison
 ```
 
-Critical deterministic engines are independently testable, including grading, mastery calculation and adaptive recommendations.
+---
+
+# 21. Presentation
+
+**In progress.** Story arc:
+
+| # | Section |
+|---|---|
+| 1 | The problem — same content for every student, no feedback loop |
+| 2 | A student's story — works hard, cannot tell if it is working |
+| 3 | The solution — evidence in, explainable next action out |
+| 4 | The student journey — goal → assessment → plan → practice → adapt |
+| 5 | The adaptive loop — answer, grade, mastery, rank, next |
+| 6 | AI strategy — where a model is used, and where arithmetic is used instead |
+| 7 | Features |
+| 8 | Architecture |
+| 9 | Security — the answer key, and read-only mastery |
+| 10 | Impact |
+| 11 | Future scope |
+| 12 | Live demo |
 
 ---
 
-# 📌 Design Philosophy
-
-adhigamAI follows one core principle:
-
-> **AI should assist learning decisions, not replace learning evidence.**
-
-The system therefore separates:
-
-```text
-             DETERMINISTIC CORE
-                    │
-        ┌───────────┼───────────┐
-        ▼           ▼           ▼
-      Grade       Mastery     Adapt
-        │           │           │
-        └───────────┼───────────┘
-                    │
-                    ▼
-              NEXT ACTION
-                    │
-                    ▼
-                    AI
-                    │
-             ┌──────┴──────┐
-             ▼             ▼
-        Explanation    Generation
-```
-
-This makes adhigamAI explainable, testable, secure and adaptable while still using generative AI where it provides the most value.
-
----
-
-# 🏆 Hackathon Vision
-
-### **Adapt. Learn. Master.**
-
-adhigamAI does not simply tell students what to study.
-
-It continuously learns from **how they learn**.
-
-Every answer becomes evidence.
-
-Every evidence update changes the learner model.
-
-Every learner-model update can change the next action.
-
-That creates a continuous adaptive learning loop designed around the individual student.
-
----
-
-## 👥 Team
-
-**Team:** AdigamAI-Adapt,Learn,Master
-
-**Members:**
-- Harsh Kumar
-- Ayush Kumar
-- Soumya Raghuwanshi
-- Simran Kumari Keshri
-
----
-
-## 📄 License
+# 22. License
 
 **Proprietary — all rights reserved.** See [LICENSE](LICENSE).
 
@@ -963,6 +910,10 @@ redistributed or reused without written permission.
 
 ---
 
-## ⭐ Built for the Hackathon
+<div align="center">
 
-**adhigamAI — Adapt. Learn. Master.**
+**Adigam AI** · ADAPT · LEARN · MASTER
+
+Built for **HackInMotion 2026** · Education & EdTech · Team `RICR-HIM-1216`
+
+</div>
