@@ -907,8 +907,7 @@ tracing (DKT/BKT) rather than a weighted formula · multi-exam parallel preparat
 
 # 20. Demo video
 
-**Not yet recorded.** It will be added here rather than linked to a placeholder.
-
+**Drive LINK: https://drive.google.com/file/d/1OZOz8_7u6kZ3lz69ClFEG-mfdVaGTqsQ/view?usp=sharing** 
 Planned flow:
 
 ```text
