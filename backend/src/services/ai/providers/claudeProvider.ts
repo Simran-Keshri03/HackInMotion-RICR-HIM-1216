@@ -235,16 +235,38 @@ function translate(error: unknown): AIProviderError {
     }
 
     if (error instanceof Anthropic.APIError) {
-        // 5xx is worth retrying; a 400 from us is not.
-        const retryable = (error.status ?? 500) >= 500;
+        // 5xx is worth retrying; a 4xx caused by this code or its configuration is not.
+        const status = error.status ?? 500;
+        const retryable = status >= 500;
+
+        /**
+         * The status stays in the log and out of the message.
+         *
+         * This used to read "The model service returned an error (401)." — accurate, and useless to a
+         * learner: nobody outside this codebase knows that 401 means a bad API key rather than
+         * something they did wrong, and a bare status code reads as an app that is broken rather than
+         * a service that is briefly unavailable. The distinction the learner *can* act on is whether
+         * waiting will help, which is exactly what `retryable` already carries.
+         */
+        console.error(
+            `Anthropic API error ${status}: ${error.message ?? 'no message'}`
+        );
+
         return new AIProviderError(
             'AI_UNAVAILABLE',
-            `The model service returned an error (${error.status ?? 'unknown'}).`,
+            retryable
+                ? 'The AI is busy right now. Try again in a moment.'
+                : 'The AI is unavailable at the moment. Everything else still works.',
             retryable
         );
     }
 
-    return new AIProviderError('AI_UNAVAILABLE', 'Unexpected AI failure.');
+    console.error('Unexpected AI failure:', error);
+
+    return new AIProviderError(
+        'AI_UNAVAILABLE',
+        'The AI is unavailable at the moment. Everything else still works.'
+    );
 }
 
 /**
