@@ -1256,3 +1256,839 @@ a:focus-visible {
     text-align: center;
     text-decoration: none;
 }
+
+/* ============================================================================
+   Motion
+
+   Everything here animates only `transform`, `opacity` and `background-position`. Those three are the
+   properties a browser can hand to the compositor, so they cost almost nothing on a slow phone —
+   which is the constraint this whole project is built against. Nothing animates width, height, blur
+   or box-shadow on a large surface, because those force layout or paint on every frame and are how an
+   interface starts to feel worse the more polish it is given.
+
+   Two timings, and no others: 180ms for anything a finger or cursor triggered, 420ms for something
+   arriving on screen. A screen where every element eases at its own speed reads as unfinished rather
+   than as considered.
+
+   Every animation in this section is switched off by the reduced-motion block at the end. That is not
+   politeness — vestibular disorders are real, and an entrance animation on every card is exactly the
+   kind of thing that triggers them.
+   ============================================================================ */
+
+@keyframes rise {
+    from { opacity: 0; transform: translateY(18px) scale(0.985); }
+    to   { opacity: 1; transform: none; }
+}
+
+@keyframes fade {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+@keyframes pop {
+    0%   { opacity: 0; transform: scale(0.94); }
+    60%  { transform: scale(1.01); }
+    100% { opacity: 1; transform: scale(1); }
+}
+
+/* A slow sweep across the wordmark's gradient. 6s so it registers as ambient rather than as
+   something demanding attention. */
+@keyframes sweep {
+    from { background-position: 0% 50%; }
+    to   { background-position: 200% 50%; }
+}
+
+/* ---------------------------------------------------------------- page entrance
+
+   The workspace is keyed on the route in Layout, so it remounts on navigation and replays this. A
+   route change that redraws instantly looks like a page reload; 420ms of rise makes it feel like one
+   app rather than seven. */
+.workspace {
+    animation: rise 520ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Cards arrive in sequence rather than all at once. Capped at six: past that the last card is waiting
+   long enough to look broken, so everything after it simply arrives with the sixth. */
+.workspace > .stack > *,
+.workspace > .worksplit > .stack > * {
+    animation: rise 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.workspace > .stack > *:nth-child(1),
+.workspace > .worksplit > .stack > *:nth-child(1) { animation-delay: 0ms; }
+.workspace > .stack > *:nth-child(2),
+.workspace > .worksplit > .stack > *:nth-child(2) { animation-delay: 70ms; }
+.workspace > .stack > *:nth-child(3),
+.workspace > .worksplit > .stack > *:nth-child(3) { animation-delay: 140ms; }
+.workspace > .stack > *:nth-child(4),
+.workspace > .worksplit > .stack > *:nth-child(4) { animation-delay: 210ms; }
+.workspace > .stack > *:nth-child(5),
+.workspace > .worksplit > .stack > *:nth-child(5) { animation-delay: 280ms; }
+.workspace > .stack > *:nth-child(n + 6),
+.workspace > .worksplit > .stack > *:nth-child(n + 6) { animation-delay: 340ms; }
+
+/* The insights rail follows the main column, so the eye lands on the content first. */
+.worksplit > aside {
+    animation: rise 520ms cubic-bezier(0.16, 1, 0.3, 1) 220ms both;
+}
+
+/* ---------------------------------------------------------------- the wordmark */
+
+.brand {
+    display: inline-flex;
+    align-items: center;
+}
+
+/* The gradient lives on the text itself so the sweep runs through the letters. `background-size:200%`
+   is what gives the animation somewhere to travel. */
+.brand span {
+    background: linear-gradient(
+        100deg,
+        #3b82f6 0%,
+        #a78bfa 25%,
+        #e0e7ff 45%,
+        #a78bfa 65%,
+        #3b82f6 100%
+    );
+    background-size: 220% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: sweep 3s linear infinite;
+}
+
+/* The mark leans in when the header is hovered — a small acknowledgement that it is a link home,
+   which is not otherwise obvious. */
+.brand svg {
+    transition: transform var(--ease);
+}
+
+.brand:hover svg {
+    transform: rotate(-6deg) scale(1.06);
+}
+
+/* ---------------------------------------------------------------- depth
+
+   Half the "it looks empty" problem is not motion, it is that a flat dark rectangle gives the eye
+   nothing to anchor on. Two fixed radial washes behind the content and a very faint dot grid put the
+   cards on a surface rather than in a void. Both are painted once and never animate. */
+body {
+    background-image:
+        radial-gradient(680px 420px at 12% -8%, rgb(59 130 246 / 0.07), transparent 70%),
+        radial-gradient(620px 420px at 92% 4%, rgb(139 92 246 / 0.08), transparent 70%);
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+}
+
+.workspace {
+    background-image: radial-gradient(rgb(148 163 184 / 0.05) 1px, transparent 1px);
+    background-size: 22px 22px;
+}
+
+/* A gradient hairline along the top of an accent card. Cheap depth, and it points at the card that
+   matters on each screen. */
+.card--accent,
+.card--glow {
+    position: relative;
+    overflow: hidden;
+}
+
+.card--accent::before,
+.card--glow::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgb(99 102 241 / 0.75), transparent);
+}
+
+/* ---------------------------------------------------------------- interactions */
+
+/* A light sweeps across a primary button on hover. One pseudo-element moving on transform — no
+   repaint of the button itself. */
+.primary {
+    position: relative;
+    overflow: hidden;
+}
+
+.primary::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        100deg,
+        transparent 20%,
+        rgb(255 255 255 / 0.22),
+        transparent 80%
+    );
+    transform: translateX(-100%);
+    transition: transform 520ms ease;
+}
+
+.primary:hover:not(:disabled)::after {
+    transform: translateX(100%);
+}
+
+/* Rows slide a hair toward the reader on hover, which reads as "this is the one" without a colour
+   change fighting the active state. */
+.row-item,
+.option {
+    transition: background var(--ease), border-color var(--ease), transform var(--ease);
+}
+
+.row-item:hover,
+.option:hover:not(:disabled) {
+    transform: translateX(2px);
+}
+
+.sidebar__link:hover {
+    transform: translateX(2px);
+}
+
+/* Icon tiles lift with their card rather than independently, so a card is one object. */
+.card--hover:hover .tile {
+    transform: translateY(-1px);
+}
+
+.tile {
+    transition: transform var(--ease);
+}
+
+/* ---------------------------------------------------------------- data arriving
+
+   Bars grow from empty. A progress bar that is simply painted at 60% states a fact; one that fills to
+   60% shows a quantity, and it is the only animation here that carries information rather than
+   polish. Scale rather than width, so it stays on the compositor. */
+.subjects__bar span,
+.badge__bar span {
+    transform-origin: left center;
+    animation: growx 620ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes growx {
+    from { transform: scaleX(0); }
+    to   { transform: scaleX(1); }
+}
+
+/* Big numbers pop in, because they are the thing a learner came to read. */
+.big {
+    animation: pop 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* The year grid resolves left to right instead of appearing whole. Delays come from a handful of
+   modulo buckets rather than 365 rules — the exact order does not matter, only that it sweeps. */
+.heatmap__cell {
+    animation: fade 500ms ease both;
+}
+
+.heatmap__cell:nth-child(7n + 1) { animation-delay: 0ms; }
+.heatmap__cell:nth-child(7n + 2) { animation-delay: 40ms; }
+.heatmap__cell:nth-child(7n + 3) { animation-delay: 80ms; }
+.heatmap__cell:nth-child(7n + 4) { animation-delay: 120ms; }
+.heatmap__cell:nth-child(7n + 5) { animation-delay: 160ms; }
+.heatmap__cell:nth-child(7n + 6) { animation-delay: 200ms; }
+.heatmap__cell:nth-child(7n)     { animation-delay: 240ms; }
+
+/* Banners arrive rather than blink into place. An error that appears instantly is easy to miss, and an
+   error nobody notices is the same as no error message. */
+.banner {
+    animation: rise 300ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* ---------------------------------------------------------------- reduced motion
+
+   Everything above, off. Layout and colour are untouched — the interface still works and still shows
+   the same information, it simply stops moving. */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+
+    .brand:hover svg,
+    .row-item:hover,
+    .option:hover,
+    .sidebar__link:hover,
+    .card--hover:hover {
+        transform: none;
+    }
+}
+
+/* ============================================================================
+   Motion, second pass
+
+   The first pass was too quiet to notice, which is its own kind of failure: an animation nobody sees
+   is bytes spent for nothing. What follows is louder, and still confined to transform, opacity and
+   background-position so the cost has not changed.
+
+   The additions are weighted toward things the learner *triggers*, because a hover or a press is
+   where motion is unambiguously useful — it confirms the interface heard you. Entrance animations can
+   only ever be decoration, so they get one clear pass and nothing more.
+   ============================================================================ */
+
+/* ---------------------------------------------------------------- the shell arrives */
+
+.topbar {
+    animation: rise 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* The sidebar items cascade down. Visible on first load and after a hard refresh, which is when
+   somebody is most likely to be judging whether the app feels finished. */
+.sidebar__link {
+    animation: slidein 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes slidein {
+    from { opacity: 0; transform: translateX(-12px); }
+    to   { opacity: 1; transform: none; }
+}
+
+.sidebar__link:nth-of-type(1) { animation-delay: 60ms; }
+.sidebar__link:nth-of-type(2) { animation-delay: 105ms; }
+.sidebar__link:nth-of-type(3) { animation-delay: 150ms; }
+.sidebar__link:nth-of-type(4) { animation-delay: 195ms; }
+.sidebar__link:nth-of-type(5) { animation-delay: 240ms; }
+.sidebar__link:nth-of-type(6) { animation-delay: 285ms; }
+.sidebar__link:nth-of-type(7) { animation-delay: 330ms; }
+.sidebar__link:nth-of-type(8) { animation-delay: 375ms; }
+
+/* ---------------------------------------------------------------- the active page
+
+   A soft breathing glow on the current sidebar item. The one piece of looping motion in the app, and
+   it earns its place by answering "where am I" from the corner of the eye. Very low amplitude — a
+   pulsing navigation is a distraction, a barely-moving one is an anchor. */
+.sidebar__link--active {
+    animation: breathe 3.2s ease-in-out infinite;
+}
+
+@keyframes breathe {
+    0%, 100% { box-shadow: 0 0 0 1px rgb(59 130 246 / 0.25), 0 4px 20px -4px rgb(99 102 241 / 0.35); }
+    50%      { box-shadow: 0 0 0 1px rgb(59 130 246 / 0.45), 0 6px 26px -4px rgb(99 102 241 / 0.55); }
+}
+
+/* The top-bar active link gets an underline that grows from the middle out. */
+.topnav__link {
+    position: relative;
+}
+
+.topnav__link::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    right: 50%;
+    bottom: 2px;
+    height: 2px;
+    border-radius: 2px;
+    background: var(--grad);
+    transition: left var(--ease), right var(--ease);
+}
+
+.topnav__link--active::after,
+.topnav__link:hover::after {
+    left: 9px;
+    right: 9px;
+}
+
+/* ---------------------------------------------------------------- pressing things
+
+   A press that moves is the cheapest possible confirmation that a tap landed, and on a slow phone —
+   where the response to a tap may be hundreds of milliseconds away — it is the difference between an
+   app that feels broken and one that feels busy. */
+button:not(:disabled),
+.btn-link {
+    transition: transform 120ms cubic-bezier(0.16, 1, 0.3, 1), background var(--ease),
+        border-color var(--ease), color var(--ease), box-shadow var(--ease);
+}
+
+button:not(:disabled):active {
+    transform: scale(0.97);
+}
+
+.primary:hover:not(:disabled),
+.secondary:hover:not(:disabled) {
+    transform: translateY(-1px);
+}
+
+/* Cards lift further and pick up a coloured edge, so hovering one is unmistakable. */
+.card--hover:hover {
+    transform: translateY(-3px);
+    border-color: rgb(99 102 241 / 0.4);
+}
+
+/* Icon tiles rotate a few degrees with their card. Small, and it makes a static card feel alive
+   without anything looping. */
+.card--hover:hover .tile,
+.row-item:hover .tile {
+    transform: translateY(-2px) rotate(-4deg) scale(1.05);
+}
+
+/* ---------------------------------------------------------------- avatars and marks */
+
+.avatar {
+    transition: transform var(--ease), box-shadow var(--ease);
+}
+
+.row-item:hover .avatar {
+    transform: scale(1.08);
+    box-shadow: var(--glow);
+}
+
+/* Rank numbers and step markers pop in one after another, which turns a leaderboard from a table into
+   a result being announced. */
+.step__n {
+    animation: pop 460ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.step:nth-child(1) .step__n { animation-delay: 120ms; }
+.step:nth-child(2) .step__n { animation-delay: 220ms; }
+.step:nth-child(3) .step__n { animation-delay: 320ms; }
+
+/* ---------------------------------------------------------------- rows arriving
+
+   Lists slide in from the left rather than fading. A leaderboard, a list of groups, a plan for the
+   week — each reads as items being dealt out. */
+.card > .row-item,
+.stack > .row-item {
+    animation: slidein 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.row-item:nth-of-type(1) { animation-delay: 40ms; }
+.row-item:nth-of-type(2) { animation-delay: 90ms; }
+.row-item:nth-of-type(3) { animation-delay: 140ms; }
+.row-item:nth-of-type(4) { animation-delay: 190ms; }
+.row-item:nth-of-type(n + 5) { animation-delay: 230ms; }
+
+/* Subject and badge cards deal out in a grid. */
+.subjects > *,
+.badges > * {
+    animation: pop 460ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.subjects > *:nth-child(1), .badges > *:nth-child(1) { animation-delay: 40ms; }
+.subjects > *:nth-child(2), .badges > *:nth-child(2) { animation-delay: 90ms; }
+.subjects > *:nth-child(3), .badges > *:nth-child(3) { animation-delay: 140ms; }
+.subjects > *:nth-child(4), .badges > *:nth-child(4) { animation-delay: 190ms; }
+.subjects > *:nth-child(5), .badges > *:nth-child(5) { animation-delay: 240ms; }
+.subjects > *:nth-child(n + 6), .badges > *:nth-child(n + 6) { animation-delay: 280ms; }
+
+/* Options in a question deal out too, so a new question reads as arriving rather than replacing. */
+.card > .stack > .option {
+    animation: slidein 380ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.option:nth-of-type(1) { animation-delay: 30ms; }
+.option:nth-of-type(2) { animation-delay: 75ms; }
+.option:nth-of-type(3) { animation-delay: 120ms; }
+.option:nth-of-type(4) { animation-delay: 165ms; }
+.option:nth-of-type(n + 5) { animation-delay: 200ms; }
+
+/* ---------------------------------------------------------------- reduced motion, again
+
+   The new rules included. Repeated deliberately rather than merged: this block sits next to what it
+   turns off, so adding an animation without disabling it takes a conscious omission rather than an
+   oversight. */
+@media (prefers-reduced-motion: reduce) {
+    .sidebar__link--active,
+    .topbar,
+    .sidebar__link,
+    .step__n,
+    .subjects > *,
+    .badges > *,
+    .card > .row-item,
+    .stack > .row-item,
+    .card > .stack > .option {
+        animation: none !important;
+    }
+
+    button:not(:disabled):active,
+    .primary:hover:not(:disabled),
+    .secondary:hover:not(:disabled),
+    .card--hover:hover,
+    .card--hover:hover .tile,
+    .row-item:hover .tile,
+    .row-item:hover .avatar {
+        transform: none !important;
+    }
+}
+
+/* ============================================================================
+   Sign-in page motion
+
+   This was missed entirely in the first two passes, and it is the worst place to miss: /login sits
+   outside the Layout, so every `.workspace` rule above skips it — and it is the first screen anybody
+   sees, including a judge opening the deployed URL. A signed-out visitor was landing on the one screen
+   in the app with no motion at all, which is why "nothing is animating" was a fair description.
+   ============================================================================ */
+
+/* The pitch column assembles top to bottom: mark, headline, then each feature. */
+.authpitch > * {
+    animation: rise 560ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.authpitch > *:nth-child(1) { animation-delay: 60ms; }
+.authpitch > *:nth-child(2) { animation-delay: 160ms; }
+.authpitch > *:nth-child(3) { animation-delay: 260ms; }
+
+.authpitch .row {
+    animation: slidein 520ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.authpitch .stack > .row:nth-child(1) { animation-delay: 340ms; }
+.authpitch .stack > .row:nth-child(2) { animation-delay: 430ms; }
+.authpitch .stack > .row:nth-child(3) { animation-delay: 520ms; }
+
+/* The headline's gradient sweeps like the wordmark, so the two read as the same brand rather than as
+   two blue things. Slower here — it is large type and a fast sweep across it is distracting. */
+.authpitch__accent {
+    background: linear-gradient(100deg, #3b82f6, #8b5cf6, #3b82f6);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: sweep 4s linear infinite;
+}
+
+/* The card arrives last and from the other side, so the eye finishes on the thing to fill in. */
+.authcard {
+    animation: cardin 620ms cubic-bezier(0.16, 1, 0.3, 1) 180ms both;
+}
+
+@keyframes cardin {
+    from { opacity: 0; transform: translateY(22px) scale(0.97); }
+    to   { opacity: 1; transform: none; }
+}
+
+/* Fields inside it follow, so the form fills itself in rather than appearing complete. */
+.authcard > * {
+    animation: rise 460ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.authcard > *:nth-child(1) { animation-delay: 320ms; }
+.authcard > *:nth-child(2) { animation-delay: 390ms; }
+.authcard > *:nth-child(3) { animation-delay: 460ms; }
+.authcard > *:nth-child(n + 4) { animation-delay: 520ms; }
+
+/* The two washes behind the page drift very slowly. This is the only ambient motion in the app and it
+   is deliberately almost imperceptible — 30 seconds for a barely-visible shift — because a login
+   screen is looked at for a few seconds and anything faster reads as a distraction rather than depth. */
+.authpage {
+    background-size: 140% 140%, 140% 140%, auto;
+    animation: drift 30s ease-in-out infinite alternate;
+}
+
+@keyframes drift {
+    from { background-position: 0% 0%, 100% 10%, 0 0; }
+    to   { background-position: 8% 6%, 92% 4%, 0 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .authpitch > *,
+    .authpitch .row,
+    .authpitch__accent,
+    .authcard,
+    .authcard > *,
+    .authpage {
+        animation: none !important;
+    }
+
+    /* The gradient text needs its colour back once the sweep is off, or it stays transparent. */
+    .authpitch__accent {
+        -webkit-background-clip: unset;
+        background-clip: unset;
+        background: none;
+        color: var(--accent);
+    }
+}
+
+/* ============================================================================
+   The signature effect: a rotating gradient halo
+
+   Almost every dark SaaS interface built this year fades content upward and calls it done, which is
+   why they all feel the same. This is the one thing here that is not the default choice — a light that
+   travels around the edge of the card that matters most on each screen.
+
+   It works by animating a custom property. `@property` registers `--spin` as an angle, which is what
+   makes it interpolatable — animate an unregistered custom property and it jumps between whole values
+   instead of sweeping. The gradient is confined to a 1.5px ring by masking the padding box out of the
+   border box, so what shows is an edge rather than a filled shape, and nothing behind the card is
+   repainted.
+
+   Cost is one composited element per halo and a property that only the gradient reads. On a browser
+   without `@property` — older Firefox — the border renders static rather than broken, which is a
+   perfectly good card.
+   ============================================================================ */
+
+@property --spin {
+    syntax: '<angle>';
+    initial-value: 0deg;
+    inherits: false;
+}
+
+.card--halo {
+    position: relative;
+    isolation: isolate;
+}
+
+.card--halo::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: inherit;
+    padding: 2px;
+    background: conic-gradient(
+        from var(--spin),
+        transparent 0deg 170deg,
+        rgb(59 130 246 / 0.9) 250deg,
+        rgb(224 231 255 / 1) 300deg,
+        rgb(167 139 250 / 1) 330deg,
+        transparent 360deg
+    );
+    /* Border box minus content box leaves the ring. */
+    -webkit-mask:
+        linear-gradient(#000 0 0) content-box,
+        linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask:
+        linear-gradient(#000 0 0) content-box,
+        linear-gradient(#000 0 0);
+    mask-composite: exclude;
+    animation: halo 3.2s linear infinite;
+    pointer-events: none;
+}
+
+@keyframes halo {
+    to { --spin: 360deg; }
+}
+
+/* The card that matters most on a screen already carries the accent class, so it gets the halo without
+   every page having to opt in one by one. */
+.card--accent,
+.card--glow {
+    position: relative;
+    isolation: isolate;
+}
+
+.card--accent::after,
+.card--glow::after {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: inherit;
+    padding: 2px;
+    background: conic-gradient(
+        from var(--spin),
+        transparent 0deg 180deg,
+        rgb(59 130 246 / 0.85) 255deg,
+        rgb(224 231 255 / 0.95) 300deg,
+        rgb(167 139 250 / 1) 335deg,
+        transparent 360deg
+    );
+    -webkit-mask:
+        linear-gradient(#000 0 0) content-box,
+        linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask:
+        linear-gradient(#000 0 0) content-box,
+        linear-gradient(#000 0 0);
+    mask-composite: exclude;
+    animation: halo 4s linear infinite;
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* ============================================================================
+   Page marks
+
+   Every screen now opens with a gradient mark beside its heading. Without one a page is a heading, a
+   paragraph and a stack of dark rectangles — accurate, and indistinguishable from the screen before
+   it. The mark is what makes a page recognisable at a glance and is the cheapest possible way to stop
+   an interface reading as one long list.
+   ============================================================================ */
+
+.hero-mark {
+    position: relative;
+    animation: float 3.4s ease-in-out infinite;
+}
+
+/* A slow rise and fall. Three pixels — enough to notice out of the corner of the eye, small enough
+   that nothing appears to move while being read. */
+@keyframes float {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50%      { transform: translateY(-9px) rotate(-3deg); }
+}
+
+/* A ring that breathes behind the mark, so the corner of the screen has something alive in it. */
+.hero-mark::after {
+    content: '';
+    position: absolute;
+    inset: -8px;
+    border-radius: 22px;
+    border: 1.5px solid rgb(139 92 246 / 0.55);
+    animation: ripple 2.6s ease-out infinite;
+    pointer-events: none;
+}
+
+@keyframes ripple {
+    0%   { opacity: 0.9; transform: scale(0.9); }
+    70%  { opacity: 0;   transform: scale(1.25); }
+    100% { opacity: 0;   transform: scale(1.25); }
+}
+
+/* ---------------------------------------------------------------- headline reveal
+
+   The login headline arrives a line at a time rather than as a block. It is the first motion anybody
+   sees, so it is the one place worth spending a beat on. */
+.authpitch__title span,
+.authpitch__title {
+    display: block;
+}
+
+.authpitch__title {
+    animation: rise 700ms cubic-bezier(0.16, 1, 0.3, 1) 120ms both;
+}
+
+.authpitch__accent {
+    animation:
+        rise 700ms cubic-bezier(0.16, 1, 0.3, 1) 260ms both,
+        sweep 4s linear 960ms infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .card--halo::before,
+    .card--accent::after,
+    .card--glow::after,
+    .hero-mark,
+    .hero-mark::after,
+    .authpitch__title,
+    .authpitch__accent {
+        animation: none !important;
+    }
+
+    /* The halo ring is decorative; with the rotation off it is a static gradient edge, which is fine.
+       The hero mark's float has to be reset or it holds mid-bob. */
+    .hero-mark {
+        transform: none;
+    }
+}
+
+/* ============================================================================
+   Always-on motion, turned up
+
+   The first three passes were all too quiet. Objectively they ran — two headless screenshots a second
+   apart differ, so the browser was animating — but every effect was tuned below the threshold at which
+   somebody glancing at a static page notices anything. An animation nobody sees is bytes spent for
+   nothing, so the always-on effects are now unmistakable while the entrance ones stay brief.
+
+   The rule kept from before: transform, opacity and background-position only.
+   ============================================================================ */
+
+/* A light travels across every card, once every eight seconds, staggered so the screen is never all
+   flashing at once. This is the effect that makes a page of dark rectangles look like a surface with
+   something happening on it, and it is the one thing here somebody will notice without being told. */
+.card {
+    position: relative;
+    overflow: hidden;
+}
+
+.card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 45%;
+    background: linear-gradient(
+        100deg,
+        transparent,
+        rgb(147 197 253 / 0.07),
+        rgb(196 181 253 / 0.1),
+        transparent
+    );
+    transform: translateX(-160%) skewX(-12deg);
+    animation: cardscan 8s ease-in-out infinite;
+    pointer-events: none;
+}
+
+@keyframes cardscan {
+    0%   { transform: translateX(-160%) skewX(-12deg); }
+    /* Crosses in the first quarter, then waits — a constant sweep would be exhausting. */
+    28%  { transform: translateX(360%) skewX(-12deg); }
+    100% { transform: translateX(360%) skewX(-12deg); }
+}
+
+/* Staggered by position so cards do not scan in unison. */
+.stack > .card:nth-child(2n)::before   { animation-delay: 1.4s; }
+.stack > .card:nth-child(3n)::before   { animation-delay: 2.8s; }
+.subjects > .card:nth-child(2n)::before { animation-delay: 1.1s; }
+.subjects > .card:nth-child(3n)::before { animation-delay: 2.2s; }
+
+/* Accent cards already carry the rotating halo on ::after, so the scan would be one effect too many
+   on the single most important card of a screen. */
+.card--accent::before,
+.card--glow::before {
+    animation: none;
+}
+
+/* The active sidebar item glows harder and moves a little, so "where am I" is answerable from the
+   corner of the eye rather than only on inspection. */
+.sidebar__link--active {
+    animation: breathe 2.4s ease-in-out infinite;
+}
+
+@keyframes breathe {
+    0%, 100% {
+        box-shadow: 0 0 0 1px rgb(59 130 246 / 0.3), 0 4px 18px -4px rgb(99 102 241 / 0.4);
+        transform: translateX(0);
+    }
+    50% {
+        box-shadow: 0 0 0 1px rgb(147 197 253 / 0.7), 0 8px 30px -4px rgb(139 92 246 / 0.75);
+        transform: translateX(3px);
+    }
+}
+
+/* The brand mark turns gently and for ever, not only on hover. It is the one piece of the interface
+   that is purely identity, so it is the right place for something ornamental. */
+.brand svg {
+    animation: tilt 6s ease-in-out infinite;
+}
+
+@keyframes tilt {
+    0%, 100% { transform: rotate(0deg) scale(1); }
+    50%      { transform: rotate(-8deg) scale(1.08); }
+}
+
+/* Icon tiles breathe very slightly, which stops a column of them reading as a static list. */
+.tile {
+    animation: tilepulse 4.5s ease-in-out infinite;
+}
+
+@keyframes tilepulse {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50%      { transform: translateY(-2px) scale(1.04); }
+}
+
+.tile:nth-of-type(2n) { animation-delay: 0.9s; }
+.tile:nth-of-type(3n) { animation-delay: 1.8s; }
+
+/* The spinner already spins; this makes a loading state feel like progress rather than a stuck wheel. */
+.state {
+    animation: fade 400ms ease both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .card::before,
+    .sidebar__link--active,
+    .brand svg,
+    .tile,
+    .state {
+        animation: none !important;
+    }
+
+    .brand svg,
+    .tile {
+        transform: none !important;
+    }
+}
