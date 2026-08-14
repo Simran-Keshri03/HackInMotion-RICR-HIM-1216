@@ -67,6 +67,21 @@ export interface GenerateQuestionsResult {
  * and can be reviewed by a person later; deleting them would throw away the evidence of
  * what the model got wrong.
  */
+/**
+ * Generations in flight, keyed by topic.
+ *
+ * Two things share this. A learner and their own retry: the practice request that triggers a
+ * generation takes about twenty seconds, and a dropped connection makes the client ask again — a
+ * second generation would be paid for twice over. And two learners on the same new topic, which
+ * is the normal case rather than a rare one, because the engine sends everybody to the same first
+ * topic of a syllabus. Both wait on the same promise and the bank is filled once.
+ *
+ * ponytail: process-local, so it does not hold across instances. Correct on the single instance
+ * this runs on; if it is ever scaled out, move the claim into the database (an advisory lock on
+ * the topic id) — duplicate spend is the only cost of getting it wrong, not incorrect data.
+ */
+const generating = new Map<string, Promise<boolean>>();
+
 export class QuestionBankService {
     private readonly ai: IAIProvider;
     private readonly questions: QuestionRepository;
@@ -74,6 +89,77 @@ export class QuestionBankService {
     constructor(ai: IAIProvider, questions: QuestionRepository) {
         this.ai = ai;
         this.questions = questions;
+    }
+
+    /**
+     * Fill the bank for a topic that has nothing to practise, once.
+     *
+     * This is what makes an AI-written syllabus usable. The model can produce the syllabus for
+     * anything a learner types — "GATE CSE", "class 10" — but a syllabus is a list of topic names,
+     * and a list of topic names cannot be practised. Before this, setting such a goal led straight
+     * to "no questions available yet" on every topic in it: the app understood the goal and then
+     * had nothing to offer.
+     *
+     * Generating the whole syllabus up front is the obvious alternative and the wrong one. GATE CSE
+     * came back as ninety topics; at four AI calls and twenty seconds each that is an hour of
+     * waiting and most of it spent on topics the learner may never reach. So the bank is filled for
+     * the one topic being practised, at the moment it is needed, and stays filled afterwards — the
+     * second learner on that topic waits for nothing.
+     *
+     * Returns whether anything usable now exists. False is a normal answer: the model may be
+     * unavailable, or every question it wrote may have failed its independent answer check. The
+     * caller shows the same honest empty state it showed before.
+     */
+    async fillIfEmpty(input: GenerateQuestionsInput): Promise<boolean> {
+        const inFlight = generating.get(input.topicId);
+
+        if (inFlight) {
+            await inFlight.catch(() => undefined);
+            return (await this.questions.countVerifiedForTopic(input.topicId)) > 0;
+        }
+
+        /**
+         * The claim is taken with no `await` between reading the map and writing to it, which is
+         * the whole reason this works: JavaScript cannot interleave another request into that gap,
+         * so exactly one caller wins.
+         *
+         * An earlier version checked the database for existing questions here, before claiming.
+         * Three simultaneous requests then all read zero, all found no claim, and all generated —
+         * eight questions written and the bill paid three times over. Every check that touches the
+         * database belongs inside the claim, not in front of it.
+         */
+        const run = this.fillNow(input);
+        generating.set(input.topicId, run);
+
+        try {
+            return await run;
+        } finally {
+            generating.delete(input.topicId);
+        }
+    }
+
+    /** Runs under the claim taken by `fillIfEmpty`, so it may safely read before writing. */
+    private async fillNow(input: GenerateQuestionsInput): Promise<boolean> {
+        // Another request may have filled this topic and released its claim while this one was
+        // still deciding to generate.
+        if ((await this.questions.countVerifiedForTopic(input.topicId)) > 0) return true;
+
+        try {
+            const result = await this.generateForTopic(input);
+
+            return result.outcomes.some(
+                (outcome) => outcome.verified && outcome.stored
+            );
+        } catch (error) {
+            // A generation failure is not a practice failure. The caller falls back to saying the
+            // topic has nothing yet, which is true, and the learner can try again.
+            console.warn(
+                `on-demand generation failed for topic ${input.topicId}: ${
+                    error instanceof Error ? error.message : String(error)
+                }`
+            );
+            return false;
+        }
     }
 
     async generateForTopic(

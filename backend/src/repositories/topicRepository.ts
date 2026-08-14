@@ -36,9 +36,26 @@ export class TopicRepository {
 
     async findCandidatesForLearner(
         userId: string,
-        now: Date
+        now: Date,
+        /**
+         * Narrows the ranking to one subject the learner picked.
+         *
+         * Intersected with the goal's scope rather than replacing it: a subject id arrives from the
+         * client, and without the intersection somebody could pass any subject in the database and
+         * practise outside their own goal. Not a security hole — no answers leak either way — but it
+         * would quietly make the goal meaningless, which is the whole basis of the ranking.
+         */
+        subjectId?: string | null
     ): Promise<TopicCandidate[]> {
-        const scopeIds = await this.findActiveGoalScope(userId);
+        const goalScope = await this.findActiveGoalScope(userId);
+
+        const scopeIds = subjectId
+            ? goalScope.filter((id) => id === subjectId)
+            : goalScope;
+
+        // A subject that is not in the goal narrows the scope to nothing, which the caller reports as
+        // an empty state rather than silently falling back to the whole syllabus.
+        if (subjectId && scopeIds.length === 0) return [];
         const topics = await this.findLeafTopics(scopeIds);
 
         if (topics.length === 0) return [];

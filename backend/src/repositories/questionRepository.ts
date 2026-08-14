@@ -131,6 +131,27 @@ export class QuestionRepository {
     }
 
     /**
+     * How many questions on this topic a learner could actually be shown.
+     *
+     * Counts only verified ones, because unverified rows exist and are invisible: a topic holding
+     * nothing but questions that failed their answer check is empty as far as practice goes. Used
+     * to decide whether the bank still needs filling, so counting the hidden ones would skip a
+     * generation and leave the learner with nothing.
+     *
+     * `head: true` asks Postgres for the count without returning the rows.
+     */
+    async countVerifiedForTopic(topicId: string): Promise<number> {
+        const { count, error } = await this.db
+            .from('questions')
+            .select('id', { count: 'exact', head: true })
+            .eq('topic_id', topicId)
+            .eq('is_verified', true);
+
+        if (error) throw error;
+        return count ?? 0;
+    }
+
+    /**
      * Stores one generated question. `isVerified` decides whether a learner will ever see
      * it -- the RLS policy on this table hides everything unverified.
      *
