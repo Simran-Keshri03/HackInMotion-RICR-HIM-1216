@@ -2,6 +2,7 @@ import { type FormEvent, useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Failed, Loading } from '@/components/Loading/States';
 import { useApi } from '@/hooks/useApi';
+import { useVoice } from '@/hooks/useVoice';
 import { api } from '@/lib/api';
 import type { ConversationSummary, TutorMessage, TutorReply } from '@/types/api';
 
@@ -30,6 +31,17 @@ export default function AITutor() {
     const [asking, setAsking] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
+    const voice = useVoice();
+
+    /**
+     * Whether the answer should be read aloud.
+     *
+     * Only when the question was asked by voice. Speaking every answer would talk over somebody who
+     * typed theirs in a library, and staying silent after somebody spoke theirs makes the feature
+     * look half-finished. Asking how you asked is the answer to both.
+     */
+    const [spokenQuestion, setSpokenQuestion] = useState(false);
+
     // Keep the newest message in view as the exchange grows.
     const endRef = useRef<HTMLDivElement | null>(null);
     useEffect(() => {
@@ -42,6 +54,7 @@ export default function AITutor() {
 
         setError(null);
         setAsking(true);
+        voice.stopSpeaking();
 
         // Show the learner's own message straight away. Waiting for the round trip to echo it back
         // makes the app feel like it dropped what they typed.
@@ -73,6 +86,8 @@ export default function AITutor() {
                     createdAt: new Date().toISOString(),
                 },
             ]);
+
+            if (spokenQuestion) voice.speak(reply.answer);
 
             // The thread now exists, or has moved to the top of the list.
             history.reload();
@@ -150,9 +165,23 @@ export default function AITutor() {
                                     : 'card'
                             }
                         >
-                            <span className="label">
-                                {message.role === 'learner' ? 'You' : 'Adigam'}
-                            </span>
+                            <div className="spread">
+                                <span className="label">
+                                    {message.role === 'learner' ? 'You' : 'Adigam'}
+                                </span>
+                                {message.role === 'tutor' && voice.canSpeak && (
+                                    <button
+                                        type="button"
+                                        onClick={() =>
+                                            voice.speaking
+                                                ? voice.stopSpeaking()
+                                                : voice.speak(message.content)
+                                        }
+                                    >
+                                        {voice.speaking ? 'Stop' : '🔊 Listen'}
+                                    </button>
+                                )}
+                            </div>
                             {/* Paragraphs preserved: the tutor is told to write short paragraphs
                                 separated by blank lines, and collapsing them into one block would
                                 undo the readability that was asked for. */}
@@ -195,21 +224,59 @@ export default function AITutor() {
                     </label>
                     <input
                         id="question"
-                        value={question}
+                        value={voice.listening ? voice.heard : question}
                         maxLength={2000}
-                        placeholder="Why does this formula work?"
-                        disabled={asking}
+                        placeholder={
+                            voice.listening ? 'Listening…' : 'Why does this formula work?'
+                        }
+                        disabled={asking || voice.listening}
                         onChange={(e) => setQuestion(e.target.value)}
                     />
+                    {voice.error && (
+                        <span className="faint" style={{ color: 'var(--bad)' }}>
+                            {voice.error}
+                        </span>
+                    )}
                 </div>
 
-                <button
-                    type="submit"
-                    className="primary wide"
-                    disabled={asking || question.trim() === ''}
-                >
-                    {asking ? 'Asking…' : 'Ask'}
-                </button>
+                {/* The microphone is only rendered where the browser actually has speech
+                    recognition — Firefox has none, and a button that silently does nothing is worse
+                    than no button. Typing is always available. */}
+                <div className="row" style={{ gap: 10 }}>
+                    {voice.canListen && (
+                        <button
+                            type="button"
+                            aria-pressed={voice.listening}
+                            disabled={asking}
+                            onClick={() => {
+                                if (voice.listening) {
+                                    voice.stopListening();
+                                    return;
+                                }
+
+                                setSpokenQuestion(true);
+                                // Sent as soon as the sentence finishes, so speaking a question is
+                                // one action rather than speak-then-press-send.
+                                voice.listen((said) => {
+                                    setQuestion(said);
+                                    void ask(said);
+                                });
+                            }}
+                        >
+                            {voice.listening ? 'Stop listening' : '🎙 Ask by voice'}
+                        </button>
+                    )}
+
+                    <button
+                        type="submit"
+                        className="primary wide"
+                        disabled={asking || voice.listening || question.trim() === ''}
+                        onClick={() => setSpokenQuestion(false)}
+                    >
+                        {asking ? 'Asking…' : 'Ask'}
+                    </button>
+                </div>
+
             </form>
 
             {/* ------------------------------------------------ history */}
