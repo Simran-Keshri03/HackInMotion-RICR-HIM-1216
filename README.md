@@ -124,6 +124,7 @@ changed. Building a 179-day plan takes about four seconds, all of it database.
 | Adaptive re-planning | Answering a learner's doubt in context |
 | Spaced repetition intervals | |
 | Grading and mock-test marking | |
+| Exam readiness scoring | |
 | Streaks, badges, consistency | |
 
 AI is used where judgement is genuinely required. Everything a learner is measured by is arithmetic they
@@ -164,6 +165,17 @@ dropping the topic.
 A paper built from the topics the plan has scheduled, marked in one pass at the end. Nothing is revealed
 mid-paper, and that is not client-side politeness — the server does not send the answers for an open
 test, so the screen could not show them.
+
+### Exam readiness
+One number, and then immediately the arithmetic behind it: weighted mastery across the syllabus, share
+of the paper attempted at all, recent mock form, and whether the days left are enough at the current
+daily budget. Each part is shown with the weight it carried and a sentence naming what would move it.
+Anything not yet measurable is **dropped and the rest reweighted, never scored as zero** — a learner
+who has not sat a mock is not less ready than one who sat one and failed it, and a scheme that says
+otherwise rewards avoiding the measurement.
+
+Measured weakness is kept apart from what was never started, because those are different kinds of
+claim: one is evidence, the other assumes a mastery of zero that was never checked.
 
 ### AI tutor, by voice or text
 Grounded in the learner's mastery on the topic in view and the questions they recently got wrong. It is
@@ -320,7 +332,7 @@ HackInMotion-RICR-HIM-1216/
 │       │   └── questions/     AI question generation pipeline
 │       ├── utils/             errors, dates, HTTP helpers
 │       └── server.ts
-│   └── tests/unit/            305 tests
+│   └── tests/unit/            328 tests
 │
 ├── frontend/
 │   └── src/
@@ -328,7 +340,7 @@ HackInMotion-RICR-HIM-1216/
 │       ├── features/auth/     AuthProvider
 │       ├── hooks/             useApi, useTheme, useVoice
 │       ├── lib/               api client, supabase auth client
-│       ├── pages/             10 screens, each its own lazy chunk
+│       ├── pages/             11 screens, each its own lazy chunk
 │       └── router.tsx
 │   └── tests/                 7 tests
 │
@@ -487,6 +499,7 @@ Every response has the same envelope:
 | `GET` | `/study-plan/current` | the plan; also settles past sessions and may re-plan |
 | `POST` | `/study-plan/generate` | build a new version |
 | `GET` | `/revision/due` | topics the schedule says are due |
+| `GET` | `/readiness` | **how ready you are, and the arithmetic behind it** |
 | `GET` | `/mock-tests` | recent papers, plus any left open |
 | `POST` | `/mock-tests` | build one from the plan |
 | `GET` | `/mock-tests/:id` | questions while open, result once submitted |
@@ -719,7 +732,7 @@ PATCH profiles        {"display_name": "Ayush"}      →  200  updated
 # 15. Testing
 
 ```bash
-cd backend  && npm test     # 305 tests, 18 files
+cd backend  && npm test     # 328 tests, 19 files
 cd frontend && npm test     #   7 tests
 cd backend  && npm run typecheck
 ```
@@ -760,7 +773,7 @@ read `correct_answer`.
 
 ![Sign in](docs/screenshots/landing.png)
 
-### Dahboards
+### Dashboard
 <img width="1470" height="835" alt="dashboard" src="https://github.com/user-attachments/assets/4ded0952-4792-4e27-87ee-94c2d9de6a92" />
 <img width="1464" height="823" alt="dashboard2" src="https://github.com/user-attachments/assets/8dcfefba-cb89-4d09-a44f-5db037aeadfd" />
 
@@ -771,7 +784,7 @@ read `correct_answer`.
 ### Goal setup
 <img width="1470" height="839" alt="goalsetup" src="https://github.com/user-attachments/assets/11e67298-e612-4306-9a5f-23f918bdde4f" />
 
-### Knowledgecheck
+### Knowledge check
 <img width="1470" height="832" alt="Knowledgecheck" src="https://github.com/user-attachments/assets/f0d0d731-3681-42ec-9fa4-9533a9575dab" />
 
 ### Landing page
@@ -780,20 +793,20 @@ read `correct_answer`.
 ### Login page
 <img width="1434" height="822" alt="loginpage" src="https://github.com/user-attachments/assets/42821830-3cb7-4b0f-a0fa-d1112ad57a19" />
 
-### Practice and knowledgecheck
+### Practice
 <img width="1470" height="832" alt="practiceknowledgecheck" src="https://github.com/user-attachments/assets/31266a39-74fd-4f2c-bf44-9425bdad98da" />
 <img width="1470" height="831" alt="Practice" src="https://github.com/user-attachments/assets/ce16850a-71d4-40ac-b7c2-e38123ae76c7" />
 
-### Student plan
+### Study plan
 <img width="1470" height="837" alt="studypaln" src="https://github.com/user-attachments/assets/847a9de0-b559-491c-8355-d2f6842bfbaf" />
 
-### Studygroup
+### Study group
 <img width="1469" height="833" alt="studygroup" src="https://github.com/user-attachments/assets/9a47d732-8508-4a86-be2b-81313781c7dd" />
 
-### progress
+### Progress
 <img width="1470" height="835" alt="progress" src="https://github.com/user-attachments/assets/07d12c7b-cda6-4406-90c7-125042acaa6f" />
 
-### voice module
+### Voice module
 <img width="1468" height="838" alt="Voicemodule" src="https://github.com/user-attachments/assets/23e356f2-7c60-4305-a90d-94020afc926a" />
 <img width="1470" height="834" alt="studyplan2" src="https://github.com/user-attachments/assets/962390b0-36dc-4736-8b66-4d5e0e8df9e9" />
 
@@ -802,7 +815,7 @@ read `correct_answer`.
 
 ### The rest
 
-The live app is the better tour, and the link is at the top. Behind sign-in there are nine screens:
+The live app is the better tour, and the link is at the top. Behind sign-in there are ten screens:
 
 | Screen | What it shows |
 |---|---|
@@ -812,6 +825,7 @@ The live app is the better tour, and the link is at the top. Behind sign-in ther
 | Study plan | today first, the rest collapsed, every session explained |
 | Practice | subject picker, then one question at a time with the mastery change after each |
 | Mock tests | a paper marked at the end, broken down by topic, weakest first |
+| Exam readiness | the score, every component that made it, and the topics costing the most |
 | Ask Adigam | the tutor, by typing or by voice, grounded in your own mastery |
 | Groups | a leaderboard, and a plain statement of what it does and does not reveal |
 | Settings | name, timezone, and dark / light / match-device |
@@ -858,16 +872,16 @@ Details, and the free-plan instance-hour limit that makes this a judgement call:
 | Planning | versioned day-by-day plans, automatic re-planning |
 | Retention | SM-2 spaced repetition, exam-capped intervals |
 | Mock tests | plan-derived papers, marked in one pass |
+| Readiness | one score, every component that made it, published thresholds |
 | Tutor | context-grounded, voice in and out |
 | Gamification | activity heatmap, streaks, consistency, 16 badges |
 | Groups | invite-code only, deliberate privacy boundary |
-| Frontend | 10 screens, code-split per route, ~101 kB gzip shared, dark and light themes |
+| Frontend | 11 screens, code-split per route, ~101 kB gzip shared, dark and light themes |
 | Ops | CI on every push, keep-alive, deep health check |
 
 ### Not built
 
 - Mistake and misconception engine — recurring conceptual errors, and targeted interventions
-- Exam readiness score — a single number from mastery, coverage, mock performance and time left
 - What-if simulation — "what happens if I study 30 extra minutes a day"
 - AI insights screen — narrative progress summaries
 - Multilingual tutoring
@@ -878,17 +892,12 @@ Details, and the free-plan instance-hour limit that makes this a judgement call:
 # 19. Future scope
 
 Everything below is genuinely not built. Features that once sat on this list — the study planner,
-adaptive re-planning, spaced repetition, mock tests, the AI tutor and voice interaction — have since
-shipped and moved to the section above.
+adaptive re-planning, spaced repetition, mock tests, the AI tutor, voice interaction and the exam
+readiness score — have since shipped and moved to the section above.
 
 ### Mistake and misconception engine
 Cluster wrong answers by the misconception behind them rather than by topic, and intervene on the
 misconception. Two learners can fail the same question for different reasons and need different help.
-
-### Exam readiness
-One number, from topic mastery weighted by exam importance, coverage, mock-test performance, recent form
-and time remaining — with the breakdown always visible, because a readiness score nobody can interrogate
-is a horoscope.
 
 ### What-if simulation
 Re-run the planner against a changed budget and show the projected difference. The planner is already a
@@ -907,8 +916,9 @@ tracing (DKT/BKT) rather than a weighted formula · multi-exam parallel preparat
 
 # 20. Demo video
 
-**Drive LINK: https://drive.google.com/file/d/1OZOz8_7u6kZ3lz69ClFEG-mfdVaGTqsQ/view?usp=sharing** 
-Planned flow:
+**[Watch the demo](https://drive.google.com/file/d/1OZOz8_7u6kZ3lz69ClFEG-mfdVaGTqsQ/view?usp=sharing)**
+
+What it covers:
 
 ```text
 Sign up  →  Goal in plain words ("GATE CSE")  →  AI resolves the syllabus
@@ -921,11 +931,9 @@ Sign up  →  Goal in plain words ("GATE CSE")  →  AI resolves the syllabus
 
 # 21. Presentation
 
-**
-[4bdf50dc-2c4f-436e-a971-9a77172d16af.pptx](https://github.com/user-attachments/files/31072621/4bdf50dc-2c4f-436e-a971-9a77172d16af.pptx)
+**[Download the slide deck](https://github.com/user-attachments/files/31072621/4bdf50dc-2c4f-436e-a971-9a77172d16af.pptx)**
 
-
-** Story arc:
+Story arc:
 
 | # | Section |
 |---|---|

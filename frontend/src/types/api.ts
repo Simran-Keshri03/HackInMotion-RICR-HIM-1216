@@ -389,3 +389,48 @@ export interface DiagnosticList {
     assessment: Assessment | null;
     limits: { min: number; max: number; default: number };
 }
+
+export interface ReadinessComponent {
+    key: 'mastery' | 'coverage' | 'mock' | 'time';
+    label: string;
+    /** 0-100. */
+    score: number;
+    /** Share of the total this component carried, after any omissions. Sums to 1. */
+    weight: number;
+    detail: string;
+}
+
+export interface ReadinessGap {
+    topicId: string;
+    name: string;
+    subjectName: string | null;
+    masteryScore: number | null;
+    cost: number;
+}
+
+export interface Readiness {
+    /** 0-100. */
+    score: number;
+    band: 'not_ready' | 'building' | 'on_track' | 'ready';
+    /** How much the score should be trusted, which is not the same as what it is. */
+    confidence: 'low' | 'medium' | 'high';
+    verdict: string;
+    components: ReadinessComponent[];
+    /** Answered and still short of the target. Measured, so this is evidence. */
+    gaps: ReadinessGap[];
+    /** Heaviest topics never attempted. Cost assumes a mastery of zero rather than measuring one. */
+    notStarted: ReadinessGap[];
+    daysRemaining: number;
+    topicsInScope: number;
+    topicsAttempted: number;
+    topicsMastered: number;
+    mocksTaken: number;
+}
+
+export interface ReadinessResponse {
+    /** Null when no goal is set, which is a normal state rather than an error. */
+    goal: { title: string; examDate: string; daysRemaining: number; dailyMinutes: number } | null;
+    readiness: Readiness | null;
+    /** Band cut-offs, published by the engine so the screen never hard-codes its own. */
+    thresholds?: { ready: number; onTrack: number; building: number; masteryTarget: number };
+}

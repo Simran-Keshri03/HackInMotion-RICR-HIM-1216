@@ -350,6 +350,50 @@ input:focus {
     border-color: #6b2320;
 }
 
+/* ---------------------------------------------------------------- dial */
+
+/* The readiness score, as an arc. A conic gradient masked into a ring rather than a chart
+   library: one arc is not worth ~30 kB gzipped, which is a third of the whole app.
+
+   The percentage arrives as the --dial custom property, so React sets one inline value and the
+   shape is entirely CSS. */
+.dial {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 96px;
+    height: 96px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: conic-gradient(
+        var(--dial-tone) 0 var(--dial, 0%),
+        var(--surface-raised) var(--dial, 0%) 100%
+    );
+}
+
+/* Punches the middle out, which is what turns the disc into a ring. Cheaper than an SVG and it
+   inherits the card background, so it stays correct in both themes. */
+.dial::after {
+    content: '';
+    position: absolute;
+    inset: 9px;
+    border-radius: 50%;
+    background: var(--surface);
+}
+
+.dial__value {
+    position: relative;
+    z-index: 1;
+    font-size: 26px;
+    font-weight: 650;
+    font-variant-numeric: tabular-nums;
+}
+
+/* A learner four months out is *supposed* to score low, so a low band is not red. Red would say
+   "something is wrong" about a number that is behaving exactly as expected. */
+.dial--warn { --dial-tone: var(--warn); }
+.dial--ok { --dial-tone: var(--good); }
+
 /* ---------------------------------------------------------------- meter */
 
 .meter {
