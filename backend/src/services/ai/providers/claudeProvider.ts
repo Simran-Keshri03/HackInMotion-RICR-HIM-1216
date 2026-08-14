@@ -1,4 +1,9 @@
-import Anthropic from '@anthropic-ai/sdk';
+import Anthropic, {
+    APIConnectionError,
+    APIConnectionTimeoutError,
+    APIError,
+    RateLimitError,
+} from '@anthropic-ai/sdk';
 import { env } from '@/config/environment.js';
 import type {
     AIJsonRequest,
@@ -201,11 +206,11 @@ function usageOf(response: { usage: { input_tokens: number; output_tokens: numbe
 function translate(error: unknown): AIProviderError {
     if (error instanceof AIProviderError) return error;
 
-    if (error instanceof Anthropic.APIConnectionTimeoutError) {
+    if (error instanceof APIConnectionTimeoutError) {
         return new AIProviderError('AI_TIMEOUT', 'The model took too long.', true);
     }
 
-    if (error instanceof Anthropic.RateLimitError) {
+    if (error instanceof RateLimitError) {
         return new AIProviderError(
             'AI_RATE_LIMITED',
             'Too many AI requests right now. Try again shortly.',
@@ -213,11 +218,11 @@ function translate(error: unknown): AIProviderError {
         );
     }
 
-    if (error instanceof Anthropic.APIConnectionError) {
+    if (error instanceof APIConnectionError) {
         return new AIProviderError('AI_UNAVAILABLE', 'Could not reach the model.', true);
     }
 
-    if (error instanceof Anthropic.APIError) {
+    if (error instanceof APIError) {
         // 5xx is worth retrying; a 4xx caused by this code or its configuration is not.
         const status = error.status ?? 500;
         const retryable = status >= 500;

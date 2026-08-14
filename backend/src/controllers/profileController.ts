@@ -37,7 +37,14 @@ export const updateProfileSchema = z
 
 function isKnownTimezone(zone: string): boolean {
     try {
-        new Intl.DateTimeFormat('en-CA', { timeZone: zone });
+        // Constructing it *is* the check -- an unrecognised zone throws RangeError. The instance is
+        // deliberately discarded, hence the `void`: without it this reads as a `new` whose result
+        // somebody forgot to use.
+        //
+        // Not `Intl.supportedValuesOf('timeZone').includes(zone)`, which looks tidier and is
+        // stricter than intended: that list holds canonical IANA names only, so a learner whose
+        // device reports the alias `Asia/Calcutta` would be told their own timezone is invalid.
+        void new Intl.DateTimeFormat('en-CA', { timeZone: zone });
         return true;
     } catch {
         return false;

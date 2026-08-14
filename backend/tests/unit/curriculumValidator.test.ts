@@ -305,7 +305,7 @@ describe('validateCurriculumReply — cleans up what the schema cannot catch', (
                 subjects: Array.from({ length: 20 }, (_, s) => ({
                     name: `Subject named ${String.fromCharCode(65 + s)}`,
                     weight: 1,
-                    topics: Array.from({ length: 30 }, (_, t) => `Topic ${s}-${t}`),
+                    topics: Array.from({ length: 30 }, (__, t) => `Topic ${s}-${t}`),
                 })),
             }),
             'class 10'
