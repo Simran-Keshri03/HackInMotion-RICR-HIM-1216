@@ -6,12 +6,17 @@
 
 begin;
 
+-- Topics now belong to a curriculum, so the test needs one of its own. Rolled back with
+-- everything else, so it leaves nothing behind and cannot collide with the seeded syllabi.
+insert into public.curricula (id, slug, name)
+values ('bbbbbbbb-0000-4000-8000-0000000000c1', 'test-topics-002', 'Topics Test Curriculum');
+
 -- A subject with two topics under it.
-insert into public.topics (id, parent_id, name, weight, sort_order)
+insert into public.topics (curriculum_id, id, parent_id, name, weight, sort_order)
 values
-    ('bbbbbbbb-0000-4000-8000-000000000001', null, 'Test Subject', 2.00, 1),
-    ('bbbbbbbb-0000-4000-8000-000000000002', 'bbbbbbbb-0000-4000-8000-000000000001', 'Test Topic A', 1.00, 1),
-    ('bbbbbbbb-0000-4000-8000-000000000003', 'bbbbbbbb-0000-4000-8000-000000000001', 'Test Topic B', 1.50, 2);
+    ('bbbbbbbb-0000-4000-8000-0000000000c1', 'bbbbbbbb-0000-4000-8000-000000000001', null, 'Test Subject', 2.00, 1),
+    ('bbbbbbbb-0000-4000-8000-0000000000c1', 'bbbbbbbb-0000-4000-8000-000000000002', 'bbbbbbbb-0000-4000-8000-000000000001', 'Test Topic A', 1.00, 1),
+    ('bbbbbbbb-0000-4000-8000-0000000000c1', 'bbbbbbbb-0000-4000-8000-000000000003', 'bbbbbbbb-0000-4000-8000-000000000001', 'Test Topic B', 1.50, 2);
 
 -- 1. The tree reads back the way we stored it.
 do $$
@@ -30,8 +35,8 @@ end $$;
 do $$
 begin
     begin
-        insert into public.topics (parent_id, name)
-        values ('bbbbbbbb-0000-4000-8000-000000000001', 'Test Topic A');
+        insert into public.topics (curriculum_id, parent_id, name)
+        values ('bbbbbbbb-0000-4000-8000-0000000000c1', 'bbbbbbbb-0000-4000-8000-000000000001', 'Test Topic A');
 
         raise exception 'FAIL: duplicate topic name under the same subject was allowed';
     exception
@@ -45,7 +50,7 @@ end $$;
 do $$
 begin
     begin
-        insert into public.topics (parent_id, name) values (null, 'Test Subject');
+        insert into public.topics (curriculum_id, parent_id, name) values ('bbbbbbbb-0000-4000-8000-0000000000c1', null, 'Test Subject');
 
         raise exception 'FAIL: duplicate subject name was allowed (nulls not distinct is missing)';
     exception
@@ -58,8 +63,8 @@ end $$;
 do $$
 begin
     begin
-        insert into public.topics (parent_id, name, weight)
-        values (null, 'Silly Weight Subject', 99);
+        insert into public.topics (curriculum_id, parent_id, name, weight)
+        values ('bbbbbbbb-0000-4000-8000-0000000000c1', null, 'Silly Weight Subject', 99);
 
         raise exception 'FAIL: weight of 99 was accepted';
     exception
@@ -87,8 +92,8 @@ begin
 end $$;
 
 -- 6. A learner may read the syllabus but must not be able to change it.
-insert into public.topics (id, parent_id, name)
-values ('bbbbbbbb-0000-4000-8000-000000000004', null, 'Readable Subject');
+insert into public.topics (curriculum_id, id, parent_id, name)
+values ('bbbbbbbb-0000-4000-8000-0000000000c1', 'bbbbbbbb-0000-4000-8000-000000000004', null, 'Readable Subject');
 
 set local role authenticated;
 set local request.jwt.claims = '{"sub":"aaaaaaaa-0000-4000-8000-000000000001"}';
@@ -102,7 +107,7 @@ begin
     assert n = 1, 'FAIL: learner cannot read the syllabus';
 
     begin
-        insert into public.topics (parent_id, name) values (null, 'Injected Subject');
+        insert into public.topics (curriculum_id, parent_id, name) values ('bbbbbbbb-0000-4000-8000-0000000000c1', null, 'Injected Subject');
         raise exception 'FAIL: a learner was able to add a subject';
     exception
         when insufficient_privilege then

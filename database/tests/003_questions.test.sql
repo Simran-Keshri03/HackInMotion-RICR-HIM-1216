@@ -7,8 +7,13 @@
 
 begin;
 
-insert into public.topics (id, parent_id, name)
-values ('cccccccc-0000-4000-8000-000000000001', null, 'Question Test Subject');
+-- Topics now belong to a curriculum, so the test needs one of its own. Rolled back with
+-- everything else, so it leaves nothing behind and cannot collide with the seeded syllabi.
+insert into public.curricula (id, slug, name)
+values ('cccccccc-0000-4000-8000-0000000000c1', 'test-questions-003', 'Questions Test Curriculum');
+
+insert into public.topics (curriculum_id, id, parent_id, name)
+values ('cccccccc-0000-4000-8000-0000000000c1', 'cccccccc-0000-4000-8000-000000000001', null, 'Question Test Subject');
 
 insert into public.questions (id, topic_id, question_type, body, options, correct_answer, difficulty, is_verified)
 values

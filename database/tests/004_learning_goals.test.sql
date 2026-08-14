@@ -6,16 +6,21 @@
 
 begin;
 
+-- Topics now belong to a curriculum, so the test needs one of its own. Rolled back with
+-- everything else, so it leaves nothing behind and cannot collide with the seeded syllabi.
+insert into public.curricula (id, slug, name)
+values ('dddddddd-0000-4000-8000-0000000000c1', 'test-goals-004', 'Goals Test Curriculum');
+
 -- Two learners, so the isolation checks have something to fail against.
 insert into auth.users (id, email)
 values
     ('dddddddd-0000-4000-8000-000000000001', 'goal-one@adigam.test'),
     ('dddddddd-0000-4000-8000-000000000002', 'goal-two@adigam.test');
 
-insert into public.topics (id, parent_id, name)
+insert into public.topics (curriculum_id, id, parent_id, name)
 values
-    ('dddddddd-0000-4000-8000-0000000000f1', null, 'Goal Test Subject'),
-    ('dddddddd-0000-4000-8000-0000000000f2', 'dddddddd-0000-4000-8000-0000000000f1', 'Goal Test Topic');
+    ('dddddddd-0000-4000-8000-0000000000c1', 'dddddddd-0000-4000-8000-0000000000f1', null, 'Goal Test Subject'),
+    ('dddddddd-0000-4000-8000-0000000000c1', 'dddddddd-0000-4000-8000-0000000000f2', 'dddddddd-0000-4000-8000-0000000000f1', 'Goal Test Topic');
 
 insert into public.learning_goals (id, user_id, title, exam_date, daily_minutes)
 values
