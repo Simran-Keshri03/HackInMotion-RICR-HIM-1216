@@ -71,6 +71,30 @@ describe('topicNeed', () => {
         expect(untouched).toBeGreaterThan(topicNeed(topic({ masteryScore: 40 })));
     });
 
+    /**
+     * The inversion the diagnostic assessment exposed, and the reason `unknownMastery` exists.
+     *
+     * `masteryScore ?? 0` stood in for "unknown" and quietly meant "the worst possible", so a topic the
+     * learner had just been measured as weak at ranked *below* one nobody had ever asked about.
+     * Observed live: answering a diagnostic question wrong moved that topic from 105 planned minutes to
+     * 75, while an unmeasured topic held the top slot at 150. That is the opposite of prioritising weak
+     * areas, which is the one thing the plan exists to do.
+     */
+    it('ranks a topic measured as weak above one never measured at all', () => {
+        const measuredWeak = topicNeed(topic({ masteryScore: 29, attempts: 1 }));
+        const neverMeasured = topicNeed(topic({ masteryScore: null, attempts: 0 }));
+
+        expect(measuredWeak).toBeGreaterThan(neverMeasured);
+    });
+
+    it('ranks a topic never measured above one measured as solid', () => {
+        // Not knowing belongs between the two things you can know.
+        const neverMeasured = topicNeed(topic({ masteryScore: null, attempts: 0 }));
+        const measuredStrong = topicNeed(topic({ masteryScore: 78, attempts: 6 }));
+
+        expect(neverMeasured).toBeGreaterThan(measuredStrong);
+    });
+
     it('still gives a mastered topic something, so it is not abandoned', () => {
         // Nobody should walk into an exam having forgotten what they knew a month ago.
         expect(topicNeed(topic({ masteryScore: 100 }))).toBeGreaterThan(0);

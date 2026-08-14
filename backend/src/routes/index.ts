@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { aiRouter } from '@/routes/ai.routes.js';
 import { attemptsRouter } from '@/routes/attempts.routes.js';
 import { recommendationsRouter } from '@/routes/adaptive.routes.js';
+import { assessmentRouter } from '@/routes/assessment.routes.js';
 import { curriculaRouter } from '@/routes/curricula.routes.js';
 import { goalsRouter } from '@/routes/goals.routes.js';
 import { groupRouter } from '@/routes/group.routes.js';
@@ -20,6 +21,7 @@ v1Router.get('/health', (_req, res) => {
 });
 
 v1Router.use('/ai', aiRouter);
+v1Router.use('/assessments', assessmentRouter);
 v1Router.use('/curricula', curriculaRouter);
 v1Router.use('/goals', goalsRouter);
 v1Router.use('/learner', learnerRouter);

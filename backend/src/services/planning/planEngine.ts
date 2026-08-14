@@ -151,6 +151,24 @@ export const PLAN_CONFIG = {
     revisionMinutes: 15,
 
     /**
+     * Mastery assumed for a topic that has never been attempted.
+     *
+     * The same neutral prior the mastery formula shrinks toward, and using it here fixes a real
+     * inversion that the diagnostic assessment exposed.
+     *
+     * `masteryScore ?? 0` used to stand in for "unknown", which quietly meant "the worst possible" —
+     * so an unmeasured topic outranked one the learner had just been measured as weak at. Answering a
+     * diagnostic question wrong *lowered* that topic's share of the plan, from 105 minutes to 75, while
+     * a topic nobody had ever asked about held the top slot at 150. That is the opposite of
+     * prioritising weak areas.
+     *
+     * Not knowing belongs between the two things you can know: an unmeasured topic (gap 0.59) now sits
+     * below one measured as weak (0.66) and above one measured as solid (0.15), which is what "we have
+     * no evidence" actually means.
+     */
+    unknownMastery: 35,
+
+    /**
      * Floor on need, so a well-known topic still gets some time.
      *
      * A topic at the target is not worthless — it is worth keeping alive. Without this the plan
@@ -179,7 +197,8 @@ export function addDays(date: string, days: number): string {
 export function topicNeed(topic: PlanTopic): number {
     const { masteryTarget, minNeedFactor } = PLAN_CONFIG;
 
-    const mastery = topic.masteryScore ?? 0;
+    // Never attempted is not the same as scored zero — see `unknownMastery`.
+    const mastery = topic.masteryScore ?? PLAN_CONFIG.unknownMastery;
     const rawGap = Math.max(0, masteryTarget - mastery) / masteryTarget;
     const gap = Math.max(minNeedFactor, rawGap);
 

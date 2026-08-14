@@ -21,6 +21,7 @@ const StudyPlan = lazy(() => import('@/pages/StudyPlan/StudyPlan'));
 const StudyGroups = lazy(() => import('@/pages/StudyGroups/StudyGroups'));
 const Settings = lazy(() => import('@/pages/Settings/Settings'));
 const MockTest = lazy(() => import('@/pages/MockTest/MockTest'));
+const Assessment = lazy(() => import('@/pages/Assessment/Assessment'));
 
 /**
  * Everything behind this needs a session.
@@ -73,6 +74,7 @@ export function AppRoutes() {
                     <Route path="/groups" element={<StudyGroups />} />
                     <Route path="/tutor" element={<AITutor />} />
                     <Route path="/mock-tests" element={<MockTest />} />
+                    <Route path="/assessment" element={<Assessment />} />
                     <Route path="/settings" element={<Settings />} />
                 </Route>
 

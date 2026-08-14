@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Icon } from '@/components/Icon/Icon';
 import { Link } from 'react-router-dom';
 import { Empty, Failed, Loading } from '@/components/Loading/States';
 import { useApi } from '@/hooks/useApi';
@@ -99,6 +100,30 @@ export default function StudyPlan() {
                     </p>
                 </Empty>
 
+                {/* The plan can only prioritise weak areas if it knows where they are.
+                    Without a knowledge check every topic reports the same neutral gap, so time is
+                    split by exam weight alone — a plan for the syllabus rather than for the learner.
+                    Offered here because this is the screen where somebody is about to find that out. */}
+                <div className="card card--glow stack">
+                    <div className="row" style={{ gap: 12, alignItems: 'flex-start' }}>
+                        <span className="tile tile--violet">
+                            <Icon name="target" />
+                        </span>
+                        <div style={{ minWidth: 0 }}>
+                            <span className="label">Get a sharper plan</span>
+                            <p style={{ margin: '6px 0 0' }}>
+                                A fifteen-minute knowledge check tells the plan which subjects
+                                you are actually weak at. Without it, time is divided by how
+                                much of the exam each subject is worth — which is a reasonable
+                                guess and nothing more.
+                            </p>
+                        </div>
+                    </div>
+                    <Link to="/assessment" className="secondary btn-link">
+                        Take the knowledge check first
+                    </Link>
+                </div>
+
                 <button
                     type="button"
                     className="primary wide"
@@ -125,10 +150,21 @@ export default function StudyPlan() {
     return (
         <div className="stack">
             <div className="spread">
-                <div>
+            <div className="spread" style={{ alignItems: 'flex-start', gap: 16 }}>
+                <div style={{ minWidth: 0 }}>
                     <span className="label">Study plan</span>
-                    <h1>{describeMinutes(current.dailyMinutes)} a day</h1>
+                    <h1 style={{ marginBottom: 0 }}>
+                        {describeMinutes(current.dailyMinutes)} a day
+                    </h1>
                 </div>
+
+                {/* The page's mark. Every screen has one so a page is recognisable at a glance
+                    rather than being a heading above a stack of dark rectangles. Hidden on narrow
+                    screens, where it would push the heading onto two awkward lines. */}
+                <span className="hero-mark" aria-hidden="true">
+                    <Icon name="calendar" size={40} />
+                </span>
+            </div>
                 <button type="button" disabled={building} onClick={() => void build()}>
                     {building ? 'Rebuilding…' : 'Rebuild'}
                 </button>

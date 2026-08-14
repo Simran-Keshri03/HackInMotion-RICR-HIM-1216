@@ -347,3 +347,45 @@ export interface MockTestList {
     open: MockTest | null;
     limits: { min: number; max: number; default: number };
 }
+
+/** A subject's band after the diagnostic. Bands, not percentages — see the engine for why. */
+export interface SubjectLevel {
+    subjectId: string;
+    subjectName: string;
+    correct: number;
+    total: number;
+    percent: number;
+    level: 'strong' | 'moderate' | 'weak' | 'unmeasured';
+}
+
+export interface DiagnosticResult {
+    correctCount: number;
+    /** Reported apart from correct: a half-finished paper is not a measurement. */
+    answeredCount: number;
+    totalQuestions: number;
+    accuracyPercent: number;
+    /** Weakest first — the order the plan will spend time in. */
+    subjects: SubjectLevel[];
+    verdict: string;
+}
+
+export interface Assessment {
+    id: string;
+    status: string;
+    questionCount: number;
+    durationMinutes: number;
+    startedAt: string;
+    completedAt: string | null;
+    /** Present only while open, and never with the answers. */
+    questions?: PracticeQuestion[];
+    /** Present only once completed. */
+    result?: DiagnosticResult;
+    coverage?: { subjectName: string; questionCount: number }[];
+    uncovered?: { subjectName: string; reason: string }[];
+}
+
+export interface DiagnosticList {
+    /** Null when this goal has never been assessed. */
+    assessment: Assessment | null;
+    limits: { min: number; max: number; default: number };
+}

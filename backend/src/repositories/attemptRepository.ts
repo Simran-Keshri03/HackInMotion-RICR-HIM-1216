@@ -65,6 +65,27 @@ export class AttemptRepository {
     }
 
     /** topic_id and attempt_number are filled in by a database trigger, not by us. */
+    /**
+     * Attempts by id, for a paper that recorded which attempt answered which question.
+     *
+     * An assessment stores only the link — `assessment_questions.attempt_id` — rather than copying the
+     * outcome, so the breakdown afterwards has to come back through here. That is the right way round:
+     * two copies of "was this correct" is two things that can disagree.
+     */
+    async findByIds(
+        attemptIds: string[]
+    ): Promise<{ id: string; topic_id: string; is_correct: boolean }[]> {
+        if (attemptIds.length === 0) return [];
+
+        const { data, error } = await this.db
+            .from('question_attempts')
+            .select('id, topic_id, is_correct')
+            .in('id', attemptIds);
+
+        if (error) throw error;
+        return (data ?? []) as { id: string; topic_id: string; is_correct: boolean }[];
+    }
+
     async insert(attempt: NewAttempt): Promise<{ id: string; topicId: string }> {
         const { data, error } = await this.db
             .from('question_attempts')
