@@ -979,13 +979,10 @@ That creates a continuous adaptive learning loop designed around the individual 
 
 ## 📄 License
 
-Add the project's selected license here.
+**Proprietary — all rights reserved.** See [LICENSE](LICENSE).
 
-Example:
-
-```text
-MIT License
-```
+The source may be read for the purpose of hackathon evaluation. It may not be copied, modified,
+redistributed or reused without written permission.
 
 ---
 
