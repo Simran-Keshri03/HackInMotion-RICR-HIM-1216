@@ -6,7 +6,7 @@
 
 | Name | Role |
 
-| Team Name | **[AdhigamAI]** 
+| Team Name | **[RICR-HIM-1216]** 
 | Team Member 1 | **[Harsh Kumar]** | Database |
 | Team Member 2 | **[Ayush Kumar]** | Backend |
 | Team Member 3 | **[Soumya Raghuwanshi]** | Frontend |
@@ -188,6 +188,8 @@ AI providers are abstracted behind an interface so the provider can be replaced 
 ---
 
 # 🏗️ Architecture
+<img width="1600" height="900" alt="architecture-diagram" src="https://github.com/user-attachments/assets/7a9446e8-93d8-4e8c-ade3-7ccfdaa7d3db" />
+
 
 ## System Architecture
 
