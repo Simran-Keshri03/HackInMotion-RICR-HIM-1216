@@ -613,7 +613,7 @@ Full write-up: [`docs/architecture.md`](docs/architecture.md).
 # 13. Database details
 
 **Supabase PostgreSQL 17 (Mumbai).** 20 tables, row-level security on all 20, 21 policies. Currently
-holding 5 curricula, 302 topics and 165 verified questions.
+holding 7 curricula, 467 topics and 174 verified questions.
 
 ### Tables
 
@@ -865,7 +865,7 @@ Details, and the free-plan instance-hour limit that makes this a judgement call:
 |---|---|
 | Database | 20 tables, RLS on all 20, 21 policies, 58 SQL checks |
 | Auth | Supabase Auth, JWT verified server-side, sign-up and sign-in |
-| Content | dynamic AI-resolved syllabi, 165 verified questions, on-demand generation |
+| Content | dynamic AI-resolved syllabi, 174 verified questions, on-demand generation |
 | Evidence | append-only attempts, server-side grading, mastery engine |
 | Adaptive | topic ranking, difficulty ladder, question selection with fallbacks |
 | Assessment | diagnostic knowledge check feeding the planner |

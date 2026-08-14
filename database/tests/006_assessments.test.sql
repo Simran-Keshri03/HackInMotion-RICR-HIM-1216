@@ -6,13 +6,18 @@
 
 begin;
 
+-- Topics now belong to a curriculum, so the test needs one of its own. Rolled back with
+-- everything else, so it leaves nothing behind and cannot collide with the seeded syllabi.
+insert into public.curricula (id, slug, name)
+values ('11111111-0000-4000-8000-0000000000c1', 'test-assessments-006', 'Assessments Test Curriculum');
+
 insert into auth.users (id, email)
 values
     ('11111111-0000-4000-8000-000000000001', 'assess-one@adigam.test'),
     ('11111111-0000-4000-8000-000000000002', 'assess-two@adigam.test');
 
-insert into public.topics (id, parent_id, name)
-values ('11111111-0000-4000-8000-0000000000f1', null, 'Assessment Test Subject');
+insert into public.topics (curriculum_id, id, parent_id, name)
+values ('11111111-0000-4000-8000-0000000000c1', '11111111-0000-4000-8000-0000000000f1', null, 'Assessment Test Subject');
 
 insert into public.questions (id, topic_id, question_type, body, options, correct_answer, is_verified)
 values

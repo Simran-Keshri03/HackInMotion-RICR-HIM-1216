@@ -10,17 +10,22 @@
 
 begin;
 
+-- Topics now belong to a curriculum, so the test needs one of its own. Rolled back with
+-- everything else, so it leaves nothing behind and cannot collide with the seeded syllabi.
+insert into public.curricula (id, slug, name)
+values ('33333333-0000-4000-8000-0000000000c1', 'test-mastery-008', 'Mastery Test Curriculum');
+
 insert into auth.users (id, email)
 values
     ('33333333-0000-4000-8000-000000000001', 'mastery-one@adigam.test'),
     ('33333333-0000-4000-8000-000000000002', 'mastery-two@adigam.test');
 
-insert into public.topics (id, parent_id, name, sort_order)
+insert into public.topics (curriculum_id, id, parent_id, name, sort_order)
 values
-    ('33333333-0000-4000-8000-0000000000f1', null, 'Mastery Test Subject', 1),
-    ('33333333-0000-4000-8000-0000000000f2', '33333333-0000-4000-8000-0000000000f1', 'Strong Topic', 1),
-    ('33333333-0000-4000-8000-0000000000f3', '33333333-0000-4000-8000-0000000000f1', 'Weak Topic', 2),
-    ('33333333-0000-4000-8000-0000000000f4', '33333333-0000-4000-8000-0000000000f1', 'Middling Topic', 3);
+    ('33333333-0000-4000-8000-0000000000c1', '33333333-0000-4000-8000-0000000000f1', null, 'Mastery Test Subject', 1),
+    ('33333333-0000-4000-8000-0000000000c1', '33333333-0000-4000-8000-0000000000f2', '33333333-0000-4000-8000-0000000000f1', 'Strong Topic', 1),
+    ('33333333-0000-4000-8000-0000000000c1', '33333333-0000-4000-8000-0000000000f3', '33333333-0000-4000-8000-0000000000f1', 'Weak Topic', 2),
+    ('33333333-0000-4000-8000-0000000000c1', '33333333-0000-4000-8000-0000000000f4', '33333333-0000-4000-8000-0000000000f1', 'Middling Topic', 3);
 
 -- A learner who is good at one topic, bad at another, average at a third.
 insert into public.concept_mastery (
