@@ -63,9 +63,9 @@ was chosen.
 | Member | Role |
 |---|---|
 | Harsh Kumar | Team Lead + Database |
-| Ayush Kumar | Backend |
-| Soumya Raghuwanshi | Frontend + Presenter |
-| Simran Kumari Keshri | Frontend |
+| Ayush Kumar | Frontend+Backend |
+| Soumya Raghuwanshi | Presenter |
+| Simran Kumari Keshri | - |
 
 ---
 
